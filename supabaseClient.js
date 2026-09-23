@@ -213,6 +213,210 @@ const CounselingService = {
     // Fallback cek di localStorage
     const localStories = JSON.parse(localStorage.getItem('oase_counseling_submissions') || '[]');
     return localStories.find(s => s.ticket_code === cleanCode) || null;
+  },
+
+  // Dapatkan seluruh antrean cerita konseling (filter kategori & status)
+  async getAllSubmissions({ category = 'all', status = 'all' } = {}) {
+    if (supabaseClient) {
+      try {
+        let query = supabaseClient
+          .from('counseling_submissions')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (category && category !== 'all') {
+          query = query.eq('category', category);
+        }
+        if (status && status !== 'all') {
+          query = query.eq('status', status);
+        }
+
+        const { data, error } = await query;
+        if (!error && data && data.length > 0) {
+          return data;
+        }
+      } catch (err) {
+        console.warn('Gagal mengambil antrean dari Supabase:', err);
+      }
+    }
+
+    // Fallback penyimpanan lokal
+    let localSubmissions = JSON.parse(localStorage.getItem('oase_counseling_submissions') || '[]');
+    if (localSubmissions.length === 0) {
+      localSubmissions = [
+        {
+          ticket_code: 'OASE-2941-KB',
+          author_name: 'User104',
+          education_level: 'SMA / SMK / MA',
+          grade_class: 'Kelas 12',
+          gender: 'Perempuan',
+          category: 'Masalah Pembelajaran & Akademik',
+          counselor_id: 'counselor-1',
+          counselor_name: 'Kak Sarah Maulida, S.Psi.',
+          story_content: 'Halo Kak Sarah, aku merasa sangat cemas menghadapi ujian kelulusan dan seleksi masuk perguruan tinggi bulan depan. Rasanya orang tua punya ekspektasi sangat tinggi, sementara nilaiku sering pas-pasan. Aku susah tidur setiap malam...',
+          status: 'menunggu_tanggapan',
+          created_at: new Date(Date.now() - 35 * 60 * 1000).toISOString()
+        },
+        {
+          ticket_code: 'OASE-5820-MN',
+          author_name: 'Bunga Lavender',
+          education_level: 'SMP / MTs',
+          grade_class: 'Kelas 9',
+          gender: 'Perempuan',
+          category: 'Masalah Keluarga & Rumah Tangga',
+          counselor_id: 'auto',
+          counselor_name: 'Pilihkan Otomatis',
+          story_content: 'Di rumah suasana sedang tidak nyaman karena orang tua sering bertengkar hebat akhir-akhir ini. Aku merasa sendirian di kamar dan tidak tahu harus bercerita ke siapa. Takut mengganggu teman...',
+          status: 'menunggu_tanggapan',
+          created_at: new Date(Date.now() - 120 * 60 * 1000).toISOString()
+        },
+        {
+          ticket_code: 'OASE-7731-XT',
+          author_name: 'Pejuang Senja',
+          education_level: 'Perguruan Tinggi / Mahasiswa',
+          grade_class: 'Semester 6',
+          gender: 'Laki-laki',
+          category: 'Karier & Rencana Masa Depan',
+          counselor_id: 'counselor-3',
+          counselor_name: 'Ibu Ningsih Rahayu, M.Pd.',
+          story_content: 'Saya merasa salah mengambil jurusan kuliah. Memasuki semester akhir ini tugas magang dan skripsi terasa begitu hampa. Apakah wajar merasa seperti ini di usia 21 tahun?',
+          status: 'menunggu_tanggapan',
+          created_at: new Date(Date.now() - 300 * 60 * 1000).toISOString()
+        }
+      ];
+      localStorage.setItem('oase_counseling_submissions', JSON.stringify(localSubmissions));
+    }
+
+    let filtered = [...localSubmissions];
+    if (category && category !== 'all') {
+      filtered = filtered.filter(item => item.category === category);
+    }
+    if (status && status !== 'all') {
+      filtered = filtered.filter(item => item.status === status);
+    }
+    return filtered.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+  },
+
+  // Berikan balasan resmi konselor
+  async replySubmission(ticketCode, replyContent, counselorName) {
+    if (!ticketCode || !replyContent) throw new Error('Data balasan tidak lengkap');
+
+    if (supabaseClient) {
+      try {
+        const { data, error } = await supabaseClient
+          .from('counseling_submissions')
+          .update({
+            counselor_reply: replyContent,
+            counselor_name: counselorName,
+            status: 'sudah_dibalas',
+            replied_at: new Date().toISOString()
+          })
+          .eq('ticket_code', ticketCode)
+          .select();
+
+        if (!error && data && data.length > 0) return data[0];
+      } catch (e) {
+        console.warn('Gagal update balasan ke Supabase:', e);
+      }
+    }
+
+    // Update di localStorage
+    const local = JSON.parse(localStorage.getItem('oase_counseling_submissions') || '[]');
+    const idx = local.findIndex(s => s.ticket_code === ticketCode);
+    if (idx !== -1) {
+      local[idx].counselor_reply = replyContent;
+      local[idx].counselor_name = counselorName;
+      local[idx].status = 'sudah_dibalas';
+      local[idx].replied_at = new Date().toISOString();
+      localStorage.setItem('oase_counseling_submissions', JSON.stringify(local));
+      return local[idx];
+    }
+    return null;
+  },
+
+  // Alihkan kasus cerita ke konselor lain (Transfer / Referral)
+  async transferSubmission({ ticketCode, newCounselorId, newCounselorName, transferredFromName, transferReason }) {
+    if (supabaseClient) {
+      try {
+        const { data, error } = await supabaseClient
+          .from('counseling_submissions')
+          .update({
+            counselor_id: newCounselorId,
+            counselor_name: newCounselorName,
+            transferred_from_name: transferredFromName,
+            transfer_reason: transferReason
+          })
+          .eq('ticket_code', ticketCode)
+          .select();
+
+        if (!error && data && data.length > 0) return data[0];
+      } catch (e) {
+        console.warn('Gagal transfer ke Supabase:', e);
+      }
+    }
+
+    // LocalStorage fallback
+    const local = JSON.parse(localStorage.getItem('oase_counseling_submissions') || '[]');
+    const idx = local.findIndex(s => s.ticket_code === ticketCode);
+    if (idx !== -1) {
+      local[idx].counselor_id = newCounselorId;
+      local[idx].counselor_name = newCounselorName;
+      local[idx].transferred_from_name = transferredFromName;
+      local[idx].transfer_reason = transferReason;
+      localStorage.setItem('oase_counseling_submissions', JSON.stringify(local));
+      return local[idx];
+    }
+    return null;
+  },
+
+  // Autentikasi Khusus Konselor (dengan fitur Tetap Login / Remember Me)
+  loginCounselor({ email, password, rememberMe = true }) {
+    const counselors = window.COUNSELORS_DATA || [];
+    const counselor = counselors.find(c => c.email && c.email.toLowerCase() === email.trim().toLowerCase());
+
+    if (!counselor) {
+      throw new Error('Email konselor tidak terdaftar.');
+    }
+    if (counselor.password && counselor.password !== password) {
+      throw new Error('Password yang dimasukkan salah.');
+    }
+
+    const sessionData = {
+      id: counselor.id,
+      name: counselor.name,
+      email: counselor.email,
+      role: 'counselor',
+      avatar: counselor.avatar,
+      specialties: counselor.specialties,
+      loggedInAt: new Date().toISOString()
+    };
+
+    if (rememberMe) {
+      localStorage.setItem('oase_counselor_session', JSON.stringify(sessionData));
+    } else {
+      sessionStorage.setItem('oase_counselor_session', JSON.stringify(sessionData));
+    }
+
+    return sessionData;
+  },
+
+  // Ambil sesi konselor saat ini (memeriksa localStorage & sessionStorage)
+  getCurrentCounselorSession() {
+    const local = localStorage.getItem('oase_counselor_session');
+    if (local) {
+      try { return JSON.parse(local); } catch(e){}
+    }
+    const sess = sessionStorage.getItem('oase_counselor_session');
+    if (sess) {
+      try { return JSON.parse(sess); } catch(e){}
+    }
+    return null;
+  },
+
+  // Logout konselor
+  logoutCounselor() {
+    localStorage.removeItem('oase_counselor_session');
+    sessionStorage.removeItem('oase_counselor_session');
   }
 };
 
