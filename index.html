@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OASE Cerita - Obrolan Aman Seputar Emosi</title>
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Tailwind Config -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            heather: {
+              50: '#FBF5F9',
+              100: '#F5EBF3',
+              200: '#EBD8E7',
+              300: '#DCB8D4',
+              400: '#C78CBB',
+              500: '#A14189', /* HEATHER MAUVE PRIMARY */
+              600: '#8E3476',
+              700: '#752A62',
+              800: '#5F244F',
+              900: '#3D1533',
+            },
+            oase: {
+              cream: '#FDFBF7',
+              surface: '#FCF9FA',
+              border: '#F0E2EC',
+              plum: '#311027',
+              muted: '#7A6273'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-oase-surface text-oase-plum font-sans antialiased selection:bg-heather-200 selection:text-heather-900">
+
+  <!-- Background Decorative Blurs -->
+  <div class="fixed inset-0 overflow-hidden pointer-events-none -z-10">
+    <div class="absolute -top-40 -left-40 w-96 h-96 bg-heather-200/50 rounded-full blur-3xl"></div>
+    <div class="absolute top-1/3 -right-32 w-80 h-80 bg-heather-300/30 rounded-full blur-3xl"></div>
+    <div class="absolute -bottom-32 left-1/4 w-96 h-96 bg-heather-100/60 rounded-full blur-3xl"></div>
+  </div>
+
+  <!-- Header / Navigation -->
+  <header class="sticky top-0 z-40 backdrop-blur-md bg-white/80 border-b border-oase-border/80 transition-all duration-300">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+      <!-- Logo & Branding -->
+      <a href="#" class="flex items-center gap-3 group">
+        <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-heather-600 to-heather-400 flex items-center justify-center text-white shadow-md shadow-heather-500/20 group-hover:scale-105 transition-transform duration-300">
+          <i data-lucide="heart-handshake" class="w-6 h-6"></i>
+        </div>
+        <div>
+          <span class="text-2xl font-bold tracking-tight text-heather-600 block leading-tight">OASE Cerita</span>
+          <span class="text-xs font-medium text-oase-muted block">Obrolan Aman Seputar Emosi</span>
+        </div>
+      </a>
+
+      <!-- Desktop Nav -->
+      <nav class="hidden md:flex items-center gap-8 text-sm font-semibold text-oase-plum/80">
+        <a href="#beranda" class="hover:text-heather-600 transition-colors">Beranda</a>
+        <a href="#tentang" class="hover:text-heather-600 transition-colors">Tentang OASE</a>
+        <a href="#fitur" class="hover:text-heather-600 transition-colors">Fitur & Manfaat</a>
+        <a href="#ruang-cerita" class="hover:text-heather-600 transition-colors">Ruang Cerita</a>
+      </nav>
+
+      <!-- Action Button -->
+      <div class="flex items-center gap-3">
+        <button id="navLoginBtn" class="px-5 py-2.5 rounded-full border border-heather-500 text-heather-600 hover:bg-heather-50 font-semibold text-sm transition-all duration-200 flex items-center gap-2">
+          <i data-lucide="log-in" class="w-4 h-4"></i>
+          <span>Login / Masuk</span>
+        </button>
+        <button id="mobileMenuBtn" class="md:hidden p-2 text-heather-700 hover:bg-heather-100/50 rounded-xl" aria-label="Menu">
+          <i data-lucide="menu" class="w-6 h-6"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Nav Menu -->
+    <div id="mobileMenu" class="hidden md:hidden px-4 pt-2 pb-6 bg-white/95 border-b border-oase-border space-y-3">
+      <a href="#beranda" class="block py-2 text-sm font-semibold text-oase-plum hover:text-heather-600">Beranda</a>
+      <a href="#tentang" class="block py-2 text-sm font-semibold text-oase-plum hover:text-heather-600">Tentang OASE</a>
+      <a href="#fitur" class="block py-2 text-sm font-semibold text-oase-plum hover:text-heather-600">Fitur & Manfaat</a>
+      <a href="#ruang-cerita" class="block py-2 text-sm font-semibold text-oase-plum hover:text-heather-600">Ruang Cerita</a>
+    </div>
+  </header>
+
+  <!-- Hero Section / Dashboard Utama -->
+  <main id="beranda" class="pt-8 pb-20 lg:pt-14 lg:pb-28">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <!-- Top Announcement Badge -->
+      <div class="flex justify-center mb-6">
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-heather-100 border border-heather-200 text-heather-700 text-xs sm:text-sm font-medium shadow-sm">
+          <span class="flex h-2 w-2 rounded-full bg-heather-500 animate-pulse"></span>
+          <span>Ruang Tenang & Terjaga untuk Emosimu</span>
+          <i data-lucide="sparkles" class="w-4 h-4 text-heather-500"></i>
+        </div>
+      </div>
+
+      <!-- Main Headline & Subheading -->
+      <div class="text-center max-w-3xl mx-auto">
+        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-oase-plum leading-[1.15]">
+          Setiap Rasa Berhak Didengar di <br class="hidden sm:inline">
+          <span class="bg-gradient-to-r from-heather-600 via-heather-500 to-heather-400 bg-clip-text text-transparent">OASE Cerita</span>
+        </h1>
+        <p class="mt-4 text-lg sm:text-xl font-semibold text-heather-600">
+          Obrolan Aman Seputar Emosi
+        </p>
+        <p class="mt-4 text-base sm:text-lg text-oase-muted leading-relaxed max-w-2xl mx-auto">
+          Tempat perlindungan di tengah padatnya hari. Lepaskan beban pikiran, kenali emosi tanpa rasa bersalah, dan temukan ruang aman untuk bercerita tanpa takut dihakimi.
+        </p>
+
+        <!-- CTA Buttons -->
+        <div class="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
+          <button id="heroLoginBtn" class="w-full sm:w-auto px-8 py-3.5 rounded-full bg-heather-500 hover:bg-heather-600 text-white font-bold text-base shadow-lg shadow-heather-500/25 hover:shadow-xl hover:shadow-heather-500/35 transition-all duration-300 flex items-center justify-center gap-2 transform hover:-translate-y-0.5">
+            <i data-lucide="message-square-heart" class="w-5 h-5"></i>
+            <span>Mulai Bercerita Sekarang</span>
+          </button>
+          <a href="#fitur" class="w-full sm:w-auto px-7 py-3.5 rounded-full bg-white hover:bg-heather-50 text-oase-plum border border-oase-border font-semibold text-base transition-all duration-200 flex items-center justify-center gap-2">
+            <i data-lucide="compass" class="w-5 h-5 text-heather-500"></i>
+            <span>Pelajari Lebih Lanjut</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Interactive Emotion Bar / Quick Pulse -->
+      <div class="mt-14 max-w-2xl mx-auto bg-white/80 backdrop-blur-md rounded-3xl p-6 sm:p-8 border border-heather-100 shadow-xl shadow-heather-500/5 text-center">
+        <h3 class="text-sm font-bold uppercase tracking-wider text-heather-600 mb-2">Bagaimana keadaan hatimu hari ini?</h3>
+        <p class="text-xs text-oase-muted mb-5">Pilih satu untuk memulai ruang refleksi pribadi Anda:</p>
+        
+        <div class="grid grid-cols-3 sm:grid-cols-6 gap-2 sm:gap-3" id="emotionSelector">
+          <button data-emotion="Tenang" class="emotion-btn flex flex-col items-center justify-center p-3 rounded-2xl border border-oase-border hover:border-heather-400 hover:bg-heather-50 transition-all duration-200 group">
+            <span class="text-2xl group-hover:scale-110 transition-transform">🌿</span>
+            <span class="text-xs font-semibold mt-1 text-oase-plum">Tenang</span>
+          </button>
+          <button data-emotion="Cemas" class="emotion-btn flex flex-col items-center justify-center p-3 rounded-2xl border border-oase-border hover:border-heather-400 hover:bg-heather-50 transition-all duration-200 group">
+            <span class="text-2xl group-hover:scale-110 transition-transform">🌧️</span>
+            <span class="text-xs font-semibold mt-1 text-oase-plum">Cemas</span>
+          </button>
+          <button data-emotion="Lelah" class="emotion-btn flex flex-col items-center justify-center p-3 rounded-2xl border border-oase-border hover:border-heather-400 hover:bg-heather-50 transition-all duration-200 group">
+            <span class="text-2xl group-hover:scale-110 transition-transform">🔋</span>
+            <span class="text-xs font-semibold mt-1 text-oase-plum">Lelah</span>
+          </button>
+          <button data-emotion="Sedih" class="emotion-btn flex flex-col items-center justify-center p-3 rounded-2xl border border-oase-border hover:border-heather-400 hover:bg-heather-50 transition-all duration-200 group">
+            <span class="text-2xl group-hover:scale-110 transition-transform">🥀</span>
+            <span class="text-xs font-semibold mt-1 text-oase-plum">Sedih</span>
+          </button>
+          <button data-emotion="Bingung" class="emotion-btn flex flex-col items-center justify-center p-3 rounded-2xl border border-oase-border hover:border-heather-400 hover:bg-heather-50 transition-all duration-200 group">
+            <span class="text-2xl group-hover:scale-110 transition-transform">🌀</span>
+            <span class="text-xs font-semibold mt-1 text-oase-plum">Bingung</span>
+          </button>
+          <button data-emotion="Syukur" class="emotion-btn flex flex-col items-center justify-center p-3 rounded-2xl border border-oase-border hover:border-heather-400 hover:bg-heather-50 transition-all duration-200 group">
+            <span class="text-2xl group-hover:scale-110 transition-transform">✨</span>
+            <span class="text-xs font-semibold mt-1 text-oase-plum">Syukur</span>
+          </button>
+        </div>
+
+        <div id="emotionFeedback" class="hidden mt-4 pt-4 border-t border-heather-100 text-sm text-heather-700 font-medium animate-fadeIn">
+          Perasaanmu sangat valid. Masuk sekarang untuk menuangkan ceritamu secara bebas.
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Section: Apa yang ada di dalam Website ini? (Tentang OASE) -->
+  <section id="tentang" class="py-16 sm:py-20 bg-white border-y border-oase-border">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+        <!-- Left Column: Penjelasan Utama -->
+        <div class="lg:col-span-6 space-y-6">
+          <div class="inline-flex items-center gap-2 text-heather-600 font-bold text-sm tracking-wider uppercase">
+            <i data-lucide="shield-check" class="w-4 h-4"></i>
+            <span>Mengenal OASE Cerita</span>
+          </div>
+          <h2 class="text-3xl sm:text-4xl font-extrabold text-oase-plum leading-snug">
+            Tempat di mana setiap emosi diakui, bukan dihakimi.
+          </h2>
+          <p class="text-base text-oase-muted leading-relaxed">
+            Seringkali kita merasa sendirian saat menghadapi badai emosi. Di <strong>OASE Cerita</strong>, kami membangun ekosistem digital yang hangat untuk membantu Anda menavigasi perasaan rumit dengan aman.
+          </p>
+
+          <div class="space-y-4 pt-2">
+            <div class="flex items-start gap-4">
+              <div class="w-10 h-10 rounded-xl bg-heather-100 text-heather-600 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <i data-lucide="lock" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <h4 class="font-bold text-oase-plum text-base">Anonimitas & Privasi Penuh</h4>
+                <p class="text-sm text-oase-muted mt-0.5">Ceritakan apa saja tanpa khawatir identitas Anda diketahui siapa pun.</p>
+              </div>
+            </div>
+
+            <div class="flex items-start gap-4">
+              <div class="w-10 h-10 rounded-xl bg-heather-100 text-heather-600 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <i data-lucide="smile" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <h4 class="font-bold text-oase-plum text-base">Ruang Validasi Empatis</h4>
+                <p class="text-sm text-oase-muted mt-0.5">Dapatkan penguatan dari sesama yang bersedia mendengarkan dengan penuh empati.</p>
+              </div>
+            </div>
+
+            <div class="flex items-start gap-4">
+              <div class="w-10 h-10 rounded-xl bg-heather-100 text-heather-600 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <i data-lucide="book-heart" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <h4 class="font-bold text-oase-plum text-base">Jurnal Emosi Personal</h4>
+                <p class="text-sm text-oase-muted mt-0.5">Pantau pola suasana hati dan temukan kedamaian dari waktu ke waktu.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column: Visual Card -->
+        <div class="lg:col-span-6">
+          <div class="relative mx-auto max-w-md lg:max-w-none">
+            <div class="absolute -inset-2 bg-gradient-to-r from-heather-400 to-heather-600 rounded-3xl blur-xl opacity-20 transform -rotate-1"></div>
+            
+            <div class="relative bg-oase-surface border border-heather-200 rounded-3xl p-6 sm:p-8 shadow-xl">
+              <div class="flex items-center justify-between border-b border-oase-border pb-4 mb-5">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-full bg-heather-200 flex items-center justify-center text-heather-700 font-bold text-sm">
+                    OC
+                  </div>
+                  <div>
+                    <h5 class="font-bold text-sm text-oase-plum">Sahabat Anonim #342</h5>
+                    <span class="text-xs text-heather-600 font-medium">Suasana: Lelah & Butuh Dengar</span>
+                  </div>
+                </div>
+                <span class="text-xs text-oase-muted">10 menit yang lalu</span>
+              </div>
+
+              <p class="text-sm text-oase-plum/90 leading-relaxed italic">
+                "Hari ini rasanya begitu berat di tempat kerja. Aku merasa usahaku tidak pernah cukup. Tapi saat menulis di sini, rasanya seperti meletakkan satu ransel batu yang sudah seharian kupanggul..."
+              </p>
+
+              <div class="mt-6 pt-4 border-t border-oase-border/80 flex items-center justify-between">
+                <div class="flex items-center gap-4 text-xs font-semibold text-heather-600">
+                  <span class="flex items-center gap-1.5"><i data-lucide="heart" class="w-4 h-4 fill-heather-500 text-heather-500"></i> 28 Pelukan Hangat</span>
+                  <span class="flex items-center gap-1.5"><i data-lucide="message-circle" class="w-4 h-4"></i> 14 Tanggapan</span>
+                </div>
+                <span class="text-xs bg-heather-100 text-heather-700 px-2.5 py-1 rounded-full font-medium">Validasi Aman</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Section: Fitur Utama -->
+  <section id="fitur" class="py-16 sm:py-24 bg-oase-surface">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="text-center max-w-2xl mx-auto mb-16">
+        <h2 class="text-xs sm:text-sm font-bold uppercase tracking-widest text-heather-600">Fitur & Layanan</h2>
+        <p class="mt-2 text-3xl sm:text-4xl font-extrabold text-oase-plum">
+          Segala Hal yang Anda Butuhkan untuk Merasa Lebih Lega
+        </p>
+        <p class="mt-3 text-base text-oase-muted">
+          Dirancang dengan sentuhan warna Heather Mauve yang menenangkan hati dan pikiran Anda.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        
+        <!-- Card 1 -->
+        <div class="bg-white rounded-3xl p-8 border border-heather-100 hover:border-heather-300 shadow-sm hover:shadow-xl hover:shadow-heather-500/10 transition-all duration-300 group flex flex-col justify-between">
+          <div>
+            <div class="w-14 h-14 rounded-2xl bg-heather-50 text-heather-600 flex items-center justify-center group-hover:bg-heather-500 group-hover:text-white transition-colors duration-300 mb-6">
+              <i data-lucide="feather" class="w-7 h-7"></i>
+            </div>
+            <h3 class="text-xl font-bold text-oase-plum mb-3">Tulis Curhat Tanpa Batas</h3>
+            <p class="text-sm text-oase-muted leading-relaxed">
+              Keluarkan isi hati Anda secara tertulis kapan pun dibutuhkan. Pilih mode publik untuk didengarkan komunitas, atau mode privat sebagai jurnal rahasia pribadi Anda.
+            </p>
+          </div>
+          <div class="mt-6 pt-4 border-t border-oase-border flex items-center text-heather-600 font-bold text-sm gap-1 group-hover:gap-2 transition-all">
+            <span>Mulai menulis</span>
+            <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          </div>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="bg-white rounded-3xl p-8 border border-heather-100 hover:border-heather-300 shadow-sm hover:shadow-xl hover:shadow-heather-500/10 transition-all duration-300 group flex flex-col justify-between">
+          <div>
+            <div class="w-14 h-14 rounded-2xl bg-heather-50 text-heather-600 flex items-center justify-center group-hover:bg-heather-500 group-hover:text-white transition-colors duration-300 mb-6">
+              <i data-lucide="users" class="w-7 h-7"></i>
+            </div>
+            <h3 class="text-xl font-bold text-oase-plum mb-3">Dukungan Komunitas Empatis</h3>
+            <p class="text-sm text-oase-muted leading-relaxed">
+              Kirimkan reaksi simpati berupa pelukan virtual, ucapan semangat, atau komentar positif yang dijaga oleh panduan komunitas anti-cyberbullying.
+            </p>
+          </div>
+          <div class="mt-6 pt-4 border-t border-oase-border flex items-center text-heather-600 font-bold text-sm gap-1 group-hover:gap-2 transition-all">
+            <span>Bergabung komunitas</span>
+            <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          </div>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="bg-white rounded-3xl p-8 border border-heather-100 hover:border-heather-300 shadow-sm hover:shadow-xl hover:shadow-heather-500/10 transition-all duration-300 group flex flex-col justify-between">
+          <div>
+            <div class="w-14 h-14 rounded-2xl bg-heather-50 text-heather-600 flex items-center justify-center group-hover:bg-heather-500 group-hover:text-white transition-colors duration-300 mb-6">
+              <i data-lucide="activity" class="w-7 h-7"></i>
+            </div>
+            <h3 class="text-xl font-bold text-oase-plum mb-3">Peta Mood & Relaksasi</h3>
+            <p class="text-sm text-oase-muted leading-relaxed">
+              Catat perjalanan emosi mingguan Anda dan dapatkan tips relaksasi serta latihan pernapasan sederhana untuk membantu menenangkan pikiran yang tegang.
+            </p>
+          </div>
+          <div class="mt-6 pt-4 border-t border-oase-border flex items-center text-heather-600 font-bold text-sm gap-1 group-hover:gap-2 transition-all">
+            <span>Lihat latihan</span>
+            <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Section: Call To Action Footer Banner -->
+  <section class="py-16 bg-gradient-to-br from-heather-600 to-heather-800 text-white relative overflow-hidden">
+    <div class="max-w-4xl mx-auto px-4 text-center relative z-10">
+      <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight">
+        Siap meringankan beban hatimu hari ini?
+      </h2>
+      <p class="mt-4 text-base sm:text-lg text-heather-100 max-w-xl mx-auto">
+        Masuk dan mulailah bercerita. OASE Cerita selalu siap menyambut Anda dengan kehangatan dan rasa aman.
+      </p>
+      <div class="mt-8">
+        <button id="ctaLoginBtn" class="px-8 py-3.5 rounded-full bg-white text-heather-700 hover:bg-heather-50 font-bold text-base shadow-xl transition-all duration-200 transform hover:scale-105">
+          Masuk & Mulai Bercerita
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-oase-surface border-t border-oase-border py-12 text-sm text-oase-muted">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-6 text-center sm:text-left">
+        <div>
+          <span class="text-lg font-bold text-heather-700">OASE Cerita</span>
+          <p class="text-xs text-oase-muted mt-1">Obrolan Aman Seputar Emosi • Ruang Nyaman Berbagi Rasa</p>
+        </div>
+        <div class="text-xs text-oase-muted max-w-md">
+          <p class="font-semibold text-heather-800">Perhatian Krisis:</p>
+          <p>Jika Anda atau seseorang yang Anda kenal berada dalam krisis mental darurat, segera hubungi Hotline Sejiwa (119 ext 8) atau layanan darurat terdekat.</p>
+        </div>
+      </div>
+      <div class="mt-8 pt-6 border-t border-oase-border/80 text-center text-xs text-oase-muted">
+        &copy; 2026 OASE Cerita. Seluruh Hak Cipta Dilindungi.
+      </div>
+    </div>
+  </footer>
+
+  <!-- Modal Login / Masuk -->
+  <div id="loginModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm hidden animate-fadeIn">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 border border-heather-200 shadow-2xl relative transform transition-all">
+      <!-- Close Button -->
+      <button id="closeModalBtn" class="absolute top-5 right-5 text-oase-muted hover:text-heather-700 p-1 rounded-full hover:bg-heather-50 transition-colors" aria-label="Tutup">
+        <i data-lucide="x" class="w-6 h-6"></i>
+      </button>
+
+      <!-- Modal Header -->
+      <div class="text-center mb-6">
+        <div class="w-12 h-12 rounded-2xl bg-heather-100 text-heather-600 flex items-center justify-center mx-auto mb-3">
+          <i data-lucide="heart-handshake" class="w-6 h-6"></i>
+        </div>
+        <h3 class="text-2xl font-bold text-oase-plum">Selamat Datang</h3>
+        <p class="text-xs text-heather-600 font-semibold mt-0.5">OASE Cerita - Obrolan Aman Seputar Emosi</p>
+        <p class="text-xs text-oase-muted mt-2">Masuk untuk mulai menuangkan emosi dan cerita Anda.</p>
+      </div>
+
+      <!-- Login Form -->
+      <form id="loginForm" class="space-y-4">
+        <div>
+          <label for="email" class="block text-xs font-bold text-oase-plum uppercase tracking-wider mb-1">Email</label>
+          <input type="email" id="email" required placeholder="nama@email.com" class="w-full px-4 py-2.5 rounded-xl border border-oase-border focus:border-heather-500 focus:ring-2 focus:ring-heather-200 outline-none text-sm transition-all">
+        </div>
+
+        <div>
+          <label for="password" class="block text-xs font-bold text-oase-plum uppercase tracking-wider mb-1">Kata Sandi</label>
+          <input type="password" id="password" required placeholder="••••••••" class="w-full px-4 py-2.5 rounded-xl border border-oase-border focus:border-heather-500 focus:ring-2 focus:ring-heather-200 outline-none text-sm transition-all">
+        </div>
+
+        <div class="flex items-center justify-between text-xs">
+          <label class="flex items-center gap-2 cursor-pointer text-oase-muted">
+            <input type="checkbox" class="rounded border-oase-border text-heather-600 focus:ring-heather-400">
+            <span>Ingat saya</span>
+          </label>
+          <a href="#" class="text-heather-600 hover:underline font-medium">Lupa sandi?</a>
+        </div>
+
+        <button type="submit" class="w-full py-3 rounded-xl bg-heather-500 hover:bg-heather-600 text-white font-bold text-sm shadow-md shadow-heather-500/20 transition-all duration-200">
+          Masuk & Mulai Bercerita
+        </button>
+
+        <!-- Supabase Notice Info -->
+        <div class="p-3 bg-heather-50 rounded-xl border border-heather-100 text-center text-xs text-heather-700">
+          <span class="font-bold">✨ Siap Terhubung ke Supabase:</span> Otentikasi dan penyimpanan cerita akan dihubungkan pada Issue #2.
+        </div>
+      </form>
+
+      <div class="mt-5 text-center text-xs text-oase-muted">
+        Belum punya akun? <a href="#" class="text-heather-600 font-bold hover:underline">Daftar sekarang</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="app.js"></script>
+  <script>
+    // Initialize Lucide Icons
+    lucide.createIcons();
+  </script>
+</body>
+</html>
