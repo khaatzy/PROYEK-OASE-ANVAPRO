@@ -39,9 +39,12 @@
   animation: fadeIn 0.3s ease-out forwards;
 }
 
-/* Emotion Button Active State */
-.emotion-btn.active {
+/* Emotion & Story Tag Button Active State */
+.emotion-btn.active,
+.story-tag-btn.active {
   border-color: #A14189 !important;
   background-color: #F5EBF3 !important;
+  color: #752A62 !important;
   box-shadow: 0 4px 14px 0 rgba(161, 65, 137, 0.18);
 }
+
