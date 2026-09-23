@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kirim Cerita & Konseling - OASE Cerita</title>
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Tailwind Config -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            heather: {
+              50: '#FBF5F9',
+              100: '#F5EBF3',
+              200: '#EBD8E7',
+              300: '#DCB8D4',
+              400: '#C78CBB',
+              500: '#A14189', /* HEATHER MAUVE PRIMARY */
+              600: '#8E3476',
+              700: '#752A62',
+              800: '#5F244F',
+              900: '#3D1533',
+            },
+            oase: {
+              cream: '#FDFBF7',
+              surface: '#FCF9FA',
+              border: '#F0E2EC',
+              plum: '#311027',
+              muted: '#7A6273'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* Radio and Select Custom Highlight */
+    .counselor-card.selected {
+      border-color: #A14189 !important;
+      background-color: #FBF5F9 !important;
+      box-shadow: 0 8px 24px -4px rgba(161, 65, 137, 0.22);
+      transform: translateY(-2px);
+    }
+    .counselor-card.selected .counselor-indicator {
+      background-color: #A14189;
+      border-color: #A14189;
+    }
+    .category-chip.active {
+      background-color: #A14189 !important;
+      color: #ffffff !important;
+      border-color: #A14189 !important;
+      box-shadow: 0 4px 12px rgba(161, 65, 137, 0.25);
+    }
+    .gender-chip.active {
+      background-color: #F5EBF3 !important;
+      border-color: #A14189 !important;
+      color: #752A62 !important;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body class="bg-oase-surface text-oase-plum font-sans antialiased selection:bg-heather-200 selection:text-heather-900 min-h-screen flex flex-col justify-between">
+
+  <!-- Background Decorative Ambient Glows -->
+  <div class="fixed inset-0 overflow-hidden pointer-events-none -z-10">
+    <div class="absolute -top-32 -left-32 w-96 h-96 bg-heather-200/40 rounded-full blur-3xl"></div>
+    <div class="absolute top-1/2 -right-32 w-96 h-96 bg-heather-300/30 rounded-full blur-3xl"></div>
+    <div class="absolute -bottom-32 left-1/3 w-96 h-96 bg-heather-100/60 rounded-full blur-3xl"></div>
+  </div>
+
+  <!-- Header / Navigation Bar -->
+  <header class="sticky top-0 z-40 backdrop-blur-md bg-white/85 border-b border-oase-border/80 transition-all">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between">
+      <!-- Back to Home & Logo -->
+      <div class="flex items-center gap-4">
+        <a href="index.html" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-full border border-oase-border bg-white text-oase-muted hover:text-heather-600 hover:border-heather-300 hover:bg-heather-50 text-xs sm:text-sm font-semibold transition-all duration-200 shadow-sm">
+          <i data-lucide="arrow-left" class="w-4 h-4"></i>
+          <span>Kembali ke Beranda</span>
+        </a>
+        <div class="hidden sm:flex items-center gap-2.5 pl-3 border-l border-oase-border">
+          <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-heather-600 to-heather-400 flex items-center justify-center text-white shadow-sm">
+            <i data-lucide="heart-handshake" class="w-4 h-4"></i>
+          </div>
+          <span class="text-lg font-bold text-heather-700">OASE Cerita</span>
+        </div>
+      </div>
+
+      <!-- Action: Cek Status Tiket -->
+      <div class="flex items-center gap-2">
+        <button id="openCheckTicketBtn" class="px-4 py-2 rounded-full border border-heather-300 bg-white text-heather-700 hover:bg-heather-50 text-xs sm:text-sm font-semibold transition-all flex items-center gap-1.5 shadow-sm">
+          <i data-lucide="ticket" class="w-4 h-4 text-heather-500"></i>
+          <span>Cek Status Curhat</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Container -->
+  <main class="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12 flex-grow w-full">
+    
+    <!-- Top Warm Welcome Banner -->
+    <div class="mb-10 text-center space-y-4">
+      <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-heather-100 text-heather-700 text-xs font-bold tracking-wide uppercase shadow-sm">
+        <i data-lucide="shield-check" class="w-4 h-4 text-heather-600"></i>
+        <span>Ruang Konseling & Curhat Terlindungi</span>
+      </div>
+      <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-oase-plum tracking-tight leading-tight">
+        Ceritakan Apapun yang <br class="hidden sm:inline">
+        <span class="text-transparent bg-clip-text bg-gradient-to-r from-heather-600 via-heather-500 to-heather-400">Menyesakkan Hatimu</span>
+      </h1>
+      <p class="max-w-2xl mx-auto text-sm sm:text-base text-oase-muted leading-relaxed">
+        Di sini, kamu tidak sendiri. Tulislah tanpa rasa takut dihakimi. Setiap cerita akan dibaca langsung oleh konselor pilihanmu dengan penuh empati dan kerahasiaan terjaga 100%.
+      </p>
+    </div>
+
+    <!-- The Submission Form Card -->
+    <div class="bg-white rounded-3xl p-6 sm:p-10 border border-oase-border/80 shadow-xl shadow-heather-900/5 relative overflow-hidden">
+      <!-- Subtle top color accent bar -->
+      <div class="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-heather-400 via-heather-500 to-heather-600"></div>
+
+      <form id="storySubmissionForm" class="space-y-10">
+        
+        <!-- ========================================== -->
+        <!-- BAGIAN 1: IDENTITAS & PROFIL PENGIRIM      -->
+        <!-- ========================================== -->
+        <div>
+          <div class="flex items-center gap-2.5 mb-6 pb-3 border-b border-oase-border">
+            <span class="w-7 h-7 rounded-full bg-heather-100 text-heather-700 flex items-center justify-center text-xs font-bold">1</span>
+            <h2 class="text-lg sm:text-xl font-bold text-oase-plum">Identitas & Informasi Anda</h2>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Kolom Nama (Fake Name) -->
+            <div class="space-y-1.5 md:col-span-2">
+              <label for="authorNameInput" class="block text-sm font-bold text-oase-plum">
+                Nama Samaran / Fake Name
+                <span class="text-xs font-normal text-oase-muted ml-1">(Boleh dikosongi)</span>
+              </label>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-oase-muted">
+                  <i data-lucide="user-check" class="w-4 h-4"></i>
+                </div>
+                <input 
+                  type="text" 
+                  id="authorNameInput" 
+                  placeholder="Contoh: Bunga Lavender, Pejuang Skripsi, Kucing Santai"
+                  class="w-full pl-10 pr-4 py-3 rounded-2xl border border-oase-border bg-oase-surface/50 text-oase-plum placeholder-oase-muted/60 text-sm focus:outline-none focus:border-heather-500 focus:bg-white focus:ring-4 focus:ring-heather-100 transition-all"
+                >
+              </div>
+              <p class="text-xs text-oase-muted flex items-center gap-1.5 pt-1">
+                <i data-lucide="info" class="w-3.5 h-3.5 text-heather-500"></i>
+                <span>Jika tidak diisi, sistem otomatis menamai Anda sebagai <span class="font-semibold text-heather-600">User1 - User999</span> demi privasi.</span>
+              </p>
+            </div>
+
+            <!-- Jenjang (Wajib) -->
+            <div class="space-y-1.5">
+              <label for="educationLevelSelect" class="block text-sm font-bold text-oase-plum">
+                Jenjang Pendidikan <span class="text-heather-500">*</span>
+              </label>
+              <div class="relative">
+                <select 
+                  id="educationLevelSelect" 
+                  required 
+                  class="w-full px-4 py-3 rounded-2xl border border-oase-border bg-oase-surface/50 text-oase-plum text-sm focus:outline-none focus:border-heather-500 focus:bg-white focus:ring-4 focus:ring-heather-100 transition-all appearance-none cursor-pointer"
+                >
+                  <option value="" disabled selected>Pilih Jenjang Pendidikan Anda...</option>
+                  <option value="SD / MI">SD / MI</option>
+                  <option value="SMP / MTs">SMP / MTs</option>
+                  <option value="SMA / SMK / MA">SMA / SMK / MA</option>
+                  <option value="Perguruan Tinggi / Mahasiswa">Perguruan Tinggi / Mahasiswa</option>
+                  <option value="Umum / Bekerja">Umum / Bekerja</option>
+                </select>
+                <div class="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-oase-muted">
+                  <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                </div>
+              </div>
+            </div>
+
+            <!-- Kelas (Opsional) -->
+            <div class="space-y-1.5">
+              <label for="gradeClassInput" class="block text-sm font-bold text-oase-plum">
+                Kelas / Tingkat
+                <span class="text-xs font-normal text-oase-muted ml-1">(Opsional)</span>
+              </label>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-oase-muted">
+                  <i data-lucide="book-open" class="w-4 h-4"></i>
+                </div>
+                <input 
+                  type="text" 
+                  id="gradeClassInput" 
+                  placeholder="Contoh: Kelas 11, Semester 5 (atau kosongi)"
+                  class="w-full pl-10 pr-4 py-3 rounded-2xl border border-oase-border bg-oase-surface/50 text-oase-plum placeholder-oase-muted/60 text-sm focus:outline-none focus:border-heather-500 focus:bg-white focus:ring-4 focus:ring-heather-100 transition-all"
+                >
+              </div>
+            </div>
+
+            <!-- Jenis Kelamin (Wajib) -->
+            <div class="space-y-2 md:col-span-2">
+              <label class="block text-sm font-bold text-oase-plum">
+                Jenis Kelamin <span class="text-heather-500">*</span>
+              </label>
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3" id="genderSelectionContainer">
+                <button type="button" data-gender="Perempuan" class="gender-chip px-4 py-3 rounded-2xl border border-oase-border bg-oase-surface/40 hover:bg-heather-50 hover:border-heather-300 text-sm font-medium text-oase-plum flex items-center justify-center gap-2 transition-all">
+                  <i data-lucide="user" class="w-4 h-4 text-heather-500"></i>
+                  <span>Perempuan</span>
+                </button>
+                <button type="button" data-gender="Laki-laki" class="gender-chip px-4 py-3 rounded-2xl border border-oase-border bg-oase-surface/40 hover:bg-heather-50 hover:border-heather-300 text-sm font-medium text-oase-plum flex items-center justify-center gap-2 transition-all">
+                  <i data-lucide="user" class="w-4 h-4 text-heather-500"></i>
+                  <span>Laki-laki</span>
+                </button>
+                <button type="button" data-gender="Memilih Tidak Disebutkan" class="gender-chip px-4 py-3 rounded-2xl border border-oase-border bg-oase-surface/40 hover:bg-heather-50 hover:border-heather-300 text-sm font-medium text-oase-plum flex items-center justify-center gap-2 transition-all">
+                  <i data-lucide="user-x" class="w-4 h-4 text-heather-400"></i>
+                  <span>Tidak Disebutkan</span>
+                </button>
+              </div>
+              <input type="hidden" id="selectedGenderInput" value="" required>
+            </div>
+          </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- BAGIAN 2: KATEGORI CERITA (WAJIB)          -->
+        <!-- ========================================== -->
+        <div>
+          <div class="flex items-center gap-2.5 mb-6 pb-3 border-b border-oase-border">
+            <span class="w-7 h-7 rounded-full bg-heather-100 text-heather-700 flex items-center justify-center text-xs font-bold">2</span>
+            <div>
+              <h2 class="text-lg sm:text-xl font-bold text-oase-plum">Kategori Cerita / Permasalahan</h2>
+              <p class="text-xs text-oase-muted">Pilih satu topik yang paling menggambarkan situasi atau perasaanmu</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3" id="categoryChipsContainer">
+            <button type="button" data-category="Masalah Pembelajaran & Akademik" class="category-chip text-left p-4 rounded-2xl border border-oase-border bg-oase-surface/60 hover:bg-heather-50 hover:border-heather-300 transition-all flex items-start gap-3 group">
+              <div class="w-9 h-9 rounded-xl bg-heather-100 text-heather-600 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
+                <i data-lucide="graduation-cap" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <span class="text-sm font-bold block leading-snug">Pembelajaran & Akademik</span>
+                <span class="text-xs text-oase-muted block mt-0.5">Tugas, nilai, kesulitan belajar</span>
+              </div>
+            </button>
+
+            <button type="button" data-category="Masalah Mental & Emosi" class="category-chip text-left p-4 rounded-2xl border border-oase-border bg-oase-surface/60 hover:bg-heather-50 hover:border-heather-300 transition-all flex items-start gap-3 group">
+              <div class="w-9 h-9 rounded-xl bg-heather-100 text-heather-600 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
+                <i data-lucide="heart-pulse" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <span class="text-sm font-bold block leading-snug">Kesehatan Mental & Emosi</span>
+                <span class="text-xs text-oase-muted block mt-0.5">Stres, cemas, lelah batin, sedih</span>
+              </div>
+            </button>
+
+            <button type="button" data-category="Masalah Keluarga & Rumah Tangga" class="category-chip text-left p-4 rounded-2xl border border-oase-border bg-oase-surface/60 hover:bg-heather-50 hover:border-heather-300 transition-all flex items-start gap-3 group">
+              <div class="w-9 h-9 rounded-xl bg-heather-100 text-heather-600 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
+                <i data-lucide="home" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <span class="text-sm font-bold block leading-snug">Keluarga & Rumah Tangga</span>
+                <span class="text-xs text-oase-muted block mt-0.5">Orang tua, saudara, konflik rumah</span>
+              </div>
+            </button>
+
+            <button type="button" data-category="Hubungan & Pertemanan" class="category-chip text-left p-4 rounded-2xl border border-oase-border bg-oase-surface/60 hover:bg-heather-50 hover:border-heather-300 transition-all flex items-start gap-3 group">
+              <div class="w-9 h-9 rounded-xl bg-heather-100 text-heather-600 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
+                <i data-lucide="users" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <span class="text-sm font-bold block leading-snug">Hubungan & Pertemanan</span>
+                <span class="text-xs text-oase-muted block mt-0.5">Sahabat, circle pergaulan, asmara</span>
+              </div>
+            </button>
+
+            <button type="button" data-category="Karier & Masa Depan" class="category-chip text-left p-4 rounded-2xl border border-oase-border bg-oase-surface/60 hover:bg-heather-50 hover:border-heather-300 transition-all flex items-start gap-3 group">
+              <div class="w-9 h-9 rounded-xl bg-heather-100 text-heather-600 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
+                <i data-lucide="compass" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <span class="text-sm font-bold block leading-snug">Karier & Rencana Masa Depan</span>
+                <span class="text-xs text-oase-muted block mt-0.5">Jurusan kuliah, impian, kebimbangan</span>
+              </div>
+            </button>
+
+            <button type="button" data-category="Lainnya" class="category-chip text-left p-4 rounded-2xl border border-oase-border bg-oase-surface/60 hover:bg-heather-50 hover:border-heather-300 transition-all flex items-start gap-3 group">
+              <div class="w-9 h-9 rounded-xl bg-heather-100 text-heather-600 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
+                <i data-lucide="message-square-heart" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <span class="text-sm font-bold block leading-snug">Lainnya</span>
+                <span class="text-xs text-oase-muted block mt-0.5">Topik bebas yang belum tercantum</span>
+              </div>
+            </button>
+          </div>
+          <input type="hidden" id="selectedCategoryInput" value="" required>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- BAGIAN 3: PILIH KONSELOR PENDAMPING        -->
+        <!-- ========================================== -->
+        <div>
+          <div class="flex items-center justify-between mb-6 pb-3 border-b border-oase-border">
+            <div class="flex items-center gap-2.5">
+              <span class="w-7 h-7 rounded-full bg-heather-100 text-heather-700 flex items-center justify-center text-xs font-bold">3</span>
+              <div>
+                <h2 class="text-lg sm:text-xl font-bold text-oase-plum">Pilih Konselor Pendamping</h2>
+                <p class="text-xs text-oase-muted">Pilih konselor yang kamu percayai untuk membaca dan merespons ceritamu</p>
+              </div>
+            </div>
+            <span class="hidden sm:inline-flex items-center gap-1 text-xs font-medium text-heather-700 bg-heather-100/80 px-2.5 py-1 rounded-full">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+              <span>Daftar Konselor Resmi</span>
+            </span>
+          </div>
+
+          <!-- Dynamic Counselors Grid (Populated from counselors.js) -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="counselorsGrid">
+            <!-- Loading placeholder -->
+            <div class="p-6 rounded-2xl border border-dashed border-heather-200 text-center text-oase-muted text-sm col-span-2">
+              Memuat daftar konselor...
+            </div>
+          </div>
+          <input type="hidden" id="selectedCounselorIdInput" value="auto">
+          <input type="hidden" id="selectedCounselorNameInput" value="Pilihkan Otomatis">
+        </div>
+
+        <!-- ========================================== -->
+        <!-- BAGIAN 4: ISI CERITA / CURHATAN            -->
+        <!-- ========================================== -->
+        <div>
+          <div class="flex items-center justify-between mb-4 pb-3 border-b border-oase-border">
+            <div class="flex items-center gap-2.5">
+              <span class="w-7 h-7 rounded-full bg-heather-100 text-heather-700 flex items-center justify-center text-xs font-bold">4</span>
+              <h2 class="text-lg sm:text-xl font-bold text-oase-plum">Cerita yang Ingin Disampaikan</h2>
+            </div>
+            <!-- Word Count Counter -->
+            <div class="text-right">
+              <span id="wordCountBadge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-heather-50 border border-heather-200 text-xs font-bold text-heather-700">
+                <i data-lucide="align-left" class="w-3.5 h-3.5"></i>
+                <span id="currentWordCount">0</span> / 2000 kata
+              </span>
+            </div>
+          </div>
+
+          <div class="space-y-2">
+            <textarea 
+              id="storyContentTextarea" 
+              rows="9" 
+              required
+              placeholder="Tuliskan apapun yang kamu rasakan tanpa ragu... Tidak ada kata yang salah di sini. Konselor kami siap mendengar keluh kesahmu dengan tulus dan penuh kasih sayang."
+              class="w-full p-4 sm:p-5 rounded-2xl border border-oase-border bg-oase-surface/40 text-oase-plum placeholder-oase-muted/60 text-sm sm:text-base leading-relaxed focus:outline-none focus:border-heather-500 focus:bg-white focus:ring-4 focus:ring-heather-100 transition-all resize-y min-h-[180px]"
+            ></textarea>
+            
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between text-xs text-oase-muted gap-2 pt-1">
+              <span class="flex items-center gap-1.5">
+                <i data-lucide="lock" class="w-3.5 h-3.5 text-heather-500"></i>
+                <span>Hanya konselor terpilih yang dapat membaca isi pesan ini.</span>
+              </span>
+              <span id="wordCountWarning" class="hidden text-red-500 font-semibold flex items-center gap-1">
+                <i data-lucide="alert-circle" class="w-3.5 h-3.5"></i>
+                <span>Cerita telah melebihi batas maksimal 2000 kata!</span>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- TOMBOL AKSI SUBMIT                         -->
+        <!-- ========================================== -->
+        <div class="pt-4 border-t border-oase-border flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p class="text-xs text-oase-muted text-center sm:text-left">
+            Setelah dikirim, kamu akan mendapatkan <strong class="text-heather-700">Kode Unik Tiket</strong> untuk mengecek jawaban konselor.
+          </p>
+
+          <button 
+            type="submit" 
+            id="submitStoryBtn" 
+            class="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-heather-600 via-heather-500 to-heather-600 hover:from-heather-700 hover:to-heather-700 text-white font-bold text-base shadow-lg shadow-heather-500/25 hover:shadow-xl hover:shadow-heather-500/35 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 flex items-center justify-center gap-2.5"
+          >
+            <i data-lucide="send" class="w-5 h-5"></i>
+            <span>Kirim Cerita ke Konselor</span>
+          </button>
+        </div>
+
+      </form>
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="mt-12 bg-white/60 border-t border-oase-border py-6 text-center text-xs text-oase-muted">
+    <div class="max-w-5xl mx-auto px-4">
+      <p>&copy; 2026 OASE Cerita. Ruang Aman Curhat & Konseling Anonim.</p>
+    </div>
+  </footer>
+
+  <!-- ======================================================== -->
+  <!-- MODAL SUKSES: TAMPILKAN KODE TIKET UNIK POST-SUBMISSION  -->
+  <!-- ======================================================== -->
+  <div id="successModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-oase-plum/60 backdrop-blur-sm hidden animate-fadeIn">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 border border-heather-100 shadow-2xl text-center space-y-6 relative overflow-hidden">
+      <!-- Top banner ribbon -->
+      <div class="w-16 h-16 rounded-3xl bg-heather-100 text-heather-600 flex items-center justify-center mx-auto shadow-md">
+        <i data-lucide="check-circle-2" class="w-9 h-9"></i>
+      </div>
+
+      <div class="space-y-2">
+        <h3 class="text-2xl font-extrabold text-oase-plum">Ceritamu Telah Diterima!</h3>
+        <p class="text-sm text-oase-muted leading-relaxed">
+          Terima kasih telah berani membuka hati. Ceritamu sudah aman diteruskan ke konselor pendamping.
+        </p>
+      </div>
+
+      <!-- Kode Tiket Box -->
+      <div class="bg-heather-50/80 border-2 border-dashed border-heather-300 rounded-2xl p-5 space-y-3">
+        <span class="text-xs uppercase font-bold text-heather-600 tracking-wider block">Kode Unik Tiket Anda:</span>
+        <div class="flex items-center justify-center gap-3">
+          <span id="ticketCodeDisplay" class="font-mono text-2xl sm:text-3xl font-black text-heather-700 tracking-wider">OASE-0000-XX</span>
+          <button id="copyTicketBtn" type="button" class="p-2.5 rounded-xl bg-white border border-heather-300 hover:bg-heather-100 text-heather-700 shadow-sm transition-all" title="Salin Kode">
+            <i data-lucide="copy" class="w-4 h-4"></i>
+          </button>
+        </div>
+        <p id="copyFeedbackText" class="text-xs text-emerald-600 font-semibold hidden">Tersalin ke clipboard!</p>
+      </div>
+
+      <!-- Warning reminder -->
+      <div class="p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-left flex items-start gap-2.5">
+        <i data-lucide="bookmark" class="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5"></i>
+        <p class="text-xs text-amber-900 leading-snug">
+          <strong>PENTING:</strong> Catat atau simpan kode tiket ini! Kamu akan menggunakannya untuk mengecek balasan atau tanggapan dari konselor melalui tombol <strong>Cek Status Curhat</strong>.
+        </p>
+      </div>
+
+      <!-- Buttons Action -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+        <button id="modalCheckStatusBtn" class="w-full py-3 rounded-2xl bg-heather-500 hover:bg-heather-600 text-white font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2">
+          <i data-lucide="search" class="w-4 h-4"></i>
+          <span>Pantau Status Cerita</span>
+        </button>
+        <a href="index.html" class="w-full py-3 rounded-2xl border border-oase-border hover:bg-heather-50 text-oase-plum font-semibold text-sm transition-all flex items-center justify-center gap-2">
+          <i data-lucide="home" class="w-4 h-4"></i>
+          <span>Kembali ke Beranda</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL CEK STATUS TIKET & BALASAN KONSELOR                -->
+  <!-- ======================================================== -->
+  <div id="checkTicketModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-oase-plum/60 backdrop-blur-sm hidden animate-fadeIn">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 border border-heather-100 shadow-2xl space-y-6 relative max-h-[90vh] overflow-y-auto">
+      
+      <!-- Close button -->
+      <button id="closeCheckTicketModalBtn" class="absolute top-5 right-5 text-oase-muted hover:text-oase-plum transition-colors">
+        <i data-lucide="x" class="w-6 h-6"></i>
+      </button>
+
+      <div class="text-left space-y-1">
+        <div class="inline-flex items-center gap-1.5 text-xs font-bold text-heather-600 bg-heather-100 px-3 py-1 rounded-full">
+          <i data-lucide="ticket" class="w-3.5 h-3.5"></i>
+          <span>Cek Tanggapan Konselor</span>
+        </div>
+        <h3 class="text-xl font-bold text-oase-plum">Lacak Jawaban Curhat</h3>
+        <p class="text-xs text-oase-muted">Masukkan kode unik yang kamu peroleh saat mengirim cerita.</p>
+      </div>
+
+      <!-- Ticket Input Form -->
+      <div class="flex items-center gap-2">
+        <input 
+          type="text" 
+          id="searchTicketInput" 
+          placeholder="Contoh: OASE-8392-AB" 
+          class="flex-grow px-4 py-3 rounded-2xl border border-oase-border bg-oase-surface/50 text-oase-plum placeholder-oase-muted/60 text-sm uppercase tracking-wider font-mono focus:outline-none focus:border-heather-500 focus:bg-white"
+        >
+        <button 
+          id="searchTicketBtn" 
+          class="px-5 py-3 rounded-2xl bg-heather-500 hover:bg-heather-600 text-white font-bold text-sm shadow-md transition-all flex items-center gap-1.5 flex-shrink-0"
+        >
+          <i data-lucide="search" class="w-4 h-4"></i>
+          <span>Cari</span>
+        </button>
+      </div>
+
+      <!-- Search Result Container -->
+      <div id="ticketResultBox" class="hidden space-y-4 pt-2 border-t border-oase-border">
+        <!-- Will be dynamically populated -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Load Scripts -->
+  <script src="counselors.js"></script>
+  <script src="supabaseClient.js"></script>
+  <script>
+    // Initialize Lucide Icons
+    lucide.createIcons();
+
+    // DOM Elements
+    const counselorsGrid = document.getElementById('counselorsGrid');
+    const selectedCounselorIdInput = document.getElementById('selectedCounselorIdInput');
+    const selectedCounselorNameInput = document.getElementById('selectedCounselorNameInput');
+    const selectedGenderInput = document.getElementById('selectedGenderInput');
+    const selectedCategoryInput = document.getElementById('selectedCategoryInput');
+    const storyTextarea = document.getElementById('storyContentTextarea');
+    const currentWordCountSpan = document.getElementById('currentWordCount');
+    const wordCountWarning = document.getElementById('wordCountWarning');
+    const submissionForm = document.getElementById('storySubmissionForm');
+    const submitBtn = document.getElementById('submitStoryBtn');
+
+    // Modals
+    const successModal = document.getElementById('successModal');
+    const ticketCodeDisplay = document.getElementById('ticketCodeDisplay');
+    const copyTicketBtn = document.getElementById('copyTicketBtn');
+    const copyFeedbackText = document.getElementById('copyFeedbackText');
+    const modalCheckStatusBtn = document.getElementById('modalCheckStatusBtn');
+
+    const checkTicketModal = document.getElementById('checkTicketModal');
+    const openCheckTicketBtn = document.getElementById('openCheckTicketBtn');
+    const closeCheckTicketModalBtn = document.getElementById('closeCheckTicketModalBtn');
+    const searchTicketInput = document.getElementById('searchTicketInput');
+    const searchTicketBtn = document.getElementById('searchTicketBtn');
+    const ticketResultBox = document.getElementById('ticketResultBox');
+
+    // 1. RENDER COUNSELORS FROM counselors.js
+    function renderCounselors() {
+      const counselors = window.COUNSELORS_DATA || [];
+      if (!counselorsGrid) return;
+      counselorsGrid.innerHTML = '';
+
+      counselors.forEach((c, index) => {
+        const isDefault = index === 0; // Pilihkan otomatis by default
+        const card = document.createElement('div');
+        card.className = `counselor-card p-4 rounded-2xl border border-oase-border bg-oase-surface/50 hover:bg-heather-50/80 cursor-pointer transition-all flex items-start gap-3.5 relative ${isDefault ? 'selected' : ''}`;
+        card.setAttribute('data-id', c.id);
+        card.setAttribute('data-name', c.name);
+
+        card.innerHTML = `
+          <div class="relative flex-shrink-0">
+            <img src="${c.avatar}" alt="${c.name}" class="w-13 h-13 rounded-2xl object-cover border-2 border-white shadow-sm w-12 h-12">
+            <span class="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-white" title="${c.status}"></span>
+          </div>
+          <div class="flex-grow min-w-0 pr-6">
+            <div class="flex items-center gap-2">
+              <h4 class="text-sm font-bold text-oase-plum truncate">${c.name}</h4>
+            </div>
+            <p class="text-xs text-heather-600 font-medium truncate mt-0.5">${c.role}</p>
+            <div class="flex flex-wrap gap-1 mt-2">
+              ${c.specialties.map(s => `<span class="px-2 py-0.5 rounded-md bg-white border border-heather-200 text-[10px] font-semibold text-heather-700">${s}</span>`).join('')}
+            </div>
+          </div>
+          <div class="counselor-indicator w-5 h-5 rounded-full border-2 border-oase-border flex items-center justify-center flex-shrink-0 absolute top-4 right-4 transition-colors">
+            <div class="w-2 h-2 rounded-full bg-white"></div>
+          </div>
+        `;
+
+        card.addEventListener('click', () => {
+          document.querySelectorAll('.counselor-card').forEach(el => el.classList.remove('selected'));
+          card.classList.add('selected');
+          selectedCounselorIdInput.value = c.id;
+          selectedCounselorNameInput.value = c.name;
+        });
+
+        counselorsGrid.appendChild(card);
+      });
+
+      if (counselors.length > 0) {
+        selectedCounselorIdInput.value = counselors[0].id;
+        selectedCounselorNameInput.value = counselors[0].name;
+      }
+    }
+
+    // 2. GENDER SELECTION HANDLER
+    document.querySelectorAll('.gender-chip').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.gender-chip').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        selectedGenderInput.value = btn.getAttribute('data-gender');
+      });
+    });
+
+    // 3. CATEGORY SELECTION HANDLER
+    document.querySelectorAll('.category-chip').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.category-chip').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        selectedCategoryInput.value = btn.getAttribute('data-category');
+      });
+    });
+
+    // 4. LIVE WORD COUNTER (MAX 2000 WORDS)
+    storyTextarea.addEventListener('input', () => {
+      const text = storyTextarea.value.trim();
+      const words = text ? text.split(/\s+/).length : 0;
+      currentWordCountSpan.textContent = words;
+
+      if (words > 2000) {
+        wordCountWarning.classList.remove('hidden');
+        storyTextarea.classList.add('border-red-400', 'focus:border-red-500', 'focus:ring-red-100');
+        submitBtn.disabled = true;
+        submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+      } else {
+        wordCountWarning.classList.add('hidden');
+        storyTextarea.classList.remove('border-red-400', 'focus:border-red-500', 'focus:ring-red-100');
+        submitBtn.disabled = false;
+        submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+      }
+    });
+
+    // 5. FORM SUBMISSION
+    submissionForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      // Validasi gender
+      if (!selectedGenderInput.value) {
+        alert('Silakan pilih Jenis Kelamin terlebih dahulu.');
+        return;
+      }
+
+      // Validasi kategori
+      if (!selectedCategoryInput.value) {
+        alert('Silakan pilih salah satu Kategori Cerita.');
+        return;
+      }
+
+      const rawAuthorName = document.getElementById('authorNameInput').value;
+      const educationLevel = document.getElementById('educationLevelSelect').value;
+      const gradeClass = document.getElementById('gradeClassInput').value;
+      const gender = selectedGenderInput.value;
+      const category = selectedCategoryInput.value;
+      const counselorId = selectedCounselorIdInput.value;
+      const counselorName = selectedCounselorNameInput.value;
+      const storyContent = storyTextarea.value.trim();
+
+      // Cek jumlah kata
+      const words = storyContent.split(/\s+/).length;
+      if (words > 2000) {
+        alert('Cerita Anda melebihi batas 2000 kata. Mohon dipersingkat.');
+        return;
+      }
+
+      // Tampilkan status loading tombol
+      const originalBtnHTML = submitBtn.innerHTML;
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = `
+        <svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        <span>Mengirim Cerita & Membuat Tiket...</span>
+      `;
+
+      try {
+        const result = await window.CounselingService.submitCounselingStory({
+          authorName: rawAuthorName,
+          educationLevel,
+          gradeClass,
+          gender,
+          category,
+          counselorId,
+          counselorName,
+          storyContent
+        });
+
+        // Sukses! Tampilkan modal receipt dengan kode unik
+        ticketCodeDisplay.textContent = result.ticketCode;
+        successModal.classList.remove('hidden');
+
+        // Reset form
+        submissionForm.reset();
+        selectedGenderInput.value = '';
+        selectedCategoryInput.value = '';
+        document.querySelectorAll('.gender-chip').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.category-chip').forEach(b => b.classList.remove('active'));
+        currentWordCountSpan.textContent = '0';
+
+      } catch (err) {
+        console.error('Gagal mengirim cerita:', err);
+        alert('Terjadi kendala saat mengirim cerita. Silakan coba lagi.');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnHTML;
+      }
+    });
+
+    // 6. COPY TICKET CODE
+    copyTicketBtn.addEventListener('click', () => {
+      const code = ticketCodeDisplay.textContent;
+      navigator.clipboard.writeText(code).then(() => {
+        copyFeedbackText.classList.remove('hidden');
+        setTimeout(() => copyFeedbackText.classList.add('hidden'), 3000);
+      });
+    });
+
+    // 7. MODAL CHECK TICKET STATUS
+    openCheckTicketBtn.addEventListener('click', () => {
+      checkTicketModal.classList.remove('hidden');
+      ticketResultBox.classList.add('hidden');
+      searchTicketInput.value = '';
+    });
+
+    closeCheckTicketModalBtn.addEventListener('click', () => {
+      checkTicketModal.classList.add('hidden');
+    });
+
+    modalCheckStatusBtn.addEventListener('click', () => {
+      const currentCode = ticketCodeDisplay.textContent;
+      successModal.classList.add('hidden');
+      checkTicketModal.classList.remove('hidden');
+      searchTicketInput.value = currentCode;
+      searchTicketBtn.click();
+    });
+
+    searchTicketBtn.addEventListener('click', async () => {
+      const queryCode = searchTicketInput.value.trim().toUpperCase();
+      if (!queryCode) {
+        alert('Masukkan kode tiket terlebih dahulu.');
+        return;
+      }
+
+      searchTicketBtn.disabled = true;
+      searchTicketBtn.innerHTML = 'Mencari...';
+
+      try {
+        const data = await window.CounselingService.getStoryByTicket(queryCode);
+        ticketResultBox.classList.remove('hidden');
+
+        if (!data) {
+          ticketResultBox.innerHTML = `
+            <div class="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs text-center space-y-1">
+              <p class="font-bold">Kode Tiket Tidak Ditemukan</p>
+              <p>Pastikan kode tiket yang kamu masukkan sudah benar (contoh: OASE-8392-AB).</p>
+            </div>
+          `;
+        } else {
+          const isReplied = data.counselor_reply && data.counselor_reply.trim() !== '';
+          const statusBadge = isReplied 
+            ? '<span class="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold">Sudah Dibalas Konselor</span>' 
+            : '<span class="px-2.5 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-bold">Sedang Ditinjau Konselor</span>';
+
+          ticketResultBox.innerHTML = `
+            <div class="bg-oase-surface p-4 rounded-2xl border border-oase-border space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="font-mono text-xs font-bold text-heather-700">${data.ticket_code}</span>
+                ${statusBadge}
+              </div>
+              <div class="text-xs space-y-1 text-oase-muted">
+                <p><strong>Pengirim:</strong> ${data.author_name} (${data.education_level}${data.grade_class ? ' - ' + data.grade_class : ''})</p>
+                <p><strong>Kategori:</strong> ${data.category}</p>
+                <p><strong>Konselor:</strong> ${data.counselor_name}</p>
+              </div>
+
+              <div class="pt-2 border-t border-oase-border">
+                <p class="text-xs font-bold text-oase-plum mb-1">Cerita Kamu:</p>
+                <div class="p-3 bg-white rounded-xl border border-oase-border text-xs text-oase-muted italic max-h-32 overflow-y-auto leading-relaxed">
+                  "${data.story_content}"
+                </div>
+              </div>
+
+              ${isReplied ? `
+                <div class="pt-2 border-t border-emerald-100">
+                  <div class="flex items-center gap-1.5 text-xs font-bold text-emerald-800 mb-1">
+                    <i data-lucide="message-circle" class="w-4 h-4 text-emerald-600"></i>
+                    <span>Tanggapan dari ${data.counselor_name}:</span>
+                  </div>
+                  <div class="p-3 bg-emerald-50 rounded-xl border border-emerald-200 text-xs text-emerald-950 font-medium leading-relaxed">
+                    ${data.counselor_reply}
+                  </div>
+                </div>
+              ` : `
+                <div class="p-3 bg-amber-50/70 rounded-xl border border-amber-200 text-xs text-amber-800 flex items-start gap-2">
+                  <i data-lucide="clock" class="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5"></i>
+                  <span>Konselor sedang membaca ceritamu. Harap simpan kode tiket ini dan cek kembali nanti secara berkala.</span>
+                </div>
+              `}
+            </div>
+          `;
+          lucide.createIcons();
+        }
+      } catch (err) {
+        console.error('Error saat mencari tiket:', err);
+        ticketResultBox.classList.remove('hidden');
+        ticketResultBox.innerHTML = `<p class="text-xs text-red-500 text-center">Gagal memuat data tiket. Coba lagi nanti.</p>`;
+      } finally {
+        searchTicketBtn.disabled = false;
+        searchTicketBtn.innerHTML = `
+          <i data-lucide="search" class="w-4 h-4"></i>
+          <span>Cari</span>
+        `;
+        lucide.createIcons();
+      }
+    });
+
+    // Close modal on click outside
+    window.addEventListener('click', (e) => {
+      if (e.target === checkTicketModal) checkTicketModal.classList.add('hidden');
+    });
+
+    // Initial render
+    renderCounselors();
+  </script>
+</body>
+</html>

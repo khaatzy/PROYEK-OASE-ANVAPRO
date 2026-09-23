@@ -123,6 +123,100 @@ const StoryService = {
   }
 };
 
-// Ekspor ke window global agar mudah diakses di app.js
+// Layanan Pengiriman Cerita & Konseling (Counseling Service)
+const CounselingService = {
+  // Fungsi pembuat kode tiket unik format OASE-XXXX-XX (contoh: OASE-8392-AB)
+  generateTicketCode() {
+    const charsNum = '0123456789';
+    const charsLetter = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+    let numPart = '';
+    for (let i = 0; i < 4; i++) {
+      numPart += charsNum.charAt(Math.floor(Math.random() * charsNum.length));
+    }
+    let letterPart = '';
+    for (let i = 0; i < 2; i++) {
+      letterPart += charsLetter.charAt(Math.floor(Math.random() * charsLetter.length));
+    }
+    return `OASE-${numPart}-${letterPart}`;
+  },
+
+  // Kirim curhatan / cerita ke konselor
+  async submitCounselingStory({
+    authorName,
+    educationLevel,
+    gradeClass = '',
+    gender,
+    category,
+    counselorId,
+    counselorName,
+    storyContent
+  }) {
+    const ticketCode = this.generateTicketCode();
+    
+    // Default nama jika tidak diisi pengirim: User1 - User9999
+    const finalAuthorName = (authorName && authorName.trim() !== '')
+      ? authorName.trim()
+      : `User${Math.floor(100 + Math.random() * 900)}`;
+
+    const submissionData = {
+      ticket_code: ticketCode,
+      author_name: finalAuthorName,
+      education_level: educationLevel,
+      grade_class: gradeClass ? gradeClass.trim() : null,
+      gender: gender,
+      category: category,
+      counselor_id: counselorId,
+      counselor_name: counselorName,
+      story_content: storyContent,
+      status: 'menunggu_tanggapan'
+    };
+
+    if (!supabaseClient) {
+      console.warn('Supabase Client tidak aktif. Menggunakan penyimpanan lokal.');
+      const localStories = JSON.parse(localStorage.getItem('oase_counseling_submissions') || '[]');
+      localStories.push({ ...submissionData, created_at: new Date().toISOString() });
+      localStorage.setItem('oase_counseling_submissions', JSON.stringify(localStories));
+      return { success: true, ticketCode, data: submissionData };
+    }
+
+    const { data, error } = await supabaseClient
+      .from('counseling_submissions')
+      .insert([submissionData])
+      .select();
+
+    if (error) {
+      console.warn('Supabase insert gagal (mungkin tabel belum dibuat di SQL Editor). Menyimpan fallback lokal:', error.message);
+      const localStories = JSON.parse(localStorage.getItem('oase_counseling_submissions') || '[]');
+      localStories.push({ ...submissionData, created_at: new Date().toISOString() });
+      localStorage.setItem('oase_counseling_submissions', JSON.stringify(localStories));
+      return { success: true, ticketCode, data: submissionData, fallback: true };
+    }
+
+    return { success: true, ticketCode, data: data?.[0] || submissionData };
+  },
+
+  // Cek cerita & balasan konselor berdasarkan kode tiket unik
+  async getStoryByTicket(ticketCode) {
+    if (!ticketCode) return null;
+    const cleanCode = ticketCode.trim().toUpperCase();
+
+    if (supabaseClient) {
+      const { data, error } = await supabaseClient
+        .from('counseling_submissions')
+        .select('*')
+        .eq('ticket_code', cleanCode)
+        .single();
+
+      if (!error && data) return data;
+    }
+
+    // Fallback cek di localStorage
+    const localStories = JSON.parse(localStorage.getItem('oase_counseling_submissions') || '[]');
+    return localStories.find(s => s.ticket_code === cleanCode) || null;
+  }
+};
+
+// Ekspor ke window global agar mudah diakses di seluruh aplikasi
 window.AuthService = AuthService;
 window.StoryService = StoryService;
+window.CounselingService = CounselingService;
