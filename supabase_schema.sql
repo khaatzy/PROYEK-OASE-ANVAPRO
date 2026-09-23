@@ -40,3 +40,36 @@ VALUES
 ('Sahabat Anonim #342', 'Lelah', 'Hari ini rasanya begitu berat di tempat kerja. Aku merasa usahaku tidak pernah cukup. Tapi saat menulis di sini, rasanya seperti meletakkan satu ransel batu yang sudah seharian kupanggul...', 28, true),
 ('Sahabat Anonim #115', 'Cemas', 'Ada banyak hal yang terjadi sekaligus minggu ini dan kepalaku rasanya penuh sekali. Mencoba tarik napas dalam-dalam dan mengingat bahwa langkah kecil tetaplah sebuah kemajuan.', 19, true),
 ('Sahabat Anonim #409', 'Syukur', 'Menemukan tempat tenang ini membuatku sadar bahwa emosiku tidak salah. Terima kasih untuk semua pelukan hangat dan kata-kata positif yang selalu saling menguatkan di sini.', 42, true);
+
+-- ========================================================
+-- 4. Buat Tabel Pengiriman Cerita & Konseling (counseling_submissions)
+-- ========================================================
+CREATE TABLE IF NOT EXISTS public.counseling_submissions (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    ticket_code TEXT UNIQUE NOT NULL,
+    author_name TEXT NOT NULL,
+    education_level TEXT NOT NULL,
+    grade_class TEXT,
+    gender TEXT NOT NULL,
+    category TEXT NOT NULL,
+    counselor_id TEXT NOT NULL,
+    counselor_name TEXT NOT NULL,
+    story_content TEXT NOT NULL,
+    status TEXT DEFAULT 'menunggu_tanggapan',
+    counselor_reply TEXT,
+    replied_at TIMESTAMP WITH TIME ZONE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- Aktifkan RLS untuk tabel counseling_submissions
+ALTER TABLE public.counseling_submissions ENABLE ROW LEVEL SECURITY;
+
+-- Kebijakan: Siapapun dapat mengirim cerita / curhatan baru
+CREATE POLICY "Siapapun dapat mengirimkan curhatan" 
+ON public.counseling_submissions FOR INSERT 
+WITH CHECK (true);
+
+-- Kebijakan: Pengunjung dapat melihat status/balasan cerita dengan kode tiket
+CREATE POLICY "Pengguna dapat mengecek curhatan berdasarkan tiket" 
+ON public.counseling_submissions FOR SELECT 
+USING (true);
