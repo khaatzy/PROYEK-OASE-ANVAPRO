@@ -1,0 +1,47 @@
+/* Custom Styling for OASE Cerita */
+
+:root {
+  --heather-mauve: #A14189;
+  --heather-mauve-light: #C78CBB;
+  --heather-mauve-dark: #752A62;
+  --heather-soft-bg: #FCF9FA;
+  --plum-text: #311027;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #F8F1F6;
+}
+::-webkit-scrollbar-thumb {
+  background: #DCB8D4;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #A14189;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+/* Emotion Button Active State */
+.emotion-btn.active {
+  border-color: #A14189 !important;
+  background-color: #F5EBF3 !important;
+  box-shadow: 0 4px 14px 0 rgba(161, 65, 137, 0.18);
+}
