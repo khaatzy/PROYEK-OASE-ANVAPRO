@@ -166,13 +166,19 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const updateNavbarSessionUI = (session) => {
     currentUserSession = session;
+    const mobileUserCard = document.getElementById('mobileUserCard');
+    const userMobileEmailLabel = document.getElementById('userMobileEmailLabel');
+
     if (session && session.user) {
       if (guestControls) guestControls.classList.add('hidden');
       if (userControls) userControls.classList.remove('hidden');
       if (userEmailLabel) userEmailLabel.textContent = session.user.email;
+      if (mobileUserCard) mobileUserCard.classList.remove('hidden');
+      if (userMobileEmailLabel) userMobileEmailLabel.textContent = session.user.email;
     } else {
       if (guestControls) guestControls.classList.remove('hidden');
       if (userControls) userControls.classList.add('hidden');
+      if (mobileUserCard) mobileUserCard.classList.add('hidden');
     }
     if (window.lucide) lucide.createIcons();
   };
@@ -215,15 +221,26 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // Logout Handler
-  if (navLogoutBtn) {
-    navLogoutBtn.addEventListener('click', async () => {
-      try {
-        await window.AuthService.signOut();
-        updateNavbarSessionUI(null);
-      } catch (err) {
-        console.error('Logout error:', err);
-      }
+  // Logout Handlers (Desktop & Mobile)
+  const handleLogout = async () => {
+    try {
+      await window.AuthService.signOut();
+      localStorage.removeItem('oase_active_user_email');
+      updateNavbarSessionUI(null);
+    } catch (err) {
+      console.error('Logout error:', err);
+    }
+  };
+
+  if (navLogoutBtn) navLogoutBtn.addEventListener('click', handleLogout);
+  const mobileLogoutBtn = document.getElementById('mobileLogoutBtn');
+  if (mobileLogoutBtn) mobileLogoutBtn.addEventListener('click', handleLogout);
+
+  const mobileWriteStoryBtn = document.getElementById('mobileWriteStoryBtn');
+  if (mobileWriteStoryBtn) {
+    mobileWriteStoryBtn.addEventListener('click', () => {
+      if (mobileMenu) mobileMenu.classList.add('hidden');
+      openStoryModal();
     });
   }
 

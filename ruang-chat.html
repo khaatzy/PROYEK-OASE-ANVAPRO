@@ -86,7 +86,19 @@
       </div>
 
       <!-- Sesi Timer 30 Menit, Notifikasi Push, Reset & Tombol Selesaikan -->
-      <div class="flex items-center gap-1.5 sm:gap-2.5 flex-shrink-0">
+      <div class="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+        <!-- Badge Enkripsi Data -->
+        <span class="hidden md:inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-[10px] sm:text-xs font-bold shadow-2xs" title="Seluruh percakapan dienkripsi dengan standar aman OASE Vault">
+          <i data-lucide="lock" class="w-3.5 h-3.5 text-emerald-600"></i>
+          <span>Terenkripsi</span>
+        </span>
+
+        <!-- Tombol Bantuan Darurat -->
+        <button id="chatEmergencyHelpBtn" class="px-2.5 py-1.5 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold transition-all flex items-center gap-1 shadow-2xs" title="Kontak Bantuan Darurat & Laporkan Kendala">
+          <i data-lucide="life-buoy" class="w-3.5 h-3.5"></i>
+          <span class="hidden sm:inline">Bantuan</span>
+        </button>
+
         <!-- Tombol Push Notifikasi -->
         <button id="chatPushNotifBtn" class="px-2.5 py-1.5 rounded-xl border-2 border-heather-300 bg-white hover:bg-heather-50 text-heather-900 text-xs font-bold transition-all flex items-center gap-1 shadow-2xs" title="Aktifkan notifikasi desktop & HP">
           <i data-lucide="bell" class="w-3.5 h-3.5 text-heather-600"></i>
@@ -115,12 +127,28 @@
     </div>
   </header>
 
+  <!-- Banner Deteksi Krisis Chat (Muncul jika ada indikasi darurat/self-harm) -->
+  <div id="chatCrisisBanner" class="hidden max-w-5xl mx-auto w-full px-3 sm:px-6 pt-3">
+    <div class="p-3.5 sm:p-4 rounded-2xl bg-rose-600 text-white shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs animate-pulse">
+      <div class="flex items-center gap-2.5 font-semibold">
+        <i data-lucide="alert-triangle" class="w-5 h-5 flex-shrink-0 text-white"></i>
+        <span>🚨 PERINGATAN KRISIS: Pesan ini mengandung indikasi bahaya/melukai diri sendiri. Mohon prioritaskan pendampingan atau arahkan segera ke Hotline SEJIWA 119 ext 8!</span>
+      </div>
+      <div class="flex items-center gap-2 flex-shrink-0">
+        <button id="chatPlayCrisisAlarmBtn" type="button" class="px-3 py-1.5 rounded-xl bg-white text-rose-700 hover:bg-rose-50 text-xs font-bold transition-all flex items-center gap-1 shadow-xs">
+          <i data-lucide="volume-2" class="w-3.5 h-3.5"></i>
+          <span>Bunyikan Alarm</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Area Chat Messages (Full-Height Scrollable) -->
   <main class="flex-grow max-w-5xl w-full mx-auto p-3 sm:p-6 overflow-y-auto space-y-3.5" id="chatMessagesContainer">
     <!-- Notice Sesi -->
     <div class="text-center py-2">
       <span class="px-3.5 py-1 rounded-full bg-white border border-heather-200 text-heather-800 text-[10px] sm:text-[11px] font-semibold shadow-2xs inline-block">
-        🔒 Sesi konseling 30 menit dimulai secara aman dan rahasia. Sampaikan cerita dengan tenang.
+        🔒 Sesi konseling 30 menit terenkripsi secara aman dan rahasia. Sampaikan cerita dengan tenang.
       </span>
     </div>
 
@@ -304,6 +332,129 @@
           <span>Kirim Penilaian</span>
         </button>
       </div>
+    </div>
+  <!-- ======================================================== -->
+  <!-- MODAL: KONTAK DARURAT & LAPOR BUG                        -->
+  <!-- ======================================================== -->
+  <div id="emergencyHelpModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-oase-plum/70 backdrop-blur-md hidden animate-fadeIn">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 border border-rose-200 shadow-2xl relative space-y-5 max-h-[92vh] overflow-y-auto">
+      
+      <button id="closeEmergencyModalBtn" type="button" class="absolute top-5 right-5 text-oase-muted hover:text-oase-plum p-1" title="Tutup">
+        <i data-lucide="x" class="w-6 h-6"></i>
+      </button>
+
+      <!-- Tabs Navigation -->
+      <div class="flex items-center gap-2 p-1 bg-oase-surface rounded-2xl border border-oase-border">
+        <button type="button" id="tabEmergencyBtn" class="flex-1 py-2 rounded-xl text-xs font-bold transition-all bg-rose-500 text-white shadow-xs flex items-center justify-center gap-1.5">
+          <i data-lucide="phone-call" class="w-3.5 h-3.5"></i>
+          <span>Kontak Darurat</span>
+        </button>
+        <button type="button" id="tabBugReportBtn" class="flex-1 py-2 rounded-xl text-xs font-bold transition-all text-oase-muted hover:text-oase-plum flex items-center justify-center gap-1.5">
+          <i data-lucide="bug" class="w-3.5 h-3.5"></i>
+          <span>Laporkan Bug</span>
+        </button>
+      </div>
+
+      <!-- Tab Content 1: Kontak Darurat -->
+      <div id="emergencyTabContent" class="space-y-4">
+        <div class="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-xs text-rose-950 space-y-1">
+          <div class="flex items-center gap-1.5 font-bold text-rose-800">
+            <i data-lucide="heart-handshake" class="w-4 h-4 text-rose-600"></i>
+            <span>Bantuan Krisis & Pendampingan Segera</span>
+          </div>
+          <p class="text-[11px] leading-relaxed text-rose-900">
+            Jika Anda atau teman Anda sedang mengalami krisis emosional hebat atau merasa ingin melukai diri sendiri, mohon segera hubungi salah satu saluran bantuan darurat resmi berikut. Anda sangat berharga dan tidak sendirian:
+          </p>
+        </div>
+
+        <div class="space-y-2.5">
+          <!-- Hotline Nasional Sejiwa -->
+          <div class="p-4 rounded-2xl border border-rose-200 bg-white hover:border-rose-400 transition-all shadow-2xs flex items-center justify-between gap-3">
+            <div class="space-y-0.5">
+              <span class="px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 text-[10px] font-bold">Nasional • 24 Jam Bebas Pulsa</span>
+              <h4 class="text-sm font-bold text-oase-plum">Layanan SEJIWA Kemenkes RI</h4>
+              <p class="text-xs text-oase-muted">Hotline Kesehatan Jiwa Nasional: Telepon 119 (Tekan 8)</p>
+            </div>
+            <a href="tel:119" class="px-3.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs flex items-center gap-1 shadow-xs flex-shrink-0">
+              <i data-lucide="phone" class="w-3.5 h-3.5"></i>
+              <span>Hubungi 119</span>
+            </a>
+          </div>
+
+          <!-- WhatsApp Konselor Siaga OASE -->
+          <div class="p-4 rounded-2xl border border-emerald-200 bg-white hover:border-emerald-400 transition-all shadow-2xs flex items-center justify-between gap-3">
+            <div class="space-y-0.5">
+              <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold">Konselor Siaga OASE</span>
+              <h4 class="text-sm font-bold text-oase-plum">WhatsApp Konselor Darurat</h4>
+              <p class="text-xs text-oase-muted">+62 812-8899-7701 (Siaga Pendampingan Krisis)</p>
+            </div>
+            <a href="https://wa.me/6281288997701?text=Halo%20Konselor%20OASE,%20saya%20membutuhkan%20bantuan%20darurat%20sekarang." target="_blank" rel="noopener noreferrer" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1 shadow-xs flex-shrink-0">
+              <i data-lucide="message-circle" class="w-3.5 h-3.5"></i>
+              <span>WhatsApp</span>
+            </a>
+          </div>
+
+          <!-- Kontak Moderator Utama -->
+          <div class="p-4 rounded-2xl border border-heather-200 bg-white hover:border-heather-400 transition-all shadow-2xs flex items-center justify-between gap-3">
+            <div class="space-y-0.5">
+              <span class="px-2 py-0.5 rounded-full bg-heather-100 text-heather-800 text-[10px] font-bold">Moderator Utama OASE</span>
+              <h4 class="text-sm font-bold text-oase-plum">Bantuan & Eskalasi Moderator</h4>
+              <p class="text-xs text-oase-muted">moderator@oase.id • WhatsApp: +62 813-1122-3344</p>
+            </div>
+            <a href="https://wa.me/6281311223344?text=Halo%20Moderator%20OASE,%20saya%20ingin%20melaporkan%20kejadian%20darurat." target="_blank" rel="noopener noreferrer" class="px-3.5 py-2 rounded-xl bg-heather-600 hover:bg-heather-700 text-white font-bold text-xs flex items-center gap-1 shadow-xs flex-shrink-0">
+              <i data-lucide="shield" class="w-3.5 h-3.5"></i>
+              <span>Kontak</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab Content 2: Laporkan Bug -->
+      <div id="bugReportTabContent" class="hidden space-y-4">
+        <div class="p-3.5 rounded-2xl bg-indigo-50 border border-indigo-200 text-xs text-indigo-950 space-y-1">
+          <div class="flex items-center gap-1.5 font-bold text-indigo-800">
+            <i data-lucide="sparkles" class="w-4 h-4 text-indigo-600"></i>
+            <span>Bantu Kami Menyempurnakan Ruang Chat</span>
+          </div>
+          <p class="text-[11px] leading-relaxed text-indigo-900">
+            Menemukan tampilan yang kurang rapi, pesan macet, atau kendala mikrofon? Laporkan langsung ke tim teknis OASE via WhatsApp atau Email di bawah ini.
+          </p>
+        </div>
+
+        <form id="bugReportForm" class="space-y-3 text-left">
+          <div class="space-y-1">
+            <label class="block text-xs font-bold text-oase-plum">Kategori Kendala:</label>
+            <select id="bugCategorySelect" class="w-full px-3.5 py-2.5 rounded-xl border border-oase-border text-xs bg-white focus:outline-none focus:border-indigo-500">
+              <option value="Tampilan Berantakan / Layout HP & Desktop">📱 Tampilan Berantakan (Mobile/Desktop)</option>
+              <option value="Pesan Macet / Gagal Terkirim">💬 Pesan Macet / Gagal Terkirim</option>
+              <option value="Mikrofon / Voice Note Tidak Berfungsi">🎙️ Mikrofon / Voice Note Tidak Berfungsi</option>
+              <option value="Lainnya">✨ Kendala Lainnya</option>
+            </select>
+          </div>
+
+          <div class="space-y-1">
+            <label class="block text-xs font-bold text-oase-plum">Deskripsi Bug / Masalah:</label>
+            <textarea id="bugDescriptionInput" rows="3" required placeholder="Jelaskan kendala yang dialami, letak halaman, atau perangkat yang digunakan..." class="w-full p-3 rounded-xl border border-oase-border text-xs focus:outline-none focus:border-indigo-500 leading-relaxed"></textarea>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+            <button type="button" id="sendBugWhatsAppBtn" class="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition-all flex items-center justify-center gap-1.5 shadow-xs">
+              <i data-lucide="message-circle" class="w-3.5 h-3.5"></i>
+              <span>Kirim via WhatsApp (+62 812-3456-7890)</span>
+            </button>
+            <button type="button" id="sendBugEmailBtn" class="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs transition-all flex items-center justify-center gap-1.5 shadow-xs">
+              <i data-lucide="mail" class="w-3.5 h-3.5"></i>
+              <span>Kirim via Email (support@oase.id)</span>
+            </button>
+          </div>
+        </form>
+
+        <div class="pt-2 border-t border-oase-border flex items-center justify-between text-[11px] text-oase-muted">
+          <span>Official Support: support@oase.id</span>
+          <span>WhatsApp IT: +62 812-3456-7890</span>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -745,12 +896,29 @@
 
       const messages = await window.ChatSessionService.getMessages(activeSession.id);
 
+      // Cek apakah ada pesan berindikasi krisis
+      const hasCrisis = messages.some(m => m.is_crisis);
+      const chatCrisisBanner = document.getElementById('chatCrisisBanner');
+      if (chatCrisisBanner) {
+        if (hasCrisis) {
+          chatCrisisBanner.classList.remove('hidden');
+        } else {
+          chatCrisisBanner.classList.add('hidden');
+        }
+      }
+
       // Cek apakah ada pesan baru
       let hasNewMessage = false;
       messages.forEach(m => {
         if (!lastRenderedMessageIds.has(m.id)) {
           hasNewMessage = true;
           lastRenderedMessageIds.add(m.id);
+
+          // Jika pesan berindikasi krisis dan berasal dari siswa, bunyikan alarm untuk konselor
+          if (m.is_crisis && m.sender_type !== currentRole && window.AudioAlertService) {
+            window.AudioAlertService.playCrisisAlarm();
+          }
+
           // Jika pesan baru berasal dari lawan bicara dan bukan saat pertama kali membuka halaman
           if (!forceScroll && m.sender_type !== currentRole && window.NotificationService) {
             window.NotificationService.sendNotification(`Pesan baru dari ${m.sender_name}`, {
@@ -771,7 +939,7 @@
       chatMessagesContainer.innerHTML = `
         <div class="text-center py-2">
           <span class="px-3.5 py-1 rounded-full bg-white border border-heather-200 text-heather-800 text-[10px] sm:text-[11px] font-semibold shadow-2xs inline-block">
-            🔒 Sesi konseling 30 menit dimulai secara aman dan rahasia. Sampaikan cerita dengan tenang.
+            🔒 Sesi konseling 30 menit terenkripsi secara aman dan rahasia (OASE Vault). Sampaikan cerita dengan tenang.
           </span>
         </div>
       `;
@@ -807,6 +975,7 @@
 
         // isMe bernilai true jika sender_type persis sama dengan peran tab saat ini
         const isMe = m.sender_type === currentRole;
+        const isCrisis = Boolean(m.is_crisis);
         const msgDiv = document.createElement('div');
         msgDiv.className = `flex items-end gap-2 max-w-[85%] sm:max-w-[75%] ${isMe ? 'ml-auto flex-row-reverse' : ''}`;
 
@@ -830,9 +999,10 @@
           // PESAN SAYA SENDIRI: Rapi di KANAN dengan foto profil rapi di samping balon
           msgDiv.innerHTML = `
             <img src="${myPhoto}" alt="Avatar Saya" class="w-7 h-7 sm:w-8 sm:h-8 rounded-xl object-cover border border-heather-200 shadow-2xs flex-shrink-0 mb-1">
-            <div class="p-3 sm:p-3.5 rounded-2xl rounded-br-xs bg-heather-500 text-white shadow-xs">
-              <span class="block text-[9px] sm:text-[10px] font-bold text-heather-100 mb-1 text-right">
-                ${currentRole === 'counselor' ? 'Anda (Konselor)' : 'Anda (Siswa)'}
+            <div class="p-3 sm:p-3.5 rounded-2xl rounded-br-xs ${isCrisis ? 'bg-rose-700 text-white border-2 border-rose-300' : 'bg-heather-500 text-white'} shadow-xs">
+              <span class="block text-[9px] sm:text-[10px] font-bold text-heather-100 mb-1 text-right flex items-center justify-end gap-1">
+                ${isCrisis ? '<span class="px-1.5 py-0.5 rounded bg-white text-rose-800 text-[9px] font-extrabold">🚨 Krisis</span>' : ''}
+                <span>${currentRole === 'counselor' ? 'Anda (Konselor)' : 'Anda (Siswa)'}</span>
               </span>
               ${bubbleContent}
               <span class="block text-[9px] sm:text-[10px] mt-1 text-right text-heather-200 font-medium">
@@ -845,9 +1015,10 @@
           const senderRoleLabel = m.sender_type === 'counselor' ? 'Konselor' : 'Siswa';
           msgDiv.innerHTML = `
             <img src="${opponentPhoto}" alt="Avatar Lawan Bicara" class="w-7 h-7 sm:w-8 sm:h-8 rounded-xl object-cover border border-heather-200 flex-shrink-0 shadow-2xs mb-1">
-            <div class="p-3 sm:p-3.5 rounded-2xl rounded-bl-xs bg-white border border-heather-200 text-oase-plum shadow-xs">
-              <span class="block text-[10px] font-bold text-heather-600 mb-1">
-                ${m.sender_name} (${senderRoleLabel})
+            <div class="p-3 sm:p-3.5 rounded-2xl rounded-bl-xs ${isCrisis ? 'bg-rose-50 border-2 border-rose-400 text-rose-950 ring-2 ring-rose-200' : 'bg-white border border-heather-200 text-oase-plum'} shadow-xs">
+              <span class="block text-[10px] font-bold ${isCrisis ? 'text-rose-700' : 'text-heather-600'} mb-1 flex items-center justify-between gap-1">
+                <span>${m.sender_name} (${senderRoleLabel})</span>
+                ${isCrisis ? '<span class="px-1.5 py-0.5 rounded bg-rose-600 text-white text-[9px] font-extrabold animate-pulse">🚨 Perhatian: Krisis</span>' : ''}
               </span>
               ${bubbleContent}
               <span class="block text-[9px] sm:text-[10px] mt-1 text-right text-oase-muted font-medium">
@@ -967,6 +1138,82 @@
 
       mediaRecorder.stop();
     });
+
+    // 7. BANTUAN DARURAT & LAPORAN BUG HANDLERS
+    const chatEmergencyHelpBtn = document.getElementById('chatEmergencyHelpBtn');
+    const emergencyHelpModal = document.getElementById('emergencyHelpModal');
+    const closeEmergencyModalBtn = document.getElementById('closeEmergencyModalBtn');
+    const tabEmergencyBtn = document.getElementById('tabEmergencyBtn');
+    const tabBugReportBtn = document.getElementById('tabBugReportBtn');
+    const emergencyTabContent = document.getElementById('emergencyTabContent');
+    const bugReportTabContent = document.getElementById('bugReportTabContent');
+    const sendBugWhatsAppBtn = document.getElementById('sendBugWhatsAppBtn');
+    const sendBugEmailBtn = document.getElementById('sendBugEmailBtn');
+    const bugCategorySelect = document.getElementById('bugCategorySelect');
+    const bugDescriptionInput = document.getElementById('bugDescriptionInput');
+    const chatPlayCrisisAlarmBtn = document.getElementById('chatPlayCrisisAlarmBtn');
+
+    if (chatPlayCrisisAlarmBtn) {
+      chatPlayCrisisAlarmBtn.addEventListener('click', () => {
+        if (window.AudioAlertService) {
+          window.AudioAlertService.playCrisisAlarm();
+        }
+      });
+    }
+
+    if (chatEmergencyHelpBtn && emergencyHelpModal) {
+      chatEmergencyHelpBtn.addEventListener('click', () => {
+        emergencyHelpModal.classList.remove('hidden');
+        lucide.createIcons();
+      });
+    }
+
+    if (closeEmergencyModalBtn && emergencyHelpModal) {
+      closeEmergencyModalBtn.addEventListener('click', () => emergencyHelpModal.classList.add('hidden'));
+    }
+
+    if (tabEmergencyBtn && tabBugReportBtn) {
+      tabEmergencyBtn.addEventListener('click', () => {
+        tabEmergencyBtn.className = "flex-1 py-2 rounded-xl text-xs font-bold transition-all bg-rose-500 text-white shadow-xs flex items-center justify-center gap-1.5";
+        tabBugReportBtn.className = "flex-1 py-2 rounded-xl text-xs font-bold transition-all text-oase-muted hover:text-oase-plum flex items-center justify-center gap-1.5";
+        emergencyTabContent.classList.remove('hidden');
+        bugReportTabContent.classList.add('hidden');
+      });
+
+      tabBugReportBtn.addEventListener('click', () => {
+        tabBugReportBtn.className = "flex-1 py-2 rounded-xl text-xs font-bold transition-all bg-indigo-600 text-white shadow-xs flex items-center justify-center gap-1.5";
+        tabEmergencyBtn.className = "flex-1 py-2 rounded-xl text-xs font-bold transition-all text-oase-muted hover:text-oase-plum flex items-center justify-center gap-1.5";
+        emergencyTabContent.classList.add('hidden');
+        bugReportTabContent.classList.remove('hidden');
+      });
+    }
+
+    if (sendBugWhatsAppBtn) {
+      sendBugWhatsAppBtn.addEventListener('click', () => {
+        const category = bugCategorySelect.value;
+        const desc = bugDescriptionInput.value.trim();
+        if (!desc) {
+          alert('Mohon isi deskripsi bug atau kendala yang Anda alami.');
+          return;
+        }
+        const text = encodeURIComponent(`Halo Tim IT OASE Cerita, saya ingin melaporkan bug pada Ruang Chat:\n\n*Kategori:* ${category}\n*Deskripsi:* ${desc}`);
+        window.open(`https://wa.me/6281234567890?text=${text}`, '_blank');
+      });
+    }
+
+    if (sendBugEmailBtn) {
+      sendBugEmailBtn.addEventListener('click', () => {
+        const category = bugCategorySelect.value;
+        const desc = bugDescriptionInput.value.trim();
+        if (!desc) {
+          alert('Mohon isi deskripsi bug atau kendala yang Anda alami.');
+          return;
+        }
+        const subject = encodeURIComponent(`[Laporan Bug Chat OASE] - ${category}`);
+        const body = encodeURIComponent(`Halo Tim IT OASE Cerita,\n\nSaya ingin melaporkan kendala pada Ruang Chat OASE Cerita:\n\nKategori: ${category}\nDeskripsi: ${desc}\n\nTerima kasih.`);
+        window.location.href = `mailto:support@oase.id?subject=${subject}&body=${body}`;
+      });
+    }
 
     // Run on startup
     initChat();

@@ -57,75 +57,117 @@
   </div>
 
   <!-- Header / Navigation -->
-  <header class="sticky top-0 z-40 backdrop-blur-md bg-white/80 border-b border-oase-border/80 transition-all duration-300">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-      <!-- Logo & Branding -->
-      <a href="#" class="flex items-center gap-3 group">
-        <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-heather-600 to-heather-400 flex items-center justify-center text-white shadow-md shadow-heather-500/20 group-hover:scale-105 transition-transform duration-300">
-          <i data-lucide="heart-handshake" class="w-6 h-6"></i>
-        </div>
-        <div>
-          <span class="text-2xl font-bold tracking-tight text-heather-600 block leading-tight">OASE Cerita</span>
-          <span class="text-xs font-medium text-oase-muted block">Obrolan Aman Seputar Emosi</span>
-        </div>
-      </a>
-
-      <!-- Desktop Nav -->
-      <nav class="hidden md:flex items-center gap-8 text-sm font-semibold text-oase-plum/80">
-        <a href="#beranda" class="hover:text-heather-600 transition-colors">Beranda</a>
-        <a href="#tentang" class="hover:text-heather-600 transition-colors">Tentang OASE</a>
-        <a href="#fitur" class="hover:text-heather-600 transition-colors">Fitur & Manfaat</a>
-        <a href="#ruang-cerita" class="hover:text-heather-600 transition-colors">Ruang Cerita</a>
-        <a href="kirim-cerita.html" class="text-heather-600 font-bold hover:text-heather-700 transition-colors flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-heather-50 border border-heather-200">
-          <i data-lucide="send" class="w-3.5 h-3.5"></i>
-          <span>Curhat ke Konselor</span>
+  <header class="sticky top-0 z-40 backdrop-blur-md bg-white/90 border-b border-oase-border/80 transition-all duration-300">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
+      
+      <!-- Group Kiri: Logo + Desktop Nav yang Memiliki Jarak Lega -->
+      <div class="flex items-center gap-6 lg:gap-10 xl:gap-12 flex-shrink-0">
+        <!-- Logo & Branding -->
+        <a href="index.html" class="flex items-center gap-2.5 sm:gap-3 group flex-shrink-0">
+          <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-tr from-heather-600 to-heather-400 flex items-center justify-center text-white shadow-md shadow-heather-500/20 group-hover:scale-105 transition-transform duration-300 flex-shrink-0">
+            <i data-lucide="heart-handshake" class="w-5 h-5 sm:w-6 sm:h-6"></i>
+          </div>
+          <div class="flex flex-col justify-center">
+            <span class="text-xl sm:text-2xl font-bold tracking-tight text-heather-600 leading-tight whitespace-nowrap">OASE Cerita</span>
+            <span class="text-[10px] sm:text-xs font-semibold text-oase-muted whitespace-nowrap hidden sm:block">Obrolan Aman Seputar Emosi</span>
+          </div>
         </a>
-      </nav>
 
-      <!-- Action Button & User Session State -->
-      <div class="flex items-center gap-3">
+        <!-- Desktop Nav: Terpisah dengan Jarak Nyata dari Logo -->
+        <nav class="hidden md:flex items-center gap-5 lg:gap-7 xl:gap-8 text-sm font-bold text-oase-plum/80 whitespace-nowrap">
+          <a href="#beranda" class="hover:text-heather-600 transition-colors">Beranda</a>
+          <a href="#tentang" class="hover:text-heather-600 transition-colors">Tentang OASE</a>
+          <a href="#fitur" class="hover:text-heather-600 transition-colors">Fitur & Manfaat</a>
+          <a href="#ruang-cerita" class="hover:text-heather-600 transition-colors">Ruang Cerita</a>
+          <a href="kirim-cerita.html" class="text-heather-600 font-extrabold hover:text-heather-700 transition-colors flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-heather-50 border border-heather-200">
+            <i data-lucide="send" class="w-3.5 h-3.5"></i>
+            <span>Curhat ke Konselor</span>
+          </a>
+        </nav>
+      </div>
+
+      <!-- Group Kanan: Action Buttons & User Session State -->
+      <div class="flex items-center gap-2 sm:gap-2.5 flex-shrink-0">
         <!-- Guest View -->
         <div id="guestControls" class="flex items-center gap-2">
-          <button id="navLoginBtn" class="px-5 py-2.5 rounded-full border border-heather-500 text-heather-600 hover:bg-heather-50 font-semibold text-sm transition-all duration-200 flex items-center gap-2">
+          <button id="navLoginBtn" class="px-4 sm:px-5 py-2 sm:py-2.5 rounded-full border border-heather-500 text-heather-600 hover:bg-heather-50 font-bold text-xs sm:text-sm transition-all duration-200 flex items-center gap-1.5 shadow-2xs">
             <i data-lucide="log-in" class="w-4 h-4"></i>
             <span>Login / Masuk</span>
           </button>
         </div>
 
-        <!-- Authenticated View (hidden by default) -->
-        <div id="userControls" class="hidden flex items-center gap-2 sm:gap-3">
-          <a href="dashboard-user.html" id="navDashboardBtn" class="px-3.5 py-2 rounded-full bg-heather-100 text-heather-700 hover:bg-heather-200 font-bold text-xs sm:text-sm shadow-xs transition-all flex items-center gap-1.5" title="Buka Dashboard Siswa">
+        <!-- Authenticated View -->
+        <div id="userControls" class="hidden flex items-center gap-1.5 sm:gap-2">
+          <!-- Tombol Dashboard Siswa (Ikon di mobile, teks di layar besar) -->
+          <a href="dashboard-user.html" id="navDashboardBtn" class="p-2 sm:px-3.5 sm:py-2 rounded-2xl bg-heather-100 text-heather-800 hover:bg-heather-200 font-bold text-xs sm:text-sm shadow-2xs transition-all flex items-center gap-1.5" title="Buka Dashboard Siswa">
             <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
-            <span class="hidden sm:inline">Dashboard Saya</span>
+            <span class="hidden xl:inline">Dashboard Saya</span>
           </a>
-          <button id="navWriteStoryBtn" class="px-4 py-2 rounded-full bg-heather-500 hover:bg-heather-600 text-white font-bold text-xs sm:text-sm shadow-md transition-all flex items-center gap-1.5">
+
+          <!-- Tombol Tulis Cerita (Hanya muncul di sm: ke atas agar layar HP tetap lega) -->
+          <button id="navWriteStoryBtn" class="hidden sm:flex px-3.5 py-2 rounded-2xl bg-heather-500 hover:bg-heather-600 text-white font-bold text-xs sm:text-sm shadow-md shadow-heather-500/20 transition-all items-center gap-1.5">
             <i data-lucide="pen-tool" class="w-4 h-4"></i>
-            <span>Tulis Cerita</span>
+            <span class="hidden md:inline">Tulis Cerita</span>
           </button>
-          <div class="flex items-center gap-2 bg-heather-50 px-3 py-1.5 rounded-full border border-heather-200">
-            <span id="userEmailLabel" class="text-xs font-semibold text-heather-700 max-w-[120px] sm:max-w-[180px] truncate">Pengguna</span>
-            <button id="navLogoutBtn" title="Keluar" class="text-oase-muted hover:text-red-500 transition-colors">
+
+          <!-- Pill Email Pengguna (Disembunyikan di layar HP, dapat diakses di menu hamburger) -->
+          <div class="hidden md:flex items-center gap-2 bg-heather-50 px-3 py-1.5 rounded-2xl border border-heather-200">
+            <span id="userEmailLabel" class="text-xs font-semibold text-heather-800 max-w-[110px] lg:max-w-[160px] truncate">Pengguna</span>
+            <button id="navLogoutBtn" title="Keluar" class="text-oase-muted hover:text-red-500 transition-colors p-0.5">
               <i data-lucide="log-out" class="w-4 h-4"></i>
             </button>
           </div>
         </div>
 
-        <button id="mobileMenuBtn" class="md:hidden p-2 text-heather-700 hover:bg-heather-100/50 rounded-xl" aria-label="Menu">
-          <i data-lucide="menu" class="w-6 h-6"></i>
+        <!-- Mobile Menu Toggle Button -->
+        <button id="mobileMenuBtn" class="md:hidden p-2 rounded-2xl bg-heather-50 border border-heather-200 text-heather-800 hover:bg-heather-100 transition-all flex items-center justify-center shadow-2xs" aria-label="Buka Menu">
+          <i data-lucide="menu" class="w-5 h-5"></i>
         </button>
       </div>
+
     </div>
 
-    <!-- Mobile Nav Menu -->
-    <div id="mobileMenu" class="hidden md:hidden px-4 pt-2 pb-6 bg-white/95 border-b border-oase-border space-y-3">
-      <a href="#beranda" class="block py-2 text-sm font-semibold text-oase-plum hover:text-heather-600">Beranda</a>
-      <a href="#tentang" class="block py-2 text-sm font-semibold text-oase-plum hover:text-heather-600">Tentang OASE</a>
-      <a href="#fitur" class="block py-2 text-sm font-semibold text-oase-plum hover:text-heather-600">Fitur & Manfaat</a>
-      <a href="#ruang-cerita" class="block py-2 text-sm font-semibold text-oase-plum hover:text-heather-600">Ruang Cerita</a>
-      <a href="kirim-cerita.html" class="block py-2 text-sm font-bold text-heather-600 hover:text-heather-700 flex items-center gap-2">
-        <i data-lucide="send" class="w-4 h-4"></i>
-        <span>Curhat ke Konselor (Halaman Baru)</span>
-      </a>
+    <!-- Mobile Nav Menu (Slide / Dropdown) -->
+    <div id="mobileMenu" class="hidden md:hidden px-4 pt-3 pb-6 bg-white/95 border-b border-oase-border space-y-3.5 animate-fadeIn">
+      <!-- Kartu Profil Pengguna di Mobile (Jika Sudah Login) -->
+      <div id="mobileUserCard" class="hidden p-3.5 rounded-2xl bg-heather-50 border border-heather-200 space-y-2.5">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2 overflow-hidden">
+            <div class="w-8 h-8 rounded-xl bg-heather-200 text-heather-800 flex items-center justify-center font-bold text-xs flex-shrink-0">
+              <i data-lucide="user" class="w-4 h-4"></i>
+            </div>
+            <div class="overflow-hidden">
+              <span class="text-[10px] text-oase-muted font-medium block">Login sebagai Siswa</span>
+              <span id="userMobileEmailLabel" class="text-xs font-bold text-oase-plum block truncate">siswa@oase.id</span>
+            </div>
+          </div>
+          <button id="mobileLogoutBtn" class="px-2.5 py-1.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 hover:bg-rose-100 text-xs font-bold flex items-center gap-1 transition-all">
+            <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+            <span>Keluar</span>
+          </button>
+        </div>
+        <div class="grid grid-cols-2 gap-2 pt-1 border-t border-heather-200/60">
+          <a href="dashboard-user.html" class="py-2 px-3 rounded-xl bg-white border border-heather-200 text-heather-700 font-bold text-xs flex items-center justify-center gap-1.5 shadow-2xs">
+            <i data-lucide="layout-dashboard" class="w-3.5 h-3.5"></i>
+            <span>Dashboard</span>
+          </a>
+          <button type="button" id="mobileWriteStoryBtn" class="py-2 px-3 rounded-xl bg-heather-500 hover:bg-heather-600 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-2xs">
+            <i data-lucide="pen-tool" class="w-3.5 h-3.5"></i>
+            <span>Tulis Cerita</span>
+          </button>
+        </div>
+      </div>
+
+      <nav class="space-y-1 font-semibold text-sm">
+        <a href="#beranda" class="block px-3 py-2 rounded-xl text-oase-plum hover:bg-heather-50 hover:text-heather-700 transition-colors">Beranda</a>
+        <a href="#tentang" class="block px-3 py-2 rounded-xl text-oase-plum hover:bg-heather-50 hover:text-heather-700 transition-colors">Tentang OASE</a>
+        <a href="#fitur" class="block px-3 py-2 rounded-xl text-oase-plum hover:bg-heather-50 hover:text-heather-700 transition-colors">Fitur & Manfaat</a>
+        <a href="#ruang-cerita" class="block px-3 py-2 rounded-xl text-oase-plum hover:bg-heather-50 hover:text-heather-700 transition-colors">Ruang Cerita</a>
+        <a href="kirim-cerita.html" class="block px-3 py-2.5 rounded-xl bg-heather-50 text-heather-700 font-bold hover:bg-heather-100 transition-colors flex items-center gap-2 border border-heather-200">
+          <i data-lucide="send" class="w-4 h-4 text-heather-600"></i>
+          <span>Curhat ke Konselor (Privat)</span>
+        </a>
+      </nav>
     </div>
   </header>
 
@@ -147,14 +189,14 @@
 
       <!-- Main Headline & Subheading -->
       <div class="text-center max-w-3xl mx-auto">
-        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-oase-plum leading-[1.15]">
+        <h1 class="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-oase-plum leading-tight">
           Setiap Rasa Berhak Didengar di <br class="hidden sm:inline">
           <span class="bg-gradient-to-r from-heather-600 via-heather-500 to-heather-400 bg-clip-text text-transparent">OASE Cerita</span>
         </h1>
-        <p class="mt-4 text-lg sm:text-xl font-semibold text-heather-600">
+        <p class="mt-3 sm:mt-4 text-base sm:text-xl font-bold text-heather-600">
           Obrolan Aman Seputar Emosi
         </p>
-        <p class="mt-4 text-base sm:text-lg text-oase-muted leading-relaxed max-w-2xl mx-auto">
+        <p class="mt-3 sm:mt-4 text-sm sm:text-base lg:text-lg text-oase-muted leading-relaxed max-w-2xl mx-auto px-2 sm:px-0">
           Tempat perlindungan di tengah padatnya hari. Lepaskan beban pikiran, kenali emosi tanpa rasa bersalah, dan temukan ruang aman untuk bercerita tanpa takut dihakimi.
         </p>
 
@@ -559,6 +601,138 @@
     </div>
   </div>
 
+  <!-- ======================================================== -->
+  <!-- MODAL: KONTAK DARURAT & LAPOR BUG                        -->
+  <!-- ======================================================== -->
+  <div id="emergencyHelpModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-oase-plum/70 backdrop-blur-md hidden animate-fadeIn">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 border border-rose-200 shadow-2xl relative space-y-5 max-h-[92vh] overflow-y-auto">
+      
+      <button id="closeEmergencyModalBtn" type="button" class="absolute top-5 right-5 text-oase-muted hover:text-oase-plum p-1" title="Tutup">
+        <i data-lucide="x" class="w-6 h-6"></i>
+      </button>
+
+      <!-- Tabs Navigation -->
+      <div class="flex items-center gap-2 p-1 bg-oase-surface rounded-2xl border border-oase-border">
+        <button type="button" id="tabEmergencyBtn" class="flex-1 py-2 rounded-xl text-xs font-bold transition-all bg-rose-500 text-white shadow-xs flex items-center justify-center gap-1.5">
+          <i data-lucide="phone-call" class="w-3.5 h-3.5"></i>
+          <span>Kontak Darurat</span>
+        </button>
+        <button type="button" id="tabBugReportBtn" class="flex-1 py-2 rounded-xl text-xs font-bold transition-all text-oase-muted hover:text-oase-plum flex items-center justify-center gap-1.5">
+          <i data-lucide="bug" class="w-3.5 h-3.5"></i>
+          <span>Laporkan Bug</span>
+        </button>
+      </div>
+
+      <!-- Tab Content 1: Kontak Darurat -->
+      <div id="emergencyTabContent" class="space-y-4">
+        <div class="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-xs text-rose-950 space-y-1">
+          <div class="flex items-center gap-1.5 font-bold text-rose-800">
+            <i data-lucide="heart-handshake" class="w-4 h-4 text-rose-600"></i>
+            <span>Bantuan Krisis & Pendampingan Segera</span>
+          </div>
+          <p class="text-[11px] leading-relaxed text-rose-900">
+            Jika Anda atau teman Anda sedang mengalami krisis emosional hebat atau merasa ingin melukai diri sendiri, mohon segera hubungi salah satu saluran bantuan darurat resmi berikut. Anda sangat berharga dan tidak sendirian:
+          </p>
+        </div>
+
+        <div class="space-y-2.5">
+          <!-- Hotline Nasional Sejiwa -->
+          <div class="p-4 rounded-2xl border border-rose-200 bg-white hover:border-rose-400 transition-all shadow-2xs flex items-center justify-between gap-3">
+            <div class="space-y-0.5">
+              <span class="px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 text-[10px] font-bold">Nasional • 24 Jam Bebas Pulsa</span>
+              <h4 class="text-sm font-bold text-oase-plum">Layanan SEJIWA Kemenkes RI</h4>
+              <p class="text-xs text-oase-muted">Hotline Kesehatan Jiwa Nasional: Telepon 119 (Tekan 8)</p>
+            </div>
+            <a href="tel:119" class="px-3.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs flex items-center gap-1 shadow-xs flex-shrink-0">
+              <i data-lucide="phone" class="w-3.5 h-3.5"></i>
+              <span>Hubungi 119</span>
+            </a>
+          </div>
+
+          <!-- WhatsApp Konselor Siaga OASE -->
+          <div class="p-4 rounded-2xl border border-emerald-200 bg-white hover:border-emerald-400 transition-all shadow-2xs flex items-center justify-between gap-3">
+            <div class="space-y-0.5">
+              <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold">Konselor Siaga OASE</span>
+              <h4 class="text-sm font-bold text-oase-plum">WhatsApp Konselor Darurat</h4>
+              <p class="text-xs text-oase-muted">+62 812-8899-7701 (Siaga Pendampingan Krisis)</p>
+            </div>
+            <a href="https://wa.me/6281288997701?text=Halo%20Konselor%20OASE,%20saya%20membutuhkan%20bantuan%20darurat%20sekarang." target="_blank" rel="noopener noreferrer" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1 shadow-xs flex-shrink-0">
+              <i data-lucide="message-circle" class="w-3.5 h-3.5"></i>
+              <span>WhatsApp</span>
+            </a>
+          </div>
+
+          <!-- Kontak Moderator Utama -->
+          <div class="p-4 rounded-2xl border border-heather-200 bg-white hover:border-heather-400 transition-all shadow-2xs flex items-center justify-between gap-3">
+            <div class="space-y-0.5">
+              <span class="px-2 py-0.5 rounded-full bg-heather-100 text-heather-800 text-[10px] font-bold">Moderator Utama OASE</span>
+              <h4 class="text-sm font-bold text-oase-plum">Bantuan & Eskalasi Moderator</h4>
+              <p class="text-xs text-oase-muted">moderator@oase.id • WhatsApp: +62 813-1122-3344</p>
+            </div>
+            <a href="https://wa.me/6281311223344?text=Halo%20Moderator%20OASE,%20saya%20ingin%20melaporkan%20kejadian%20darurat." target="_blank" rel="noopener noreferrer" class="px-3.5 py-2 rounded-xl bg-heather-600 hover:bg-heather-700 text-white font-bold text-xs flex items-center gap-1 shadow-xs flex-shrink-0">
+              <i data-lucide="shield" class="w-3.5 h-3.5"></i>
+              <span>Kontak</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab Content 2: Laporkan Bug -->
+      <div id="bugReportTabContent" class="hidden space-y-4">
+        <div class="p-3.5 rounded-2xl bg-indigo-50 border border-indigo-200 text-xs text-indigo-950 space-y-1">
+          <div class="flex items-center gap-1.5 font-bold text-indigo-800">
+            <i data-lucide="sparkles" class="w-4 h-4 text-indigo-600"></i>
+            <span>Bantu Kami Menyempurnakan OASE Cerita</span>
+          </div>
+          <p class="text-[11px] leading-relaxed text-indigo-900">
+            Menemukan tampilan yang kurang rapi, tombol macet, atau kendala lainnya? Laporkan langsung ke tim teknis OASE via WhatsApp atau Email di bawah ini.
+          </p>
+        </div>
+
+        <form id="bugReportForm" class="space-y-3 text-left">
+          <div class="space-y-1">
+            <label class="block text-xs font-bold text-oase-plum">Kategori Kendala:</label>
+            <select id="bugCategorySelect" class="w-full px-3.5 py-2.5 rounded-xl border border-oase-border text-xs bg-white focus:outline-none focus:border-indigo-500">
+              <option value="Tampilan Berantakan / Layout HP & Desktop">📱 Tampilan Berantakan (Mobile/Desktop)</option>
+              <option value="Tombol / Navigasi Macet">⚙️ Tombol / Navigasi Macet</option>
+              <option value="Kendala Login / Cerita">💬 Kendala Login / Cerita</option>
+              <option value="Lainnya">✨ Kendala Lainnya</option>
+            </select>
+          </div>
+
+          <div class="space-y-1">
+            <label class="block text-xs font-bold text-oase-plum">Deskripsi Bug / Masalah:</label>
+            <textarea id="bugDescriptionInput" rows="3" required placeholder="Jelaskan kendala yang dialami, letak halaman, atau perangkat yang digunakan..." class="w-full p-3 rounded-xl border border-oase-border text-xs focus:outline-none focus:border-indigo-500 leading-relaxed"></textarea>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+            <button type="button" id="sendBugWhatsAppBtn" class="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition-all flex items-center justify-center gap-1.5 shadow-xs">
+              <i data-lucide="message-circle" class="w-3.5 h-3.5"></i>
+              <span>Kirim via WhatsApp (+62 812-3456-7890)</span>
+            </button>
+            <button type="button" id="sendBugEmailBtn" class="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs transition-all flex items-center justify-center gap-1.5 shadow-xs">
+              <i data-lucide="mail" class="w-3.5 h-3.5"></i>
+              <span>Kirim via Email (support@oase.id)</span>
+            </button>
+          </div>
+        </form>
+
+        <div class="pt-2 border-t border-oase-border flex items-center justify-between text-[11px] text-oase-muted">
+          <span>Official Support: support@oase.id</span>
+          <span>WhatsApp IT: +62 812-3456-7890</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Floating Action Button: Bantuan Darurat & Lapor Bug -->
+  <button id="floatingEmergencyBtn" class="fixed bottom-6 right-6 z-40 px-4 py-3 rounded-2xl bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white text-xs font-extrabold shadow-lg shadow-rose-500/25 transition-all flex items-center gap-2 hover:scale-105 active:scale-95 group" title="Bantuan Darurat & Laporkan Bug">
+    <i data-lucide="life-buoy" class="w-4 h-4"></i>
+    <span class="hidden sm:inline">Bantuan Darurat & Lapor Bug</span>
+    <span class="sm:hidden">Bantuan</span>
+  </button>
+
   <!-- Scripts: Supabase CDN, Client Config, and Application Logic -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabaseClient.js"></script>
@@ -566,6 +740,73 @@
   <script>
     // Initialize Lucide Icons
     lucide.createIcons();
+
+    // Bantuan Darurat & Laporan Bug Handlers
+    const emergencyHelpModal = document.getElementById('emergencyHelpModal');
+    const floatingEmergencyBtn = document.getElementById('floatingEmergencyBtn');
+    const closeEmergencyModalBtn = document.getElementById('closeEmergencyModalBtn');
+    const tabEmergencyBtn = document.getElementById('tabEmergencyBtn');
+    const tabBugReportBtn = document.getElementById('tabBugReportBtn');
+    const emergencyTabContent = document.getElementById('emergencyTabContent');
+    const bugReportTabContent = document.getElementById('bugReportTabContent');
+    const sendBugWhatsAppBtn = document.getElementById('sendBugWhatsAppBtn');
+    const sendBugEmailBtn = document.getElementById('sendBugEmailBtn');
+    const bugCategorySelect = document.getElementById('bugCategorySelect');
+    const bugDescriptionInput = document.getElementById('bugDescriptionInput');
+
+    if (floatingEmergencyBtn && emergencyHelpModal) {
+      floatingEmergencyBtn.addEventListener('click', () => {
+        emergencyHelpModal.classList.remove('hidden');
+        lucide.createIcons();
+      });
+    }
+
+    if (closeEmergencyModalBtn && emergencyHelpModal) {
+      closeEmergencyModalBtn.addEventListener('click', () => emergencyHelpModal.classList.add('hidden'));
+    }
+
+    if (tabEmergencyBtn && tabBugReportBtn) {
+      tabEmergencyBtn.addEventListener('click', () => {
+        tabEmergencyBtn.className = "flex-1 py-2 rounded-xl text-xs font-bold transition-all bg-rose-500 text-white shadow-xs flex items-center justify-center gap-1.5";
+        tabBugReportBtn.className = "flex-1 py-2 rounded-xl text-xs font-bold transition-all text-oase-muted hover:text-oase-plum flex items-center justify-center gap-1.5";
+        emergencyTabContent.classList.remove('hidden');
+        bugReportTabContent.classList.add('hidden');
+      });
+
+      tabBugReportBtn.addEventListener('click', () => {
+        tabBugReportBtn.className = "flex-1 py-2 rounded-xl text-xs font-bold transition-all bg-indigo-600 text-white shadow-xs flex items-center justify-center gap-1.5";
+        tabEmergencyBtn.className = "flex-1 py-2 rounded-xl text-xs font-bold transition-all text-oase-muted hover:text-oase-plum flex items-center justify-center gap-1.5";
+        emergencyTabContent.classList.add('hidden');
+        bugReportTabContent.classList.remove('hidden');
+      });
+    }
+
+    if (sendBugWhatsAppBtn) {
+      sendBugWhatsAppBtn.addEventListener('click', () => {
+        const category = bugCategorySelect.value;
+        const desc = bugDescriptionInput.value.trim();
+        if (!desc) {
+          alert('Mohon isi deskripsi kendala yang Anda alami.');
+          return;
+        }
+        const text = encodeURIComponent(`Halo Tim IT OASE Cerita, saya ingin melaporkan bug pada Beranda OASE:\n\n*Kategori:* ${category}\n*Deskripsi:* ${desc}`);
+        window.open(`https://wa.me/6281234567890?text=${text}`, '_blank');
+      });
+    }
+
+    if (sendBugEmailBtn) {
+      sendBugEmailBtn.addEventListener('click', () => {
+        const category = bugCategorySelect.value;
+        const desc = bugDescriptionInput.value.trim();
+        if (!desc) {
+          alert('Mohon isi deskripsi kendala yang Anda alami.');
+          return;
+        }
+        const subject = encodeURIComponent(`[Laporan Bug OASE] - ${category}`);
+        const body = encodeURIComponent(`Halo Tim IT OASE Cerita,\n\nSaya ingin melaporkan kendala pada Beranda OASE Cerita:\n\nKategori: ${category}\nDeskripsi: ${desc}\n\nTerima kasih.`);
+        window.location.href = `mailto:support@oase.id?subject=${subject}&body=${body}`;
+      });
+    }
   </script>
 </body>
 </html>

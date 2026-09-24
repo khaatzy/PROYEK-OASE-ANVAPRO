@@ -54,9 +54,10 @@ CREATE TABLE IF NOT EXISTS public.counseling_submissions (
     category TEXT NOT NULL,
     counselor_id TEXT NOT NULL,
     counselor_name TEXT NOT NULL,
-    story_content TEXT NOT NULL,
+    story_content TEXT NOT NULL, -- Isi cerita (terenkripsi ENC_v1:... untuk privasi)
+    is_crisis BOOLEAN DEFAULT false, -- True jika terdeteksi indikasi krisis/self-harm
     status TEXT DEFAULT 'menunggu_tanggapan',
-    counselor_reply TEXT,
+    counselor_reply TEXT, -- Balasan konselor (terenkripsi ENC_v1:...)
     replied_at TIMESTAMP WITH TIME ZONE,
     transferred_from_name TEXT,
     transfer_reason TEXT,
@@ -128,9 +129,14 @@ CREATE TABLE IF NOT EXISTS public.counseling_sessions (
     counselor_id TEXT NOT NULL,
     counselor_name TEXT NOT NULL,
     topic TEXT NOT NULL,
+    booking_date TEXT, -- Tanggal booking (YYYY-MM-DD)
+    booking_time TEXT, -- Jam slot booking (misal: 13:00)
     duration_minutes INT DEFAULT 30,
     scheduled_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
     status TEXT DEFAULT 'aktif' CHECK (status IN ('menunggu_konfirmasi', 'aktif', 'selesai', 'dibatalkan')),
+    rating INT, -- Rating 1-5 bintang dari siswa
+    review TEXT, -- Ulasan/feedback dari siswa
+    motivational_message TEXT, -- Pesan motivasi penutup dari konselor
     started_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()),
     ended_at TIMESTAMP WITH TIME ZONE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
@@ -159,9 +165,10 @@ CREATE TABLE IF NOT EXISTS public.session_messages (
     sender_id TEXT NOT NULL,
     sender_name TEXT NOT NULL,
     sender_type TEXT NOT NULL CHECK (sender_type IN ('user', 'counselor')),
-    message_type TEXT DEFAULT 'text' CHECK (message_type IN ('text', 'voice')),
-    message_text TEXT,
+    message_type TEXT DEFAULT 'text' CHECK (message_type IN ('text', 'voice', 'motivation')),
+    message_text TEXT, -- Teks pesan (terenkripsi ENC_v1:... untuk privasi)
     audio_data TEXT, -- Base64 Data URL atau URL file rekaman suara
+    is_crisis BOOLEAN DEFAULT false, -- True jika pesan mengandung kata kunci darurat/self-harm
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
@@ -174,3 +181,4 @@ USING (true);
 CREATE POLICY "Partisipan sesi dapat mengirim pesan" 
 ON public.session_messages FOR INSERT 
 WITH CHECK (true);
+
