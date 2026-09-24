@@ -358,17 +358,10 @@
               type="text" 
               id="counselorEmailInput" 
               required 
-              placeholder="sarah@oase.id atau nama konselor" 
+              placeholder="Masukkan email atau nama konselor" 
+              autocomplete="username"
               class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-oase-border text-sm focus:outline-none focus:border-heather-500 focus:ring-2 focus:ring-heather-100"
             >
-          </div>
-        </div>
-
-        <!-- Quick Fill Akun Konselor Terdaftar -->
-        <div class="space-y-1.5 text-left pt-1">
-          <span class="block text-[11px] font-bold text-heather-800 uppercase tracking-wider">Pilih Cepat Akun Terdaftar:</span>
-          <div id="counselorQuickFillContainer" class="flex flex-wrap gap-1.5">
-            <!-- Diisi otomatis dari counselors.js -->
           </div>
         </div>
 
@@ -380,7 +373,8 @@
               type="password" 
               id="counselorPasswordInput" 
               required 
-              placeholder="••••••••" 
+              placeholder="Masukkan password Anda" 
+              autocomplete="current-password"
               class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-oase-border text-sm focus:outline-none focus:border-heather-500 focus:ring-2 focus:ring-heather-100"
             >
           </div>
@@ -741,7 +735,6 @@
       currentSession = window.CounselingService.getCurrentCounselorSession();
       if (!currentSession || currentSession.role !== 'counselor') {
         counselorLoginModal.classList.remove('hidden');
-        populateQuickFillCounselors();
         return false;
       }
 
@@ -751,27 +744,20 @@
       return true;
     }
 
-    function populateQuickFillCounselors() {
-      const container = document.getElementById('counselorQuickFillContainer');
-      if (!container) return;
-      const counselors = (window.COUNSELORS_DATA || []).filter(c => c.id !== 'auto' && c.email);
-      container.innerHTML = counselors.map(c => `
-        <button type="button" class="quick-counselor-login-btn px-2.5 py-1 rounded-xl bg-heather-50 hover:bg-heather-100 text-heather-900 text-[11px] font-bold border border-heather-300 transition-all flex items-center gap-1 shadow-2xs" data-email="${c.email}" data-pass="${c.password || 'konselor123'}">
-          <span>${c.name.split(',')[0]}</span>
-        </button>
-      `).join('');
-
-      container.querySelectorAll('.quick-counselor-login-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          counselorEmailInput.value = btn.getAttribute('data-email');
-          counselorPasswordInput.value = btn.getAttribute('data-pass');
-        });
-      });
-    }
-
     // Greet counselor warmly based on local time
     function setupGreeting() {
       if (!currentSession) return;
+
+      // Sinkronkan nama dan info konselor secara otomatis dengan data terbaru di counselors.js
+      if (window.COUNSELORS_DATA) {
+        const fresh = window.COUNSELORS_DATA.find(c => c.id === currentSession.id);
+        if (fresh) {
+          currentSession.name = fresh.name;
+          currentSession.avatar = fresh.avatar || currentSession.avatar;
+          currentSession.email = fresh.email || currentSession.email;
+        }
+      }
+
       const hour = new Date().getHours();
       let timeGreeting = 'Selamat Pagi';
       if (hour >= 11 && hour < 15) timeGreeting = 'Selamat Siang';

@@ -681,9 +681,9 @@
         opponentAvatar.src = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&h=200&q=80';
       } else {
         const counselorObj = (window.COUNSELORS_DATA || []).find(c => c.id === activeSession.counselor_id) || {
-          name: activeSession.counselor_name || 'Kak Sarah Maulida, S.Psi.',
+          name: activeSession.counselor_name || 'Konselor OASE',
           role: 'Konselor Terverifikasi OASE',
-          avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=200&h=200&q=80'
+          avatar: 'https://images.unsplash.com/photo-1544027993-37dbfe43562a?auto=format&fit=crop&w=200&h=200&q=80'
         };
         opponentName.textContent = counselorObj.name;
         sessionTopicMeta.textContent = `${counselorObj.role} • Topik: ${activeSession.topic}`;
@@ -1043,7 +1043,7 @@
       let senderId, senderName;
       if (currentRole === 'counselor') {
         senderId = (currentCounselorSession && currentCounselorSession.id) || activeSession.counselor_id || 'counselor-1';
-        senderName = (currentCounselorSession && currentCounselorSession.name) || activeSession.counselor_name || 'Kak Sarah Maulida, S.Psi.';
+        senderName = (currentCounselorSession && currentCounselorSession.name) || activeSession.counselor_name || 'Konselor OASE';
       } else {
         senderId = (currentUserSession && currentUserSession.id) || activeSession.user_id || 'user-1';
         senderName = (currentUserSession && currentUserSession.display_name) || activeSession.user_name || 'Sahabat OASE';
@@ -1116,7 +1116,7 @@
           let senderId, senderName;
           if (currentRole === 'counselor') {
             senderId = (currentCounselorSession && currentCounselorSession.id) || activeSession.counselor_id || 'counselor-1';
-            senderName = (currentCounselorSession && currentCounselorSession.name) || activeSession.counselor_name || 'Kak Sarah Maulida, S.Psi.';
+            senderName = (currentCounselorSession && currentCounselorSession.name) || activeSession.counselor_name || 'Konselor OASE';
           } else {
             senderId = (currentUserSession && currentUserSession.id) || activeSession.user_id || 'user-1';
             senderName = (currentUserSession && currentUserSession.display_name) || activeSession.user_name || 'Sahabat OASE';

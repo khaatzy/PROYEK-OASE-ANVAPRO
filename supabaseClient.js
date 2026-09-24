@@ -479,7 +479,7 @@ const CounselingService = {
     if (item.counselor_id && item.counselor_id !== 'auto') {
       const cObj = counselors.find(c => c.id === item.counselor_id);
       if (cObj) name = cObj.name;
-    } else if (name.includes('Sarah Maulida')) {
+    } else if (name && (name.toLowerCase().includes('sarah') || name.toLowerCase().includes('rachma'))) {
       const c1 = counselors.find(c => c.id === 'counselor-1');
       if (c1) name = c1.name;
     }
@@ -703,26 +703,41 @@ const CounselingService = {
   loginCounselor({ email, password, rememberMe = true }) {
     const counselors = window.COUNSELORS_DATA || [];
     const query = (email || '').trim().toLowerCase();
+    const inputPass = (password || '').trim();
 
-    // Cari berdasarkan email, nama lengkap, atau ID konselor
+    if (!counselors || counselors.length === 0) {
+      throw new Error('Data konselor belum termuat dari file counselors.js. Pastikan file counselors.js tersimpan dengan benar.');
+    }
+
+    if (!query) {
+      throw new Error('Silakan masukkan email atau nama konselor.');
+    }
+
+    // Cari konselor berdasarkan email, nama lengkap, potongan nama, atau ID
     const counselor = counselors.find(c => {
       if (!c || c.id === 'auto') return false;
-      const matchEmail = c.email && c.email.trim().toLowerCase() === query;
-      const matchName = c.name && c.name.trim().toLowerCase() === query;
-      const matchPartialName = c.name && c.name.trim().toLowerCase().includes(query);
-      const matchId = c.id && c.id.trim().toLowerCase() === query;
+      const cEmail = (c.email || '').trim().toLowerCase();
+      const cName = (c.name || '').trim().toLowerCase();
+      const cId = (c.id || '').trim().toLowerCase();
+
+      const matchEmail = cEmail && cEmail === query;
+      const matchName = cName && cName === query;
+      const matchPartialName = query.length >= 3 && cName.includes(query);
+      const matchId = cId && cId === query;
       return matchEmail || matchName || matchPartialName || matchId;
     });
 
     if (!counselor) {
       const availableList = counselors
         .filter(c => c.id !== 'auto' && c.email)
-        .map(c => `${c.name} (${c.email})`)
-        .join(', ');
-      throw new Error(`Akun konselor "${email}" tidak ditemukan. Pastikan email atau nama konselor sesuai dengan yang terdaftar di counselors.js.\n\nAkun yang terdaftar:\n${availableList}`);
+        .map(c => `• ${c.name} (${c.email})`)
+        .join('\n');
+      throw new Error(`Akun konselor "${email}" tidak ditemukan.\n\nAkun yang terdaftar di counselors.js:\n${availableList}\n\nPastikan email atau nama yang Anda masukkan sesuai.`);
     }
-    if (counselor.password && counselor.password !== password) {
-      throw new Error(`Password untuk ${counselor.name} salah. Periksa kembali password yang terdaftar di counselors.js.`);
+
+    const expectedPass = (counselor.password || '').trim();
+    if (expectedPass && expectedPass !== inputPass) {
+      throw new Error(`Password untuk konselor "${counselor.name}" tidak sesuai. Periksa password di counselors.js.`);
     }
 
     const sessionData = {
@@ -744,17 +759,32 @@ const CounselingService = {
     return sessionData;
   },
 
-  // Ambil sesi konselor saat ini (memeriksa localStorage & sessionStorage)
+  // Ambil sesi konselor saat ini (memeriksa localStorage & sessionStorage + auto-sync dengan counselors.js)
   getCurrentCounselorSession() {
+    let session = null;
     const local = localStorage.getItem('oase_counselor_session');
     if (local) {
-      try { return JSON.parse(local); } catch(e){}
+      try { session = JSON.parse(local); } catch(e){}
     }
-    const sess = sessionStorage.getItem('oase_counselor_session');
-    if (sess) {
-      try { return JSON.parse(sess); } catch(e){}
+    if (!session) {
+      const sess = sessionStorage.getItem('oase_counselor_session');
+      if (sess) {
+        try { session = JSON.parse(sess); } catch(e){}
+      }
     }
-    return null;
+
+    // Selalu sinkronkan dengan data terbaru dari counselors.js jika user mengubah nama/email di file
+    if (session && window.COUNSELORS_DATA) {
+      const freshCounselor = window.COUNSELORS_DATA.find(c => c.id === session.id);
+      if (freshCounselor) {
+        session.name = freshCounselor.name;
+        session.email = freshCounselor.email;
+        session.avatar = freshCounselor.avatar || session.avatar;
+        session.specialties = freshCounselor.specialties || session.specialties;
+      }
+    }
+
+    return session;
   },
 
   // Logout konselor
