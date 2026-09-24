@@ -573,24 +573,183 @@ const ChatSessionService = {
     return sessions.filter(s => s.counselor_id === counselorId);
   },
 
-  // Selesaikan Sesi
-  async endSession(sessionId) {
-    if (supabaseClient) {
-      try {
-        await supabaseClient.from('counseling_sessions').update({
-          status: 'selesai',
-          ended_at: new Date().toISOString()
-        }).eq('id', sessionId);
-      } catch (e) {}
-    }
-
+  // Selesaikan Sesi dengan opsi pesan motivasi konselor
+  async endSession(sessionId, motivationalMessage = null) {
+    let targetSession = null;
     const sessions = JSON.parse(localStorage.getItem('oase_counseling_sessions') || '[]');
     const idx = sessions.findIndex(s => s.id === sessionId);
     if (idx !== -1) {
       sessions[idx].status = 'selesai';
       sessions[idx].ended_at = new Date().toISOString();
+      if (motivationalMessage) {
+        sessions[idx].motivational_message = motivationalMessage;
+      }
+      targetSession = sessions[idx];
       localStorage.setItem('oase_counseling_sessions', JSON.stringify(sessions));
     }
+
+    if (supabaseClient) {
+      try {
+        const updateData = {
+          status: 'selesai',
+          ended_at: new Date().toISOString()
+        };
+        if (motivationalMessage) {
+          updateData.motivational_message = motivationalMessage;
+        }
+        await supabaseClient.from('counseling_sessions').update(updateData).eq('id', sessionId);
+      } catch (e) {}
+    }
+
+    // Jika ada pesan motivasi saat menyelesaikan sesi, simpan juga sebagai pesan spesial
+    if (motivationalMessage && targetSession) {
+      await this.submitMotivationalMessage(sessionId, motivationalMessage, targetSession.counselor_name);
+    }
+
+    // Picu notifikasi bahwa sesi telah diselesaikan
+    this.triggerNotification({
+      type: 'session_ended',
+      sessionId,
+      title: 'Sesi Konseling Telah Selesai',
+      message: 'Sesi konseling 30 menit telah berakhir dan diarsipkan ke riwayat.'
+    });
+
+    return targetSession;
+  },
+
+  // Kirim Pesan Motivasi & Semangat Penutup oleh Konselor
+  async submitMotivationalMessage(sessionId, messageText, counselorName = 'Konselor OASE') {
+    const sessions = JSON.parse(localStorage.getItem('oase_counseling_sessions') || '[]');
+    const idx = sessions.findIndex(s => s.id === sessionId);
+    let targetSession = null;
+    if (idx !== -1) {
+      sessions[idx].motivational_message = messageText;
+      sessions[idx].motivational_sent_at = new Date().toISOString();
+      targetSession = sessions[idx];
+      localStorage.setItem('oase_counseling_sessions', JSON.stringify(sessions));
+    }
+
+    // Masukkan ke riwayat pesan sebagai jenis 'motivation'
+    const msg = {
+      id: 'msg-mot-' + Date.now(),
+      session_id: sessionId,
+      sender_id: targetSession ? targetSession.counselor_id : 'counselor',
+      sender_name: counselorName,
+      sender_type: 'counselor',
+      message_type: 'motivation',
+      message_text: messageText,
+      created_at: new Date().toISOString()
+    };
+
+    const allMsgs = JSON.parse(localStorage.getItem('oase_session_messages') || '[]');
+    allMsgs.push(msg);
+    localStorage.setItem('oase_session_messages', JSON.stringify(allMsgs));
+
+    if (supabaseClient) {
+      try {
+        await supabaseClient.from('counseling_sessions').update({ motivational_message: messageText }).eq('id', sessionId);
+        await supabaseClient.from('session_messages').insert([msg]);
+      } catch (e) {}
+    }
+
+    this.triggerNotification({
+      type: 'motivation',
+      sessionId,
+      title: `Pesan Semangat dari ${counselorName}`,
+      message: `💌 "${messageText.substring(0, 60)}${messageText.length > 60 ? '...' : ''}"`
+    });
+
+    return msg;
+  },
+
+  // Simpan Rating & Ulasan Konselor oleh Siswa (Bintang 1-5)
+  async rateSession(sessionId, rating, reviewText = '') {
+    const starNum = Math.min(5, Math.max(1, parseInt(rating) || 5));
+    const sessions = JSON.parse(localStorage.getItem('oase_counseling_sessions') || '[]');
+    const idx = sessions.findIndex(s => s.id === sessionId);
+    let counselorId = null;
+
+    if (idx !== -1) {
+      sessions[idx].rating = starNum;
+      sessions[idx].review = reviewText.trim();
+      sessions[idx].rated_at = new Date().toISOString();
+      counselorId = sessions[idx].counselor_id;
+      localStorage.setItem('oase_counseling_sessions', JSON.stringify(sessions));
+    }
+
+    if (supabaseClient) {
+      try {
+        await supabaseClient.from('counseling_sessions').update({
+          rating: starNum,
+          review: reviewText.trim(),
+          rated_at: new Date().toISOString()
+        }).eq('id', sessionId);
+      } catch (e) {}
+    }
+
+    // Rekalkulasi akumulasi rating konselor
+    if (counselorId) {
+      this.recalculateCounselorRating(counselorId);
+    }
+
+    return { success: true, rating: starNum, review: reviewText };
+  },
+
+  // Hitung ulang akumulasi rating konselor
+  recalculateCounselorRating(counselorId) {
+    const sessions = JSON.parse(localStorage.getItem('oase_counseling_sessions') || '[]');
+    const ratedSessions = sessions.filter(s => s.counselor_id === counselorId && s.rating);
+    
+    // Rating default awal jika belum ada
+    let totalScore = ratedSessions.reduce((acc, curr) => acc + (curr.rating || 5), 0);
+    let totalCount = ratedSessions.length;
+
+    // Tambahkan bobot default reputasi profesional awal (5 bintang x 5 review)
+    const baseCount = 5;
+    const baseScore = 25; // 5.0
+    const finalScore = totalScore + baseScore;
+    const finalCount = totalCount + baseCount;
+    const avg = (finalScore / finalCount).toFixed(1);
+
+    const ratingsMap = JSON.parse(localStorage.getItem('oase_counselor_ratings') || '{}');
+    ratingsMap[counselorId] = {
+      average: avg,
+      totalCount: finalCount,
+      realReviewsCount: totalCount
+    };
+    localStorage.setItem('oase_counselor_ratings', JSON.stringify(ratingsMap));
+    return ratingsMap[counselorId];
+  },
+
+  // Dapatkan Rating Konselor
+  getCounselorRating(counselorId) {
+    const ratingsMap = JSON.parse(localStorage.getItem('oase_counselor_ratings') || '{}');
+    if (ratingsMap[counselorId]) {
+      return ratingsMap[counselorId];
+    }
+    // Jika belum ada, hitung atau berikan default 5.0
+    return this.recalculateCounselorRating(counselorId);
+  },
+
+  // Dapatkan Sesi Konseling yang Telah Selesai (Riwayat)
+  async getCompletedSessions(userEmail = null, counselorId = null) {
+    if (supabaseClient) {
+      try {
+        let query = supabaseClient.from('counseling_sessions').select('*').eq('status', 'selesai');
+        if (userEmail) query = query.eq('user_email', userEmail);
+        if (counselorId) query = query.eq('counselor_id', counselorId);
+        const { data, error } = await query.order('ended_at', { ascending: false });
+        if (!error && data) return data;
+      } catch (e) {}
+    }
+
+    const sessions = JSON.parse(localStorage.getItem('oase_counseling_sessions') || '[]');
+    return sessions.filter(s => {
+      const matchStatus = s.status === 'selesai';
+      const matchUser = userEmail ? s.user_email === userEmail : true;
+      const matchCounselor = counselorId ? s.counselor_id === counselorId : true;
+      return matchStatus && matchUser && matchCounselor;
+    });
   },
 
   // Kirim Pesan (Teks atau Voice Note)
