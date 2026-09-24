@@ -838,52 +838,59 @@ const GeminiService = {
     localStorage.removeItem('oase_gemini_active_model');
   },
 
-  async getWorkingModel(apiKey) {
+  async discoverWorkingModel(apiKey) {
     const key = apiKey || this.getApiKey();
     if (!key) throw new Error('API Key belum diisi.');
-
-    const cached = localStorage.getItem('oase_gemini_active_model');
-    if (cached) return cached;
-
-    // Prioritas model yang diuji
-    const candidatePriorities = [
-      'gemini-2.5-flash',
-      'gemini-2.0-flash',
-      'gemini-2.5-flash-lite',
-      'gemini-1.5-flash-latest',
-      'gemini-1.5-flash',
-      'gemini-pro'
-    ];
 
     try {
       const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${key}`);
       if (res.ok) {
         const data = await res.json();
         const available = (data.models || [])
-          .filter(m => m.supportedGenerationMethods && m.supportedGenerationMethods.includes('generateContent'))
+          .filter(m => Array.isArray(m.supportedGenerationMethods) && m.supportedGenerationMethods.includes('generateContent'))
           .map(m => m.name.replace(/^models\//, ''));
 
-        for (const candidate of candidatePriorities) {
-          if (available.includes(candidate)) {
-            localStorage.setItem('oase_gemini_active_model', candidate);
-            return candidate;
-          }
-        }
-
         if (available.length > 0) {
-          const picked = available.find(m => m.includes('flash')) || available[0];
-          localStorage.setItem('oase_gemini_active_model', picked);
-          return picked;
+          // Prioritas model Google Gemini yang paling stabil dan terkini
+          const preferredOrder = [
+            'gemini-3.8-flash',
+            'gemini-flash-latest',
+            'gemini-3.5-flash',
+            'gemini-3.5-flash-lite',
+            'gemini-3.1-flash-lite',
+            'gemini-2.5-flash',
+            'gemini-2.5-flash-lite',
+            'gemini-2.0-flash',
+            'gemini-1.5-flash',
+            'gemini-1.5-flash-latest'
+          ];
+
+          for (const pref of preferredOrder) {
+            if (available.includes(pref)) {
+              localStorage.setItem('oase_gemini_active_model', pref);
+              return pref;
+            }
+          }
+
+          // Jika tidak ada di daftar prioritas, gunakan model flash apa saja atau model pertama yang tersedia
+          const anyModel = available.find(m => m.includes('flash')) || available[0];
+          localStorage.setItem('oase_gemini_active_model', anyModel);
+          return anyModel;
         }
       } else {
         const errJson = await res.json().catch(() => ({}));
-        throw new Error(errJson.error?.message || `Gagal memeriksa model (${res.status})`);
+        if (errJson.error?.message) {
+          throw new Error(errJson.error.message);
+        }
       }
     } catch (e) {
-      console.warn('Gagal cek model via ListModels, menggunakan fallback default:', e);
+      console.warn('Auto-discovery model info:', e.message);
+      if (e.message && (e.message.includes('API key') || e.message.includes('API_KEY'))) {
+        throw e;
+      }
     }
 
-    return 'gemini-2.5-flash';
+    return 'gemini-3.8-flash';
   },
 
   async chatWithGemini(userMessage, chatHistory = []) {
@@ -925,15 +932,23 @@ Gunakan bahasa Indonesia yang akrab, sopan, santun, dan menyentuh hati. Jangan m
       });
     }
 
+    // Dapatkan model aktif dari discovery atau cache
+    let primaryModel = localStorage.getItem('oase_gemini_active_model');
+    if (!primaryModel) {
+      primaryModel = await this.discoverWorkingModel(apiKey);
+    }
+
     // Urutan prioritas model Gemini modern Google
     const candidateModels = [
-      localStorage.getItem('oase_gemini_active_model'),
+      primaryModel,
+      'gemini-3.8-flash',
+      'gemini-flash-latest',
+      'gemini-3.5-flash',
+      'gemini-3.5-flash-lite',
+      'gemini-3.1-flash-lite',
       'gemini-2.5-flash',
       'gemini-2.0-flash',
-      'gemini-2.5-flash-lite',
-      'gemini-1.5-flash-latest',
-      'gemini-1.5-flash',
-      'gemini-pro'
+      'gemini-1.5-flash'
     ].filter(Boolean);
     const modelsToTry = [...new Set(candidateModels)];
 
@@ -982,11 +997,12 @@ Gunakan bahasa Indonesia yang akrab, sopan, santun, dan menyentuh hati. Jangan m
       }
     }
 
-    // Jika model di atas belum ada yang cocok, coba query ListModels langsung
+    // Jika model di atas belum ada yang cocok, lakukan discovery ulang secara eksplisit
     try {
-      const activeFromList = await this.getWorkingModel(apiKey);
-      if (activeFromList && !modelsToTry.includes(activeFromList)) {
-        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${activeFromList}:generateContent?key=${apiKey}`;
+      localStorage.removeItem('oase_gemini_active_model');
+      const fallbackDiscovered = await this.discoverWorkingModel(apiKey);
+      if (fallbackDiscovered && !modelsToTry.includes(fallbackDiscovered)) {
+        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${fallbackDiscovered}:generateContent?key=${apiKey}`;
         const response = await fetch(endpoint, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -1002,7 +1018,7 @@ Gunakan bahasa Indonesia yang akrab, sopan, santun, dan menyentuh hati. Jangan m
           const data = await response.json();
           const replyText = data.candidates?.[0]?.content?.parts?.[0]?.text;
           if (replyText) {
-            localStorage.setItem('oase_gemini_active_model', activeFromList);
+            localStorage.setItem('oase_gemini_active_model', fallbackDiscovered);
             return replyText;
           }
         }
