@@ -851,18 +851,16 @@ const GeminiService = {
           .map(m => m.name.replace(/^models\//, ''));
 
         if (available.length > 0) {
-          // Prioritas model Google Gemini yang paling stabil dan terkini
+          // Prioritas model Google Gemini termurah, paling hemat token, dan anti-antrean (Flash-Lite)
           const preferredOrder = [
-            'gemini-3.8-flash',
-            'gemini-flash-latest',
-            'gemini-3.5-flash',
+            'gemini-2.5-flash-lite',
             'gemini-3.5-flash-lite',
             'gemini-3.1-flash-lite',
             'gemini-2.5-flash',
-            'gemini-2.5-flash-lite',
+            'gemini-3.8-flash',
+            'gemini-flash-latest',
             'gemini-2.0-flash',
-            'gemini-1.5-flash',
-            'gemini-1.5-flash-latest'
+            'gemini-1.5-flash'
           ];
 
           for (const pref of preferredOrder) {
@@ -872,8 +870,8 @@ const GeminiService = {
             }
           }
 
-          // Jika tidak ada di daftar prioritas, gunakan model flash apa saja atau model pertama yang tersedia
-          const anyModel = available.find(m => m.includes('flash')) || available[0];
+          // Jika tidak ada di daftar prioritas, gunakan model flash-lite/flash apa saja yang ada
+          const anyModel = available.find(m => m.includes('lite')) || available.find(m => m.includes('flash')) || available[0];
           localStorage.setItem('oase_gemini_active_model', anyModel);
           return anyModel;
         }
@@ -890,7 +888,7 @@ const GeminiService = {
       }
     }
 
-    return 'gemini-3.8-flash';
+    return 'gemini-2.5-flash-lite';
   },
 
   async chatWithGemini(userMessage, chatHistory = []) {
@@ -938,15 +936,15 @@ Gunakan bahasa Indonesia yang akrab, sopan, santun, dan menyentuh hati. Jangan m
       primaryModel = await this.discoverWorkingModel(apiKey);
     }
 
-    // Urutan prioritas model Gemini modern Google
+    // Urutan prioritas model Gemini: Model termurah, paling hemat token, dan anti high-demand (Flash-Lite)
     const candidateModels = [
       primaryModel,
-      'gemini-3.8-flash',
-      'gemini-flash-latest',
-      'gemini-3.5-flash',
+      'gemini-2.5-flash-lite',
       'gemini-3.5-flash-lite',
       'gemini-3.1-flash-lite',
       'gemini-2.5-flash',
+      'gemini-3.8-flash',
+      'gemini-flash-latest',
       'gemini-2.0-flash',
       'gemini-1.5-flash'
     ].filter(Boolean);
