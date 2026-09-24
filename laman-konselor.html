@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ruang Kerja Konselor - OASE Cerita</title>
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Tailwind Config -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            heather: {
+              50: '#FBF5F9',
+              100: '#F5EBF3',
+              200: '#EBD8E7',
+              300: '#DCB8D4',
+              400: '#C78CBB',
+              500: '#A14189', /* HEATHER MAUVE PRIMARY */
+              600: '#8E3476',
+              700: '#752A62',
+              800: '#5F244F',
+              900: '#3D1533',
+            },
+            oase: {
+              cream: '#FDFBF7',
+              surface: '#FCF9FA',
+              border: '#F0E2EC',
+              plum: '#311027',
+              muted: '#7A6273'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .filter-chip.active {
+      background-color: #A14189 !important;
+      color: #ffffff !important;
+      border-color: #A14189 !important;
+      box-shadow: 0 4px 14px -2px rgba(161, 65, 137, 0.25);
+    }
+  </style>
+</head>
+<body class="bg-oase-surface text-oase-plum font-sans antialiased min-h-screen flex flex-col justify-between selection:bg-heather-200 selection:text-heather-900">
+
+  <!-- Background Decorative Ambient Glows -->
+  <div class="fixed inset-0 overflow-hidden pointer-events-none -z-10">
+    <div class="absolute -top-32 -right-32 w-96 h-96 bg-heather-200/40 rounded-full blur-3xl"></div>
+    <div class="absolute top-1/2 -left-32 w-96 h-96 bg-heather-300/25 rounded-full blur-3xl"></div>
+    <div class="absolute -bottom-32 right-1/4 w-96 h-96 bg-heather-100/50 rounded-full blur-3xl"></div>
+  </div>
+
+  <!-- Header / Nav Khusus Konselor -->
+  <header class="sticky top-0 z-40 backdrop-blur-md bg-white/90 border-b border-oase-border shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+      
+      <!-- Logo & Status Konselor Portal -->
+      <div class="flex items-center gap-3">
+        <a href="index.html" class="flex items-center gap-2.5 group">
+          <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-heather-600 to-heather-400 flex items-center justify-center text-white shadow-md shadow-heather-500/20 group-hover:scale-105 transition-transform">
+            <i data-lucide="shield-check" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-lg font-bold text-heather-700 leading-tight">OASE Cerita</span>
+              <span class="px-2 py-0.5 rounded-full bg-heather-100 text-heather-700 text-[10px] font-extrabold uppercase tracking-wider">Portal Konselor</span>
+            </div>
+            <span class="text-xs text-oase-muted font-medium">Ruang Dengar & Pendampingan Empatis</span>
+          </div>
+        </a>
+      </div>
+
+      <!-- Counselor Profile Bar & Actions -->
+      <div id="counselorProfileNav" class="flex items-center gap-3">
+        <div class="hidden sm:flex items-center gap-3 bg-heather-50/80 border border-heather-200/80 px-3.5 py-1.5 rounded-2xl">
+          <img id="navCounselorAvatar" src="" alt="Avatar" class="w-9 h-9 rounded-xl object-cover border border-heather-300 shadow-xs">
+          <div class="text-left">
+            <span id="navCounselorName" class="text-xs font-bold text-oase-plum block truncate max-w-[160px]">Konselor</span>
+            <span id="navCounselorRole" class="text-[10px] text-heather-600 font-semibold block truncate max-w-[160px]">Psikolog</span>
+          </div>
+        </div>
+
+        <a href="index.html" title="Kembali ke Beranda Publik" class="p-2.5 rounded-xl border border-oase-border hover:bg-heather-50 text-oase-muted hover:text-heather-600 transition-all">
+          <i data-lucide="external-link" class="w-4 h-4"></i>
+        </a>
+
+        <button id="logoutBtn" title="Keluar dari Portal Konselor" class="px-3.5 py-2 rounded-xl bg-rose-50 border border-rose-200 hover:bg-rose-100 text-rose-700 text-xs font-bold transition-all flex items-center gap-1.5">
+          <i data-lucide="log-out" class="w-4 h-4"></i>
+          <span class="hidden sm:inline">Keluar</span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Main Content Area -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full space-y-8">
+    
+    <!-- 0. Welcoming Banner Khusus Konselor -->
+    <div class="bg-gradient-to-r from-white via-heather-50/60 to-white rounded-3xl p-6 sm:p-8 border border-heather-100 shadow-md relative overflow-hidden">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
+        <div class="space-y-2">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-semibold">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span>Status Konselor: Aktif Siap Mendengar</span>
+          </div>
+          <h1 id="greetingHeading" class="text-2xl sm:text-3xl font-extrabold text-oase-plum tracking-tight">
+            Selamat Datang, Konselor.
+          </h1>
+          <p class="text-sm text-oase-muted max-w-2xl leading-relaxed">
+            Terima kasih telah hadir dengan ketulusan hati untuk mendengarkan beban saudara-saudara kita. Di bawah ini adalah antrean cerita yang membutuhkan kehangatan dan perspektif bijakmu.
+          </p>
+        </div>
+
+        <!-- Quick Summary Stats Cards -->
+        <div class="grid grid-cols-3 gap-3 flex-shrink-0">
+          <div class="bg-white p-3.5 sm:p-4 rounded-2xl border border-oase-border text-center shadow-xs">
+            <span id="statQueueCount" class="text-xl sm:text-2xl font-black text-amber-600 block">0</span>
+            <span class="text-[11px] font-semibold text-oase-muted">Menunggu</span>
+          </div>
+          <div class="bg-white p-3.5 sm:p-4 rounded-2xl border border-oase-border text-center shadow-xs">
+            <span id="statAnsweredCount" class="text-xl sm:text-2xl font-black text-emerald-600 block">0</span>
+            <span class="text-[11px] font-semibold text-oase-muted">Sudah Dibalas</span>
+          </div>
+          <div class="bg-white p-3.5 sm:p-4 rounded-2xl border border-oase-border text-center shadow-xs">
+            <span id="statTotalCount" class="text-xl sm:text-2xl font-black text-heather-600 block">0</span>
+            <span class="text-[11px] font-semibold text-oase-muted">Total Kasus</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filter & Kontrol Antrean -->
+    <div class="bg-white rounded-3xl p-5 sm:p-6 border border-oase-border shadow-sm space-y-4">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-base sm:text-lg font-bold text-oase-plum flex items-center gap-2">
+            <i data-lucide="layers" class="w-5 h-5 text-heather-500"></i>
+            <span>Antrean Cerita & Curhat Masuk</span>
+          </h2>
+          <p class="text-xs text-oase-muted">Disusun berurutan berdasarkan waktu masuk. Kamu bebas memilih kasus mana yang ingin direspons lebih dulu.</p>
+        </div>
+
+        <!-- Search Bar & Refresh -->
+        <div class="flex items-center gap-2">
+          <div class="relative flex-grow sm:w-64">
+            <i data-lucide="search" class="w-4 h-4 text-oase-muted absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+            <input 
+              type="text" 
+              id="searchKeywordInput" 
+              placeholder="Cari kode tiket, nama, kata kunci..." 
+              class="w-full pl-9 pr-3 py-2 rounded-xl border border-oase-border bg-oase-surface/50 text-xs focus:outline-none focus:border-heather-500 focus:bg-white"
+            >
+          </div>
+          <button id="refreshQueueBtn" class="p-2.5 rounded-xl border border-oase-border hover:bg-heather-50 text-heather-700 transition-colors" title="Muat Ulang Antrean">
+            <i data-lucide="rotate-cw" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Category Filter Chips -->
+      <div class="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none" id="categoryFilterContainer">
+        <button type="button" data-category="all" class="filter-chip active px-3.5 py-1.5 rounded-xl border border-oase-border text-xs font-semibold whitespace-nowrap transition-all">
+          Semua Topik
+        </button>
+        <button type="button" data-category="Masalah Pembelajaran & Akademik" class="filter-chip px-3.5 py-1.5 rounded-xl border border-oase-border text-xs font-semibold text-oase-muted hover:text-heather-600 hover:bg-heather-50 whitespace-nowrap transition-all">
+          🎓 Pembelajaran & Akademik
+        </button>
+        <button type="button" data-category="Masalah Mental & Emosi" class="filter-chip px-3.5 py-1.5 rounded-xl border border-oase-border text-xs font-semibold text-oase-muted hover:text-heather-600 hover:bg-heather-50 whitespace-nowrap transition-all">
+          🧠 Mental & Emosi
+        </button>
+        <button type="button" data-category="Masalah Keluarga & Rumah Tangga" class="filter-chip px-3.5 py-1.5 rounded-xl border border-oase-border text-xs font-semibold text-oase-muted hover:text-heather-600 hover:bg-heather-50 whitespace-nowrap transition-all">
+          🏡 Keluarga & Rumah Tangga
+        </button>
+        <button type="button" data-category="Hubungan & Pertemanan" class="filter-chip px-3.5 py-1.5 rounded-xl border border-oase-border text-xs font-semibold text-oase-muted hover:text-heather-600 hover:bg-heather-50 whitespace-nowrap transition-all">
+          🤝 Hubungan & Pertemanan
+        </button>
+        <button type="button" data-category="Karier & Rencana Masa Depan" class="filter-chip px-3.5 py-1.5 rounded-xl border border-oase-border text-xs font-semibold text-oase-muted hover:text-heather-600 hover:bg-heather-50 whitespace-nowrap transition-all">
+          🧭 Karier & Masa Depan
+        </button>
+        <button type="button" data-category="Lainnya" class="filter-chip px-3.5 py-1.5 rounded-xl border border-oase-border text-xs font-semibold text-oase-muted hover:text-heather-600 hover:bg-heather-50 whitespace-nowrap transition-all">
+          ✨ Lainnya
+        </button>
+      </div>
+
+      <!-- Status Filter Tabs -->
+      <div class="flex items-center gap-2 pt-2 border-t border-oase-border text-xs">
+        <span class="text-oase-muted font-medium">Status:</span>
+        <button type="button" data-status="all" class="status-tab font-bold text-heather-700 underline decoration-2 underline-offset-4">Semua</button>
+        <span class="text-oase-border">|</span>
+        <button type="button" data-status="menunggu_tanggapan" class="status-tab text-oase-muted hover:text-heather-600">Menunggu Tanggapan</button>
+        <span class="text-oase-border">|</span>
+        <button type="button" data-status="sudah_dibalas" class="status-tab text-oase-muted hover:text-heather-600">Sudah Selesai Dibalas</button>
+      </div>
+    </div>
+
+    <!-- Stories Queue Grid -->
+    <div id="queueContainer" class="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <!-- Loading Skeleton -->
+      <div class="col-span-full py-16 text-center text-oase-muted">
+        <div class="w-10 h-10 border-4 border-heather-200 border-t-heather-600 rounded-full animate-spin mx-auto mb-3"></div>
+        <p class="text-sm font-medium">Memuat antrean cerita masuk...</p>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="mt-12 bg-white/70 border-t border-oase-border py-6 text-center text-xs text-oase-muted">
+    <div class="max-w-7xl mx-auto px-4">
+      <p>&copy; 2026 OASE Cerita. Portal Rahasia Konselor & Pendampingan Psikologis.</p>
+    </div>
+  </footer>
+
+  <!-- ======================================================== -->
+  <!-- MODAL / OVERLAY LOGIN KHUSUS KONSELOR                    -->
+  <!-- ======================================================== -->
+  <div id="counselorLoginModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-oase-plum/80 backdrop-blur-md hidden animate-fadeIn">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 border border-heather-100 shadow-2xl relative space-y-6">
+      <div class="text-center space-y-2">
+        <div class="w-14 h-14 rounded-2xl bg-heather-100 text-heather-600 flex items-center justify-center mx-auto shadow-md">
+          <i data-lucide="lock" class="w-7 h-7"></i>
+        </div>
+        <h3 class="text-2xl font-black text-oase-plum">Login Khusus Konselor</h3>
+        <p class="text-xs text-oase-muted">
+          Laman ini terproteksi dan hanya dapat diakses oleh konselor terverifikasi OASE Cerita.
+        </p>
+      </div>
+
+      <form id="counselorLoginForm" class="space-y-4">
+        <div class="space-y-1 text-left">
+          <label class="block text-xs font-bold text-oase-plum">Email Konselor</label>
+          <div class="relative">
+            <i data-lucide="mail" class="w-4 h-4 text-oase-muted absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+            <input 
+              type="email" 
+              id="counselorEmailInput" 
+              required 
+              placeholder="sarah@oase.id" 
+              class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-oase-border text-sm focus:outline-none focus:border-heather-500 focus:ring-2 focus:ring-heather-100"
+            >
+          </div>
+        </div>
+
+        <div class="space-y-1 text-left">
+          <label class="block text-xs font-bold text-oase-plum">Password</label>
+          <div class="relative">
+            <i data-lucide="key" class="w-4 h-4 text-oase-muted absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+            <input 
+              type="password" 
+              id="counselorPasswordInput" 
+              required 
+              placeholder="••••••••" 
+              class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-oase-border text-sm focus:outline-none focus:border-heather-500 focus:ring-2 focus:ring-heather-100"
+            >
+          </div>
+        </div>
+
+        <!-- 3. Checkbox Tetap Login (Remember Me) Sesuai Permintaan User -->
+        <div class="flex items-center justify-between text-xs">
+          <label class="flex items-center gap-2 text-oase-plum font-semibold cursor-pointer select-none">
+            <input type="checkbox" id="rememberMeCheckbox" checked class="w-4 h-4 rounded text-heather-600 focus:ring-heather-400 border-gray-300">
+            <span>Tetap Login di Perangkat Ini</span>
+          </label>
+        </div>
+
+        <button 
+          type="submit" 
+          id="loginSubmitBtn" 
+          class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-heather-600 to-heather-500 hover:from-heather-700 hover:to-heather-600 text-white font-bold text-sm shadow-md shadow-heather-500/25 transition-all flex items-center justify-center gap-2"
+        >
+          <i data-lucide="log-in" class="w-4 h-4"></i>
+          <span>Masuk ke Laman Konselor</span>
+        </button>
+
+        <div class="pt-2 text-center">
+          <a href="index.html" class="text-xs text-oase-muted hover:text-heather-600 transition-colors inline-flex items-center gap-1 font-medium">
+            <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+            <span>Kembali ke Halaman Utama</span>
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- 2. ANTARMUKA PEMBERIAN RESPON (RESPONSE INTERFACE MODAL) -->
+  <!-- ======================================================== -->
+  <div id="responseModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-oase-plum/70 backdrop-blur-md hidden animate-fadeIn">
+    <div class="bg-white rounded-3xl max-w-3xl w-full p-6 sm:p-8 border border-heather-100 shadow-2xl relative max-h-[92vh] overflow-y-auto space-y-6">
+      
+      <!-- Close button -->
+      <button id="closeResponseModalBtn" class="absolute top-5 right-5 text-oase-muted hover:text-oase-plum transition-colors p-1">
+        <i data-lucide="x" class="w-6 h-6"></i>
+      </button>
+
+      <!-- Header Info Kasus -->
+      <div class="space-y-3 pb-4 border-b border-oase-border">
+        <div class="flex flex-wrap items-center gap-2">
+          <span id="modalTicketBadge" class="font-mono px-3 py-1 rounded-full bg-heather-100 text-heather-700 text-xs font-extrabold tracking-wider">OASE-0000-XX</span>
+          <span id="modalCategoryBadge" class="px-3 py-1 rounded-full bg-oase-surface border border-oase-border text-xs font-bold text-oase-plum">Kategori</span>
+          <span id="modalTimeBadge" class="text-xs text-oase-muted font-medium ml-auto">Waktu Masuk</span>
+        </div>
+        
+        <div class="flex items-center gap-3 pt-1">
+          <div class="w-10 h-10 rounded-2xl bg-heather-100 text-heather-700 flex items-center justify-center font-bold text-sm flex-shrink-0">
+            <i data-lucide="user" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 id="modalAuthorName" class="text-base font-bold text-oase-plum">Nama Samaran</h3>
+            <p id="modalAuthorMeta" class="text-xs text-oase-muted">Jenjang Pendidikan • Jenis Kelamin</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cerita Lengkap User -->
+      <div class="space-y-2">
+        <label class="block text-xs font-bold uppercase tracking-wider text-heather-600">Isi Cerita Pengirim:</label>
+        <div id="modalStoryContent" class="p-4 sm:p-5 rounded-2xl bg-oase-surface/80 border border-oase-border text-sm text-oase-plum leading-relaxed whitespace-pre-line max-h-56 overflow-y-auto italic">
+          Cerita user...
+        </div>
+      </div>
+
+      <!-- Form Menuliskan Tanggapan Konselor -->
+      <form id="replyStoryForm" class="space-y-4">
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <label for="counselorReplyTextarea" class="block text-sm font-bold text-oase-plum flex items-center gap-1.5">
+              <i data-lucide="message-square-heart" class="w-4 h-4 text-heather-500"></i>
+              <span>Tanggapan & Pendampingan Anda (Akan Dilihat Pengirim):</span>
+            </label>
+            <span id="replyWordCount" class="text-xs text-oase-muted font-medium">0 kata</span>
+          </div>
+
+          <textarea 
+            id="counselorReplyTextarea" 
+            rows="6" 
+            required 
+            placeholder="Tuliskan kata-kata empati, validasi perasaan mereka, dan panduan yang menguatkan hati..."
+            class="w-full p-4 rounded-2xl border border-oase-border bg-white text-sm leading-relaxed focus:outline-none focus:border-heather-500 focus:ring-4 focus:ring-heather-100 transition-all resize-y"
+          ></textarea>
+        </div>
+
+        <!-- Tombol Aksi Tanggapan & Alih Kasus -->
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
+          <button 
+            type="button" 
+            id="triggerTransferBtn" 
+            class="w-full sm:w-auto px-4 py-2.5 rounded-xl border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-800 text-xs font-bold transition-all flex items-center justify-center gap-1.5"
+          >
+            <i data-lucide="arrow-right-left" class="w-4 h-4 text-amber-600"></i>
+            <span>Alihkan Kasus ke Konselor Lain</span>
+          </button>
+
+          <div class="flex items-center gap-2 w-full sm:w-auto">
+            <button 
+              type="submit" 
+              id="submitReplyBtn" 
+              class="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-heather-500 hover:bg-heather-600 text-white font-bold text-xs sm:text-sm shadow-md shadow-heather-500/25 transition-all flex items-center justify-center gap-2"
+            >
+              <i data-lucide="send" class="w-4 h-4"></i>
+              <span>Kirim Balasan Resmi</span>
+            </button>
+          </div>
+        </div>
+      </form>
+
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- 3. FITUR ALIH KASUS (TRANSFER/REFERRAL MODAL)             -->
+  <!-- ======================================================== -->
+  <div id="transferModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-oase-plum/70 backdrop-blur-md hidden animate-fadeIn">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 border border-heather-100 shadow-2xl space-y-5 relative">
+      
+      <!-- Close button -->
+      <button id="closeTransferModalBtn" class="absolute top-5 right-5 text-oase-muted hover:text-oase-plum transition-colors p-1">
+        <i data-lucide="x" class="w-6 h-6"></i>
+      </button>
+
+      <div class="space-y-1">
+        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-bold">
+          <i data-lucide="arrow-right-left" class="w-3.5 h-3.5"></i>
+          <span>Alihkan Kasus / Referral</span>
+        </div>
+        <h3 class="text-xl font-bold text-oase-plum">Alihkan Kasus ke Konselor Lain</h3>
+        <p class="text-xs text-oase-muted">Pilih konselor yang lebih ahli atau relevan dengan kebutuhan cerita ini.</p>
+      </div>
+
+      <form id="transferForm" class="space-y-4">
+        <div class="space-y-1 text-left">
+          <label class="block text-xs font-bold text-oase-plum">Konselor Tujuan:</label>
+          <select id="transferCounselorSelect" required class="w-full px-4 py-2.5 rounded-xl border border-oase-border bg-oase-surface/50 text-sm focus:outline-none focus:border-heather-500 cursor-pointer">
+            <!-- Populated via JS -->
+          </select>
+        </div>
+
+        <div class="space-y-1 text-left">
+          <label class="block text-xs font-bold text-oase-plum">Alasan Pengalihan Kasus:</label>
+          <textarea 
+            id="transferReasonTextarea" 
+            required 
+            rows="3" 
+            placeholder="Contoh: Pengirim membutuhkan bimbingan karier khusus, sehingga lebih tepat ditangani oleh Ibu Ningsih."
+            class="w-full p-3 rounded-xl border border-oase-border text-xs focus:outline-none focus:border-heather-500"
+          ></textarea>
+        </div>
+
+        <div class="pt-2 flex items-center justify-end gap-2">
+          <button type="button" id="cancelTransferBtn" class="px-4 py-2 rounded-xl border border-oase-border text-xs font-semibold text-oase-muted hover:bg-heather-50">
+            Batal
+          </button>
+          <button type="submit" id="confirmTransferBtn" class="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs shadow-md transition-all flex items-center gap-1.5">
+            <i data-lucide="check" class="w-4 h-4"></i>
+            <span>Konfirmasi Alihkan Kasus</span>
+          </button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="counselors.js"></script>
+  <script src="supabaseClient.js"></script>
+  <script>
+    lucide.createIcons();
+
+    // State Variables
+    let currentSession = null;
+    let allQueueStories = [];
+    let activeCategory = 'all';
+    let activeStatus = 'all';
+    let currentSelectedTicket = null;
+
+    // DOM Elements
+    const counselorLoginModal = document.getElementById('counselorLoginModal');
+    const counselorLoginForm = document.getElementById('counselorLoginForm');
+    const counselorEmailInput = document.getElementById('counselorEmailInput');
+    const counselorPasswordInput = document.getElementById('counselorPasswordInput');
+    const rememberMeCheckbox = document.getElementById('rememberMeCheckbox');
+    const logoutBtn = document.getElementById('logoutBtn');
+
+    const greetingHeading = document.getElementById('greetingHeading');
+    const navCounselorAvatar = document.getElementById('navCounselorAvatar');
+    const navCounselorName = document.getElementById('navCounselorName');
+    const navCounselorRole = document.getElementById('navCounselorRole');
+
+    const statQueueCount = document.getElementById('statQueueCount');
+    const statAnsweredCount = document.getElementById('statAnsweredCount');
+    const statTotalCount = document.getElementById('statTotalCount');
+
+    const queueContainer = document.getElementById('queueContainer');
+    const searchKeywordInput = document.getElementById('searchKeywordInput');
+    const refreshQueueBtn = document.getElementById('refreshQueueBtn');
+
+    // Modals
+    const responseModal = document.getElementById('responseModal');
+    const closeResponseModalBtn = document.getElementById('closeResponseModalBtn');
+    const modalTicketBadge = document.getElementById('modalTicketBadge');
+    const modalCategoryBadge = document.getElementById('modalCategoryBadge');
+    const modalTimeBadge = document.getElementById('modalTimeBadge');
+    const modalAuthorName = document.getElementById('modalAuthorName');
+    const modalAuthorMeta = document.getElementById('modalAuthorMeta');
+    const modalStoryContent = document.getElementById('modalStoryContent');
+    const counselorReplyTextarea = document.getElementById('counselorReplyTextarea');
+    const replyWordCount = document.getElementById('replyWordCount');
+    const replyStoryForm = document.getElementById('replyStoryForm');
+    const submitReplyBtn = document.getElementById('submitReplyBtn');
+
+    const triggerTransferBtn = document.getElementById('triggerTransferBtn');
+    const transferModal = document.getElementById('transferModal');
+    const closeTransferModalBtn = document.getElementById('closeTransferModalBtn');
+    const cancelTransferBtn = document.getElementById('cancelTransferBtn');
+    const transferForm = document.getElementById('transferForm');
+    const transferCounselorSelect = document.getElementById('transferCounselorSelect');
+    const transferReasonTextarea = document.getElementById('transferReasonTextarea');
+
+    // 1. CHECK COUNSELOR AUTH ON LOAD
+    function checkAuth() {
+      currentSession = window.CounselingService.getCurrentCounselorSession();
+      if (!currentSession || currentSession.role !== 'counselor') {
+        counselorLoginModal.classList.remove('hidden');
+        return false;
+      }
+
+      counselorLoginModal.classList.add('hidden');
+      setupGreeting();
+      loadQueue();
+      return true;
+    }
+
+    // Greet counselor warmly based on local time
+    function setupGreeting() {
+      if (!currentSession) return;
+      const hour = new Date().getHours();
+      let timeGreeting = 'Selamat Pagi';
+      if (hour >= 11 && hour < 15) timeGreeting = 'Selamat Siang';
+      else if (hour >= 15 && hour < 18) timeGreeting = 'Selamat Sore';
+      else if (hour >= 18 || hour < 4) timeGreeting = 'Selamat Malam';
+
+      greetingHeading.innerHTML = `${timeGreeting}, <span class="text-heather-600">${currentSession.name}</span>.`;
+      navCounselorAvatar.src = currentSession.avatar || 'https://images.unsplash.com/photo-1544027993-37dbfe43562a?auto=format&fit=crop&w=200&h=200&q=80';
+      navCounselorName.textContent = currentSession.name;
+      navCounselorRole.textContent = currentSession.email;
+    }
+
+    // Helper: Relative time format
+    function getRelativeTime(isoDateStr) {
+      if (!isoDateStr) return 'Baru saja';
+      const past = new Date(isoDateStr).getTime();
+      const diffMs = Date.now() - past;
+      const diffMins = Math.floor(diffMs / 60000);
+      if (diffMins < 1) return 'Baru saja';
+      if (diffMins < 60) return `${diffMins} menit lalu`;
+      const diffHours = Math.floor(diffMins / 60);
+      if (diffHours < 24) return `${diffHours} jam lalu`;
+      const diffDays = Math.floor(diffHours / 24);
+      return `${diffDays} hari lalu`;
+    }
+
+    // 2. LOAD QUEUE STORIES
+    async function loadQueue() {
+      queueContainer.innerHTML = `
+        <div class="col-span-full py-16 text-center text-oase-muted">
+          <div class="w-10 h-10 border-4 border-heather-200 border-t-heather-600 rounded-full animate-spin mx-auto mb-3"></div>
+          <p class="text-sm font-medium">Memuat antrean cerita masuk...</p>
+        </div>
+      `;
+
+      try {
+        allQueueStories = await window.CounselingService.getAllSubmissions({ category: 'all', status: 'all' });
+        renderQueue();
+      } catch (err) {
+        console.error('Gagal mengambil antrean:', err);
+        queueContainer.innerHTML = `<div class="col-span-full text-center py-10 text-red-500 text-sm">Gagal memuat antrean cerita. Silakan coba lagi.</div>`;
+      }
+    }
+
+    // Render Filtered Queue
+    function renderQueue() {
+      let filtered = [...allQueueStories];
+
+      // Filter Kategori
+      if (activeCategory !== 'all') {
+        filtered = filtered.filter(s => s.category === activeCategory);
+      }
+
+      // Filter Status
+      if (activeStatus !== 'all') {
+        filtered = filtered.filter(s => s.status === activeStatus);
+      }
+
+      // Filter Keyword
+      const q = searchKeywordInput.value.trim().toLowerCase();
+      if (q) {
+        filtered = filtered.filter(s => 
+          (s.ticket_code && s.ticket_code.toLowerCase().includes(q)) ||
+          (s.author_name && s.author_name.toLowerCase().includes(q)) ||
+          (s.story_content && s.story_content.toLowerCase().includes(q))
+        );
+      }
+
+      // Update Summary Stats
+      const waitingCount = allQueueStories.filter(s => s.status !== 'sudah_dibalas').length;
+      const answeredCount = allQueueStories.filter(s => s.status === 'sudah_dibalas').length;
+      statQueueCount.textContent = waitingCount;
+      statAnsweredCount.textContent = answeredCount;
+      statTotalCount.textContent = allQueueStories.length;
+
+      if (filtered.length === 0) {
+        queueContainer.innerHTML = `
+          <div class="col-span-full py-16 text-center space-y-3 bg-white rounded-3xl border border-oase-border">
+            <div class="w-12 h-12 rounded-2xl bg-heather-50 text-heather-500 flex items-center justify-center mx-auto">
+              <i data-lucide="inbox" class="w-6 h-6"></i>
+            </div>
+            <p class="text-base font-bold text-oase-plum">Tidak ada antrean cerita pada filter ini</p>
+            <p class="text-xs text-oase-muted">Semua cerita telah tertangani atau belum ada yang masuk untuk kategori ini.</p>
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
+      queueContainer.innerHTML = '';
+      filtered.forEach((story, idx) => {
+        const isAnswered = story.status === 'sudah_dibalas';
+        const card = document.createElement('div');
+        card.className = "bg-white rounded-3xl p-5 sm:p-6 border border-oase-border/90 hover:border-heather-300 hover:shadow-lg hover:shadow-heather-500/5 transition-all space-y-4 flex flex-col justify-between";
+
+        const relativeTime = getRelativeTime(story.created_at);
+
+        card.innerHTML = `
+          <div class="space-y-3">
+            <div class="flex items-center justify-between gap-2">
+              <span class="font-mono text-xs font-bold text-heather-700 bg-heather-50 px-2.5 py-1 rounded-lg border border-heather-200">${story.ticket_code}</span>
+              ${isAnswered 
+                ? '<span class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[11px] font-bold">✓ Sudah Dibalas</span>'
+                : '<span class="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[11px] font-bold">⏳ Menunggu Respons</span>'
+              }
+            </div>
+
+            <div class="flex items-center justify-between text-xs text-oase-muted">
+              <span class="font-semibold text-oase-plum flex items-center gap-1.5">
+                <i data-lucide="user" class="w-3.5 h-3.5 text-heather-500"></i>
+                <span>${story.author_name}</span>
+                <span class="text-[10px] text-oase-muted font-normal">(${story.education_level}${story.grade_class ? ' • ' + story.grade_class : ''})</span>
+              </span>
+              <span class="flex items-center gap-1 text-[11px]">
+                <i data-lucide="clock" class="w-3 h-3"></i>
+                <span>${relativeTime}</span>
+              </span>
+            </div>
+
+            <div class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-heather-50/70 border border-heather-200 text-heather-800 text-[11px] font-semibold">
+              <i data-lucide="tag" class="w-3 h-3 text-heather-500"></i>
+              <span>${story.category}</span>
+            </div>
+
+            <p class="text-xs text-oase-muted leading-relaxed line-clamp-3 bg-oase-surface/50 p-3 rounded-xl border border-oase-border/50 italic">
+              "${story.story_content}"
+            </p>
+
+            ${story.transferred_from_name ? `
+              <div class="p-2 rounded-lg bg-purple-50 border border-purple-200 text-[11px] text-purple-900 flex items-start gap-1.5">
+                <i data-lucide="arrow-right-left" class="w-3.5 h-3.5 text-purple-600 flex-shrink-0 mt-0.5"></i>
+                <span>Dialihkan dari <strong>${story.transferred_from_name}</strong>: "${story.transfer_reason || ''}"</span>
+              </div>
+            ` : ''}
+          </div>
+
+          <div class="pt-3 border-t border-oase-border flex items-center justify-between gap-2">
+            <span class="text-[11px] text-oase-muted">Ditugaskan ke: <strong>${story.counselor_name}</strong></span>
+            <button class="open-respond-btn px-4 py-2 rounded-xl ${isAnswered ? 'bg-heather-50 text-heather-700 hover:bg-heather-100' : 'bg-heather-500 text-white hover:bg-heather-600'} text-xs font-bold transition-all shadow-xs flex items-center gap-1.5" data-code="${story.ticket_code}">
+              <i data-lucide="${isAnswered ? 'eye' : 'message-circle'}" class="w-3.5 h-3.5"></i>
+              <span>${isAnswered ? 'Lihat Tanggapan' : 'Tanggapi Cerita'}</span>
+            </button>
+          </div>
+        `;
+
+        card.querySelector('.open-respond-btn').addEventListener('click', () => {
+          openResponseModal(story);
+        });
+
+        queueContainer.appendChild(card);
+      });
+
+      lucide.createIcons();
+    }
+
+    // 3. OPEN RESPONSE INTERFACE MODAL
+    function openResponseModal(story) {
+      currentSelectedTicket = story;
+      modalTicketBadge.textContent = story.ticket_code;
+      modalCategoryBadge.textContent = story.category;
+      modalTimeBadge.textContent = getRelativeTime(story.created_at);
+      modalAuthorName.textContent = story.author_name;
+      modalAuthorMeta.textContent = `${story.education_level} ${story.grade_class ? ' • ' + story.grade_class : ''} • Jenis Kelamin: ${story.gender}`;
+      modalStoryContent.textContent = story.story_content;
+
+      // Pre-fill existing reply if any
+      counselorReplyTextarea.value = story.counselor_reply || '';
+      updateReplyWordCount();
+
+      responseModal.classList.remove('hidden');
+    }
+
+    closeResponseModalBtn.addEventListener('click', () => {
+      responseModal.classList.add('hidden');
+    });
+
+    // Word count in response textarea
+    function updateReplyWordCount() {
+      const words = counselorReplyTextarea.value.trim() ? counselorReplyTextarea.value.trim().split(/\s+/).length : 0;
+      replyWordCount.textContent = `${words} kata`;
+    }
+    counselorReplyTextarea.addEventListener('input', updateReplyWordCount);
+
+    // Submit Reply
+    replyStoryForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!currentSelectedTicket) return;
+
+      const replyContent = counselorReplyTextarea.value.trim();
+      if (!replyContent) return;
+
+      submitReplyBtn.disabled = true;
+      submitReplyBtn.innerHTML = `Mengirim Balasan...`;
+
+      try {
+        await window.CounselingService.replySubmission(
+          currentSelectedTicket.ticket_code,
+          replyContent,
+          currentSession ? currentSession.name : 'Konselor OASE'
+        );
+
+        alert(`Tanggapan berhasil dikirim! Pengirim dengan kode tiket ${currentSelectedTicket.ticket_code} dapat melihat balasan ini.`);
+        responseModal.classList.add('hidden');
+        await loadQueue();
+      } catch (err) {
+        console.error('Gagal membalas:', err);
+        alert('Gagal mengirim balasan. Silakan coba lagi.');
+      } finally {
+        submitReplyBtn.disabled = false;
+        submitReplyBtn.innerHTML = `
+          <i data-lucide="send" class="w-4 h-4"></i>
+          <span>Kirim Balasan Resmi</span>
+        `;
+        lucide.createIcons();
+      }
+    });
+
+    // 4. TRANSFER / REFERRAL MODAL
+    triggerTransferBtn.addEventListener('click', () => {
+      if (!currentSelectedTicket) return;
+      populateCounselorOptions();
+      transferModal.classList.remove('hidden');
+    });
+
+    closeTransferModalBtn.addEventListener('click', () => transferModal.classList.add('hidden'));
+    cancelTransferBtn.addEventListener('click', () => transferModal.classList.add('hidden'));
+
+    function populateCounselorOptions() {
+      const counselors = window.COUNSELORS_DATA || [];
+      transferCounselorSelect.innerHTML = '';
+
+      counselors.forEach(c => {
+        if (c.id === 'auto') return;
+        // Don't show current counselor if matches
+        const option = document.createElement('option');
+        option.value = c.id;
+        option.textContent = `${c.name} (${c.role})`;
+        transferCounselorSelect.appendChild(option);
+      });
+    }
+
+    transferForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!currentSelectedTicket) return;
+
+      const newId = transferCounselorSelect.value;
+      const selectedCounselorObj = (window.COUNSELORS_DATA || []).find(c => c.id === newId);
+      const newName = selectedCounselorObj ? selectedCounselorObj.name : 'Konselor Lain';
+      const reason = transferReasonTextarea.value.trim();
+
+      const confirmBtn = document.getElementById('confirmTransferBtn');
+      confirmBtn.disabled = true;
+      confirmBtn.textContent = 'Mengalihkan...';
+
+      try {
+        await window.CounselingService.transferSubmission({
+          ticketCode: currentSelectedTicket.ticket_code,
+          newCounselorId: newId,
+          newCounselorName: newName,
+          transferredFromName: currentSession ? currentSession.name : 'Konselor',
+          transferReason: reason
+        });
+
+        alert(`Kasus ${currentSelectedTicket.ticket_code} berhasil dialihkan ke ${newName}!`);
+        transferModal.classList.add('hidden');
+        responseModal.classList.add('hidden');
+        transferReasonTextarea.value = '';
+        await loadQueue();
+      } catch (err) {
+        console.error('Gagal transfer:', err);
+        alert('Gagal mengalihkan kasus. Coba lagi nanti.');
+      } finally {
+        confirmBtn.disabled = false;
+        confirmBtn.innerHTML = `
+          <i data-lucide="check" class="w-4 h-4"></i>
+          <span>Konfirmasi Alihkan Kasus</span>
+        `;
+        lucide.createIcons();
+      }
+    });
+
+    // 5. CATEGORY & STATUS FILTER HANDLERS
+    document.querySelectorAll('.filter-chip').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        activeCategory = btn.getAttribute('data-category');
+        renderQueue();
+      });
+    });
+
+    document.querySelectorAll('.status-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.status-tab').forEach(t => {
+          t.classList.remove('font-bold', 'text-heather-700', 'underline', 'decoration-2', 'underline-offset-4');
+          t.classList.add('text-oase-muted');
+        });
+        tab.classList.add('font-bold', 'text-heather-700', 'underline', 'decoration-2', 'underline-offset-4');
+        tab.classList.remove('text-oase-muted');
+        activeStatus = tab.getAttribute('data-status');
+        renderQueue();
+      });
+    });
+
+    searchKeywordInput.addEventListener('input', renderQueue);
+    refreshQueueBtn.addEventListener('click', loadQueue);
+
+    // 6. LOGIN HANDLER
+    counselorLoginForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const email = counselorEmailInput.value.trim();
+      const password = counselorPasswordInput.value;
+      const rememberMe = rememberMeCheckbox.checked;
+
+      try {
+        currentSession = window.CounselingService.loginCounselor({ email, password, rememberMe });
+        checkAuth();
+      } catch (err) {
+        alert(err.message || 'Login gagal. Periksa email dan password.');
+      }
+    });
+
+    // 7. LOGOUT HANDLER
+    logoutBtn.addEventListener('click', () => {
+      if (confirm('Apakah Anda yakin ingin keluar dari Portal Konselor?')) {
+        window.CounselingService.logoutCounselor();
+        location.reload();
+      }
+    });
+
+    // Run on start
+    checkAuth();
+  </script>
+</body>
+</html>
