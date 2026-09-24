@@ -714,9 +714,9 @@
             <div class="space-y-0.5">
               <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold">Konselor Siaga OASE</span>
               <h4 class="text-sm font-bold text-oase-plum">WhatsApp Konselor Darurat</h4>
-              <p class="text-xs text-oase-muted">+62 812-8899-7701 (Siaga Pendampingan Krisis)</p>
+              <p class="text-xs text-oase-muted">+62 856-4699-3097 (Siaga Pendampingan Krisis)</p>
             </div>
-            <a href="https://wa.me/6281288997701?text=Halo%20Konselor%20OASE,%20saya%20membutuhkan%20bantuan%20darurat%20sekarang." target="_blank" rel="noopener noreferrer" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1 shadow-xs flex-shrink-0">
+            <a href="https://wa.me/6285646993097?text=Halo%20Konselor%20OASE,%20saya%20membutuhkan%20bantuan%20darurat%20sekarang." target="_blank" rel="noopener noreferrer" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1 shadow-xs flex-shrink-0">
               <i data-lucide="message-circle" class="w-3.5 h-3.5"></i>
               <span>WhatsApp</span>
             </a>
@@ -727,9 +727,9 @@
             <div class="space-y-0.5">
               <span class="px-2 py-0.5 rounded-full bg-heather-100 text-heather-800 text-[10px] font-bold">Moderator Utama OASE</span>
               <h4 class="text-sm font-bold text-oase-plum">Bantuan & Eskalasi Moderator</h4>
-              <p class="text-xs text-oase-muted">moderator@oase.id • WhatsApp: +62 813-1122-3344</p>
+              <p class="text-xs text-oase-muted">moderator@oase.id • WhatsApp: +62 822-2817-6090</p>
             </div>
-            <a href="https://wa.me/6281311223344?text=Halo%20Moderator%20OASE,%20saya%20ingin%20melaporkan%20kejadian%20darurat." target="_blank" rel="noopener noreferrer" class="px-3.5 py-2 rounded-xl bg-heather-600 hover:bg-heather-700 text-white font-bold text-xs flex items-center gap-1 shadow-xs flex-shrink-0">
+            <a href="https://wa.me/6282228176090?text=Halo%20Moderator%20OASE,%20saya%20ingin%20melaporkan%20kejadian%20darurat." target="_blank" rel="noopener noreferrer" class="px-3.5 py-2 rounded-xl bg-heather-600 hover:bg-heather-700 text-white font-bold text-xs flex items-center gap-1 shadow-xs flex-shrink-0">
               <i data-lucide="shield" class="w-3.5 h-3.5"></i>
               <span>Kontak</span>
             </a>
@@ -842,6 +842,34 @@
             <option value="Karier & Rencana Masa Depan">🧭 Karier & Masa Depan</option>
             <option value="Lainnya">✨ Lainnya</option>
           </select>
+        </div>
+
+        <!-- Jenjang Pendidikan Siswa (Tombol Pilihan) -->
+        <div class="space-y-1.5">
+          <label class="block text-xs font-bold text-oase-plum">Pilih Jenjang Pendidikan:</label>
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-2" id="anonEducationChipsContainer">
+            <button type="button" data-education="SD / MI" class="anon-edu-chip py-2 px-2.5 rounded-xl border border-oase-border bg-white hover:bg-rose-50 text-[11px] font-semibold text-oase-plum text-center transition-all flex items-center justify-center gap-1">
+              <i data-lucide="graduation-cap" class="w-3.5 h-3.5 text-rose-500"></i>
+              <span>SD / MI</span>
+            </button>
+            <button type="button" data-education="SMP / MTs" class="anon-edu-chip py-2 px-2.5 rounded-xl border border-oase-border bg-white hover:bg-rose-50 text-[11px] font-semibold text-oase-plum text-center transition-all flex items-center justify-center gap-1">
+              <i data-lucide="graduation-cap" class="w-3.5 h-3.5 text-rose-500"></i>
+              <span>SMP / MTs</span>
+            </button>
+            <button type="button" data-education="SMA / SMK / MA" class="anon-edu-chip py-2 px-2.5 rounded-xl border border-rose-500 bg-rose-50 text-rose-700 text-[11px] font-bold text-center transition-all active shadow-xs flex items-center justify-center gap-1">
+              <i data-lucide="graduation-cap" class="w-3.5 h-3.5 text-rose-600"></i>
+              <span>SMA / SMK / MA</span>
+            </button>
+            <button type="button" data-education="Perguruan Tinggi / Mahasiswa" class="anon-edu-chip py-2 px-2.5 rounded-xl border border-oase-border bg-white hover:bg-rose-50 text-[11px] font-semibold text-oase-plum text-center transition-all flex items-center justify-center gap-1">
+              <i data-lucide="graduation-cap" class="w-3.5 h-3.5 text-rose-500"></i>
+              <span>Kuliah / PT</span>
+            </button>
+            <button type="button" data-education="Umum / Bekerja" class="anon-edu-chip py-2 px-2.5 rounded-xl border border-oase-border bg-white hover:bg-rose-50 text-[11px] font-semibold text-oase-plum text-center transition-all col-span-2 sm:col-span-1 flex items-center justify-center gap-1">
+              <i data-lucide="briefcase" class="w-3.5 h-3.5 text-rose-500"></i>
+              <span>Umum / Bekerja</span>
+            </button>
+          </div>
+          <input type="hidden" id="anonSelectedEducationInput" value="SMA / SMK / MA">
         </div>
 
         <!-- Isi Cerita Anonim -->
@@ -1689,6 +1717,23 @@
         regenerateAnonNameBtn.addEventListener('click', generateAnonPseudonym);
       }
 
+      // Handle Tombol Pilihan Jenjang Pendidikan di Modal Curhat Anonim
+      const eduChips = document.querySelectorAll('.anon-edu-chip');
+      const anonSelectedEducationInput = document.getElementById('anonSelectedEducationInput');
+      eduChips.forEach(chip => {
+        chip.addEventListener('click', () => {
+          eduChips.forEach(c => {
+            c.classList.remove('border-rose-500', 'bg-rose-50', 'text-rose-700', 'font-bold', 'shadow-xs');
+            c.classList.add('border-oase-border', 'bg-white', 'text-oase-plum', 'font-semibold');
+          });
+          chip.classList.remove('border-oase-border', 'bg-white', 'text-oase-plum', 'font-semibold');
+          chip.classList.add('border-rose-500', 'bg-rose-50', 'text-rose-700', 'font-bold', 'shadow-xs');
+          if (anonSelectedEducationInput) {
+            anonSelectedEducationInput.value = chip.getAttribute('data-education');
+          }
+        });
+      });
+
       if (anonCurhatForm) {
         anonCurhatForm.addEventListener('submit', async (e) => {
           e.preventDefault();
@@ -1697,6 +1742,7 @@
           const counselorName = counselorObj ? counselorObj.name : 'Konselor OASE';
           const category = anonCategorySelect.value;
           const storyContent = anonStoryInput.value.trim();
+          const selectedEducation = (anonSelectedEducationInput && anonSelectedEducationInput.value) ? anonSelectedEducationInput.value : 'SMA / SMK / MA';
 
           if (!storyContent) return;
 
@@ -1706,8 +1752,8 @@
           try {
             const res = await window.CounselingService.submitCounselingStory({
               authorName: currentAnonPseudonym,
-              educationLevel: 'Siswa / Remaja',
-              gradeClass: 'Anonim',
+              educationLevel: selectedEducation,
+              gradeClass: 'Siswa Anonim',
               gender: 'Rahasia',
               category: category,
               counselorId: counselorId === 'auto' ? null : counselorId,

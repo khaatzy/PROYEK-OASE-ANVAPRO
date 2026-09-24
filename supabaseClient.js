@@ -548,57 +548,13 @@ const CounselingService = {
       }
     }
 
-    // Fallback penyimpanan lokal
+    // Fallback penyimpanan lokal murni (tanpa dummy message otomatis)
     let localSubmissions = JSON.parse(localStorage.getItem('oase_counseling_submissions') || '[]');
-    const counselors = window.COUNSELORS_DATA || [];
-    const counselor1 = counselors.find(c => c.id === 'counselor-1') || { name: 'Rachma Murtisari Prihastanti, S.Pd' };
-    const counselor3 = counselors.find(c => c.id === 'counselor-3') || { name: 'Ningsih, S.Pd' };
-
-    if (localSubmissions.length === 0) {
-      localSubmissions = [
-        {
-          ticket_code: 'OASE-2941-KB',
-          author_name: 'User104',
-          education_level: 'SMA / SMK / MA',
-          grade_class: 'Kelas 12',
-          gender: 'Perempuan',
-          category: 'Masalah Pembelajaran & Akademik',
-          counselor_id: 'counselor-1',
-          counselor_name: counselor1.name,
-          story_content: window.EncryptionService ? window.EncryptionService.encrypt('Halo Kak Rachma, aku merasa sangat cemas menghadapi ujian kelulusan dan seleksi masuk perguruan tinggi bulan depan. Rasanya orang tua punya ekspektasi sangat tinggi, sementara nilaiku sering pas-pasan. Aku susah tidur setiap malam...') : 'Halo Kak Rachma...',
-          status: 'menunggu_tanggapan',
-          is_crisis: false,
-          created_at: new Date(Date.now() - 35 * 60 * 1000).toISOString()
-        },
-        {
-          ticket_code: 'OASE-5820-MN',
-          author_name: 'Bunga Lavender',
-          education_level: 'SMP / MTs',
-          grade_class: 'Kelas 9',
-          gender: 'Perempuan',
-          category: 'Masalah Keluarga & Rumah Tangga',
-          counselor_id: 'auto',
-          counselor_name: 'Pilihkan Otomatis',
-          story_content: window.EncryptionService ? window.EncryptionService.encrypt('Di rumah suasana sedang tidak nyaman karena orang tua sering bertengkar hebat akhir-akhir ini. Aku merasa sendirian di kamar dan tidak tahu harus bercerita ke siapa. Takut mengganggu teman...') : 'Di rumah...',
-          status: 'menunggu_tanggapan',
-          is_crisis: false,
-          created_at: new Date(Date.now() - 120 * 60 * 1000).toISOString()
-        },
-        {
-          ticket_code: 'OASE-7731-XT',
-          author_name: 'Pejuang Senja',
-          education_level: 'Perguruan Tinggi / Mahasiswa',
-          grade_class: 'Semester 6',
-          gender: 'Laki-laki',
-          category: 'Karier & Rencana Masa Depan',
-          counselor_id: 'counselor-3',
-          counselor_name: counselor3.name,
-          story_content: window.EncryptionService ? window.EncryptionService.encrypt('Saya merasa salah mengambil jurusan kuliah. Memasuki semester akhir ini tugas magang dan skripsi terasa begitu hampa. Apakah wajar merasa seperti ini di usia 21 tahun?') : 'Saya merasa...',
-          status: 'menunggu_tanggapan',
-          is_crisis: false,
-          created_at: new Date(Date.now() - 300 * 60 * 1000).toISOString()
-        }
-      ];
+    
+    // Bersihkan dummy messages lama (jika sebelumnya pernah tersimpan di browser)
+    const dummyTicketCodes = ['OASE-2941-KB', 'OASE-5820-MN', 'OASE-7731-XT'];
+    if (localSubmissions.some(s => dummyTicketCodes.includes(s.ticket_code))) {
+      localSubmissions = localSubmissions.filter(s => !dummyTicketCodes.includes(s.ticket_code));
       localStorage.setItem('oase_counseling_submissions', JSON.stringify(localSubmissions));
     }
 
