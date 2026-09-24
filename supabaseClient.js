@@ -56,6 +56,67 @@ const AuthService = {
     return supabaseClient.auth.onAuthStateChange((event, session) => {
       callback(event, session);
     });
+  },
+
+  // Perbarui Password Pengguna
+  async updatePassword(newPassword) {
+    if (supabaseClient) {
+      const { data, error } = await supabaseClient.auth.updateUser({
+        password: newPassword
+      });
+      if (error) throw error;
+      return data;
+    }
+    localStorage.setItem('oase_local_password', newPassword);
+    return { success: true };
+  },
+
+  // Dapatkan Profil & Role Pengguna (User, Moderator, Konselor)
+  async getUserProfile(userId, email) {
+    if (supabaseClient && userId) {
+      try {
+        const { data, error } = await supabaseClient
+          .from('profiles')
+          .select('*')
+          .eq('auth_user_id', userId)
+          .single();
+        if (!error && data) return data;
+      } catch(e) {}
+    }
+    const savedProfiles = JSON.parse(localStorage.getItem('oase_user_profiles') || '{}');
+    if (email && savedProfiles[email]) {
+      return savedProfiles[email];
+    }
+    return {
+      email: email || 'siswa@oase.id',
+      role: 'user',
+      moderator_approval_status: 'none',
+      full_name: email ? email.split('@')[0] : 'Siswa OASE'
+    };
+  },
+
+  // Pengajuan Role Moderator (Menunggu Persetujuan Moderator Utama)
+  async requestModeratorRole(email, reason = '') {
+    if (supabaseClient) {
+      try {
+        await supabaseClient.from('profiles').upsert({
+          email,
+          role: 'moderator',
+          moderator_approval_status: 'pending',
+          updated_at: new Date().toISOString()
+        });
+      } catch(e) {}
+    }
+    const savedProfiles = JSON.parse(localStorage.getItem('oase_user_profiles') || '{}');
+    savedProfiles[email] = {
+      ...(savedProfiles[email] || {}),
+      email,
+      role: 'moderator',
+      moderator_approval_status: 'pending',
+      moderator_reason: reason
+    };
+    localStorage.setItem('oase_user_profiles', JSON.stringify(savedProfiles));
+    return { success: true, status: 'pending' };
   }
 };
 
@@ -420,7 +481,270 @@ const CounselingService = {
   }
 };
 
+// Layanan Sesi Chat Konseling Real-Time & Voice Note (End-to-End ala Halodoc)
+const ChatSessionService = {
+  // Booking Sesi Konseling Baru (Durasi 30 Menit)
+  async bookSession({ userId, userEmail, userName, counselorId, counselorName, topic, scheduledAt = null }) {
+    const sessionData = {
+      id: 'session-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7),
+      user_id: userId || 'user-' + Date.now(),
+      user_email: userEmail,
+      user_name: userName || userEmail.split('@')[0],
+      counselor_id: counselorId,
+      counselor_name: counselorName,
+      topic: topic || 'Keluhan Umum & Emosional',
+      duration_minutes: 30,
+      scheduled_at: scheduledAt || new Date().toISOString(),
+      status: 'aktif',
+      started_at: new Date().toISOString(),
+      created_at: new Date().toISOString()
+    };
+
+    if (supabaseClient) {
+      try {
+        const { data, error } = await supabaseClient
+          .from('counseling_sessions')
+          .insert([sessionData])
+          .select();
+        if (!error && data && data.length > 0) {
+          this.triggerNotification({
+            type: 'booking',
+            targetRole: 'counselor',
+            counselorId: counselorId,
+            title: 'Sesi Konseling Baru Dipesan!',
+            message: `${sessionData.user_name} memesan sesi 30 menit (${topic})`
+          });
+          return data[0];
+        }
+      } catch (e) {
+        console.warn('Booking Supabase fallback to local:', e);
+      }
+    }
+
+    const sessions = JSON.parse(localStorage.getItem('oase_counseling_sessions') || '[]');
+    sessions.unshift(sessionData);
+    localStorage.setItem('oase_counseling_sessions', JSON.stringify(sessions));
+
+    this.triggerNotification({
+      type: 'booking',
+      targetRole: 'counselor',
+      counselorId: counselorId,
+      title: 'Sesi Konseling Baru Dipesan!',
+      message: `${sessionData.user_name} memesan sesi 30 menit (${topic})`
+    });
+
+    return sessionData;
+  },
+
+  // Ambil Sesi Aktif
+  async getActiveSession(userEmail, counselorId = null) {
+    if (supabaseClient) {
+      try {
+        let query = supabaseClient.from('counseling_sessions').select('*').eq('status', 'aktif');
+        if (userEmail) query = query.eq('user_email', userEmail);
+        if (counselorId) query = query.eq('counselor_id', counselorId);
+        const { data, error } = await query.order('created_at', { ascending: false }).limit(1);
+        if (!error && data && data.length > 0) return data[0];
+      } catch (e) {}
+    }
+
+    const sessions = JSON.parse(localStorage.getItem('oase_counseling_sessions') || '[]');
+    return sessions.find(s => {
+      const matchUser = userEmail ? s.user_email === userEmail : true;
+      const matchCounselor = counselorId ? s.counselor_id === counselorId : true;
+      return matchUser && matchCounselor && s.status === 'aktif';
+    }) || null;
+  },
+
+  // Dapatkan seluruh sesi untuk konselor tertentu
+  async getCounselorSessions(counselorId) {
+    if (supabaseClient) {
+      try {
+        const { data, error } = await supabaseClient
+          .from('counseling_sessions')
+          .select('*')
+          .eq('counselor_id', counselorId)
+          .order('created_at', { ascending: false });
+        if (!error && data) return data;
+      } catch (e) {}
+    }
+
+    const sessions = JSON.parse(localStorage.getItem('oase_counseling_sessions') || '[]');
+    return sessions.filter(s => s.counselor_id === counselorId);
+  },
+
+  // Selesaikan Sesi
+  async endSession(sessionId) {
+    if (supabaseClient) {
+      try {
+        await supabaseClient.from('counseling_sessions').update({
+          status: 'selesai',
+          ended_at: new Date().toISOString()
+        }).eq('id', sessionId);
+      } catch (e) {}
+    }
+
+    const sessions = JSON.parse(localStorage.getItem('oase_counseling_sessions') || '[]');
+    const idx = sessions.findIndex(s => s.id === sessionId);
+    if (idx !== -1) {
+      sessions[idx].status = 'selesai';
+      sessions[idx].ended_at = new Date().toISOString();
+      localStorage.setItem('oase_counseling_sessions', JSON.stringify(sessions));
+    }
+  },
+
+  // Kirim Pesan (Teks atau Voice Note)
+  async sendMessage({ sessionId, senderId, senderName, senderType, messageType = 'text', messageText = '', audioData = null }) {
+    const msg = {
+      id: 'msg-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6),
+      session_id: sessionId,
+      sender_id: senderId,
+      sender_name: senderName,
+      sender_type: senderType, // 'user' | 'counselor'
+      message_type: messageType, // 'text' | 'voice'
+      message_text: messageText,
+      audio_data: audioData,
+      created_at: new Date().toISOString()
+    };
+
+    if (supabaseClient) {
+      try {
+        const { data, error } = await supabaseClient.from('session_messages').insert([msg]).select();
+        if (!error && data && data.length > 0) {
+          this.triggerNotification({
+            type: 'message',
+            sessionId,
+            senderType,
+            title: `Pesan baru dari ${senderName}`,
+            message: messageType === 'voice' ? '🎙️ Mengirim pesan suara (Voice Note)' : messageText
+          });
+          return data[0];
+        }
+      } catch (e) {}
+    }
+
+    const allMsgs = JSON.parse(localStorage.getItem('oase_session_messages') || '[]');
+    allMsgs.push(msg);
+    localStorage.setItem('oase_session_messages', JSON.stringify(allMsgs));
+
+    this.triggerNotification({
+      type: 'message',
+      sessionId,
+      senderType,
+      title: `Pesan baru dari ${senderName}`,
+      message: messageType === 'voice' ? '🎙️ Mengirim pesan suara (Voice Note)' : messageText
+    });
+
+    return msg;
+  },
+
+  // Ambil Semua Pesan dalam Sesi
+  async getMessages(sessionId) {
+    if (supabaseClient) {
+      try {
+        const { data, error } = await supabaseClient
+          .from('session_messages')
+          .select('*')
+          .eq('session_id', sessionId)
+          .order('created_at', { ascending: true });
+        if (!error && data && data.length > 0) return data;
+      } catch (e) {}
+    }
+
+    const allMsgs = JSON.parse(localStorage.getItem('oase_session_messages') || '[]');
+    return allMsgs.filter(m => m.session_id === sessionId);
+  },
+
+  // Sistem Notifikasi Dua Arah
+  triggerNotification(payload) {
+    const notifs = JSON.parse(localStorage.getItem('oase_notifications') || '[]');
+    notifs.unshift({ ...payload, id: 'notif-' + Date.now(), timestamp: new Date().toISOString(), read: false });
+    localStorage.setItem('oase_notifications', JSON.stringify(notifs.slice(0, 40)));
+    window.dispatchEvent(new CustomEvent('oase_new_notification', { detail: payload }));
+  },
+
+  getNotifications() {
+    return JSON.parse(localStorage.getItem('oase_notifications') || '[]');
+  }
+};
+
+// Layanan Interaktif Gemini AI (Sahabat OASE)
+const GeminiService = {
+  getApiKey() {
+    return localStorage.getItem('oase_gemini_api_key') || '';
+  },
+
+  setApiKey(key) {
+    localStorage.setItem('oase_gemini_api_key', key.trim());
+  },
+
+  async chatWithGemini(userMessage, chatHistory = []) {
+    const apiKey = this.getApiKey();
+    if (!apiKey) {
+      throw new Error('API Key Gemini belum diatur. Silakan masukkan API Key Gemini Anda di formulir Chat AI.');
+    }
+
+    const systemPrompt = `Kamu adalah 'Sahabat OASE', konselor sebaya AI yang berhati hangat, empatik, bijaksana, dan menenangkan untuk para siswa/remaja Indonesia.
+Tujuan utamamu adalah mendengarkan dengan penuh penerimaan tanpa menghakimi, memvalidasi perasaan mereka, dan memberi penguatan yang lembut serta solusi reflektif yang aman.
+Gunakan bahasa Indonesia yang akrab, sopan, santun, dan menyentuh hati. Jangan memberikan diagnosis medis berat; jika ada indikasi krisis darurat, selalu sarankan dengan hangat untuk berbicara dengan konselor resmi OASE atau layanan darurat Sejiwa (119 ext 8).`;
+
+    const contents = [
+      {
+        role: 'user',
+        parts: [{ text: `${systemPrompt}\n\nUser menyapa/bercerita:\n${userMessage}` }]
+      }
+    ];
+
+    if (chatHistory && chatHistory.length > 0) {
+      contents.length = 0;
+      contents.push({
+        role: 'user',
+        parts: [{ text: systemPrompt }]
+      });
+      contents.push({
+        role: 'model',
+        parts: [{ text: 'Halo! Aku Sahabat OASE. Aku selalu di sini untuk mendengar ceritamu dengan penuh rasa aman dan kehangatan. Ceritakan apa saja yang ada di hatimu.' }]
+      });
+      chatHistory.slice(-6).forEach(h => {
+        contents.push({
+          role: h.sender === 'user' ? 'user' : 'model',
+          parts: [{ text: h.text }]
+        });
+      });
+      contents.push({
+        role: 'user',
+        parts: [{ text: userMessage }]
+      });
+    }
+
+    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: contents,
+        generationConfig: {
+          temperature: 0.7,
+          maxOutputTokens: 800
+        }
+      })
+    });
+
+    if (!response.ok) {
+      const errData = await response.json().catch(() => ({}));
+      throw new Error(errData.error?.message || `Gagal menghubungi Gemini API (Status: ${response.status})`);
+    }
+
+    const data = await response.json();
+    const replyText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!replyText) throw new Error('Tidak ada respon yang diterima dari Gemini AI.');
+    return replyText;
+  }
+};
+
 // Ekspor ke window global agar mudah diakses di seluruh aplikasi
 window.AuthService = AuthService;
 window.StoryService = StoryService;
 window.CounselingService = CounselingService;
+window.ChatSessionService = ChatSessionService;
+window.GeminiService = GeminiService;

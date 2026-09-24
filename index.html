@@ -93,7 +93,11 @@
         </div>
 
         <!-- Authenticated View (hidden by default) -->
-        <div id="userControls" class="hidden flex items-center gap-3">
+        <div id="userControls" class="hidden flex items-center gap-2 sm:gap-3">
+          <a href="dashboard-user.html" id="navDashboardBtn" class="px-3.5 py-2 rounded-full bg-heather-100 text-heather-700 hover:bg-heather-200 font-bold text-xs sm:text-sm shadow-xs transition-all flex items-center gap-1.5" title="Buka Dashboard Siswa">
+            <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+            <span class="hidden sm:inline">Dashboard Saya</span>
+          </a>
           <button id="navWriteStoryBtn" class="px-4 py-2 rounded-full bg-heather-500 hover:bg-heather-600 text-white font-bold text-xs sm:text-sm shadow-md transition-all flex items-center gap-1.5">
             <i data-lucide="pen-tool" class="w-4 h-4"></i>
             <span>Tulis Cerita</span>

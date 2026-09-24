@@ -192,10 +192,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       try {
         if (authMode === 'login') {
           await window.AuthService.signIn(email, password);
-          showAuthFeedback('Berhasil masuk! Selamat datang kembali di OASE.', 'success');
+          localStorage.setItem('oase_active_user_email', email);
+          showAuthFeedback('Berhasil masuk! Membuka dashboard siswa...', 'success');
           setTimeout(() => {
             closeAuthModal();
             authForm.reset();
+            window.location.href = 'dashboard-user.html';
           }, 800);
         } else {
           await window.AuthService.signUp(email, password);

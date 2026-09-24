@@ -88,3 +88,89 @@ VALUES
 ('OASE-2941-KB', 'User104', 'SMA / SMK / MA', 'Kelas 12', 'Perempuan', 'Masalah Pembelajaran & Akademik', 'counselor-1', 'Kak Sarah Maulida, S.Psi.', 'Halo Kak Sarah, aku merasa sangat cemas menghadapi ujian kelulusan dan seleksi masuk perguruan tinggi bulan depan. Rasanya orang tua punya ekspektasi sangat tinggi, sementara nilaiku sering pas-pasan. Aku susah tidur setiap malam...', 'menunggu_tanggapan', NOW() - INTERVAL '35 minutes'),
 ('OASE-5820-MN', 'Bunga Lavender', 'SMP / MTs', 'Kelas 9', 'Perempuan', 'Masalah Keluarga & Rumah Tangga', 'auto', 'Pilihkan Otomatis', 'Di rumah suasana sedang tidak nyaman karena orang tua sering bertengkar hebat akhir-akhir ini. Aku merasa sendirian di kamar dan tidak tahu harus bercerita ke siapa. Takut mengganggu teman...', 'menunggu_tanggapan', NOW() - INTERVAL '2 hours'),
 ('OASE-7731-XT', 'Pejuang Senja', 'Perguruan Tinggi / Mahasiswa', 'Semester 6', 'Laki-laki', 'Karier & Rencana Masa Depan', 'counselor-3', 'Ibu Ningsih Rahayu, M.Pd.', 'Saya merasa salah mengambil jurusan kuliah. Memasuki semester akhir ini tugas magang dan skripsi terasa begitu hampa. Apakah wajar merasa seperti ini di usia 21 tahun?', 'menunggu_tanggapan', NOW() - INTERVAL '5 hours');
+
+-- ========================================================
+-- 5. Tabel Profil Pengguna & Role Akun (profiles)
+-- ========================================================
+CREATE TABLE IF NOT EXISTS public.profiles (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    auth_user_id UUID UNIQUE,
+    email TEXT UNIQUE NOT NULL,
+    full_name TEXT,
+    role TEXT DEFAULT 'user' CHECK (role IN ('user', 'counselor', 'moderator')),
+    moderator_approval_status TEXT DEFAULT 'pending' CHECK (moderator_approval_status IN ('pending', 'approved', 'rejected')),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Profil dapat dibaca oleh pemilik dan konselor" 
+ON public.profiles FOR SELECT 
+USING (true);
+
+CREATE POLICY "Pengguna dapat memperbarui profilnya sendiri" 
+ON public.profiles FOR UPDATE 
+USING (true);
+
+CREATE POLICY "Pengguna dapat mendaftarkan profil awal" 
+ON public.profiles FOR INSERT 
+WITH CHECK (true);
+
+-- ========================================================
+-- 6. Tabel Sesi Konseling Booking (counseling_sessions)
+-- ========================================================
+CREATE TABLE IF NOT EXISTS public.counseling_sessions (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    user_id TEXT NOT NULL,
+    user_email TEXT NOT NULL,
+    user_name TEXT NOT NULL,
+    counselor_id TEXT NOT NULL,
+    counselor_name TEXT NOT NULL,
+    topic TEXT NOT NULL,
+    duration_minutes INT DEFAULT 30,
+    scheduled_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+    status TEXT DEFAULT 'aktif' CHECK (status IN ('menunggu_konfirmasi', 'aktif', 'selesai', 'dibatalkan')),
+    started_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()),
+    ended_at TIMESTAMP WITH TIME ZONE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+ALTER TABLE public.counseling_sessions ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Semua pihak dalam sesi dapat melihat sesi" 
+ON public.counseling_sessions FOR SELECT 
+USING (true);
+
+CREATE POLICY "User dapat melakukan booking sesi baru" 
+ON public.counseling_sessions FOR INSERT 
+WITH CHECK (true);
+
+CREATE POLICY "User dan konselor dapat memperbarui status sesi" 
+ON public.counseling_sessions FOR UPDATE 
+USING (true);
+
+-- ========================================================
+-- 7. Tabel Pesan Chat & Voice Note (session_messages)
+-- ========================================================
+CREATE TABLE IF NOT EXISTS public.session_messages (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    session_id UUID REFERENCES public.counseling_sessions(id) ON DELETE CASCADE,
+    sender_id TEXT NOT NULL,
+    sender_name TEXT NOT NULL,
+    sender_type TEXT NOT NULL CHECK (sender_type IN ('user', 'counselor')),
+    message_type TEXT DEFAULT 'text' CHECK (message_type IN ('text', 'voice')),
+    message_text TEXT,
+    audio_data TEXT, -- Base64 Data URL atau URL file rekaman suara
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+ALTER TABLE public.session_messages ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Pesan dapat dibaca oleh partisipan sesi" 
+ON public.session_messages FOR SELECT 
+USING (true);
+
+CREATE POLICY "Partisipan sesi dapat mengirim pesan" 
+ON public.session_messages FOR INSERT 
+WITH CHECK (true);

@@ -1,0 +1,1208 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Siswa - OASE Cerita</title>
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Tailwind Config -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            heather: {
+              50: '#FBF5F9',
+              100: '#F5EBF3',
+              200: '#EBD8E7',
+              300: '#DCB8D4',
+              400: '#C78CBB',
+              500: '#A14189', /* HEATHER MAUVE PRIMARY */
+              600: '#8E3476',
+              700: '#752A62',
+              800: '#5F244F',
+              900: '#3D1533',
+            },
+            oase: {
+              cream: '#FDFBF7',
+              surface: '#FCF9FA',
+              border: '#F0E2EC',
+              plum: '#311027',
+              muted: '#7A6273'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    @keyframes pulse-ring {
+      0% { transform: scale(0.95); opacity: 0.8; }
+      50% { transform: scale(1.15); opacity: 0.4; }
+      100% { transform: scale(0.95); opacity: 0.8; }
+    }
+    .recording-pulse {
+      animation: pulse-ring 1.5s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body class="bg-oase-surface text-oase-plum font-sans antialiased min-h-screen flex flex-col justify-between selection:bg-heather-200 selection:text-heather-900">
+
+  <!-- Background Decorative Ambient Glows -->
+  <div class="fixed inset-0 overflow-hidden pointer-events-none -z-10">
+    <div class="absolute -top-32 -left-32 w-96 h-96 bg-heather-200/40 rounded-full blur-3xl"></div>
+    <div class="absolute top-1/3 -right-32 w-96 h-96 bg-heather-300/25 rounded-full blur-3xl"></div>
+    <div class="absolute -bottom-32 left-1/4 w-96 h-96 bg-heather-100/50 rounded-full blur-3xl"></div>
+  </div>
+
+  <!-- Header / Navigation Bar -->
+  <header class="sticky top-0 z-40 backdrop-blur-md bg-white/90 border-b border-oase-border shadow-xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+      
+      <!-- Brand & Title -->
+      <div class="flex items-center gap-3">
+        <a href="index.html" class="flex items-center gap-2.5 group">
+          <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-heather-600 to-heather-400 flex items-center justify-center text-white shadow-md shadow-heather-500/20 group-hover:scale-105 transition-transform">
+            <i data-lucide="sparkles" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-lg font-bold text-heather-700 leading-tight">OASE Cerita</span>
+              <span class="px-2 py-0.5 rounded-full bg-heather-100 text-heather-700 text-[10px] font-extrabold uppercase tracking-wider">Dashboard Siswa</span>
+            </div>
+            <span class="text-xs text-oase-muted font-medium">Ruang Aman dan Nyaman Berbagi Rasa</span>
+          </div>
+        </a>
+      </div>
+
+      <!-- Right Header Actions (Notifikasi & Hamburger Menu) -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        
+        <!-- Tombol Lonceng Notifikasi -->
+        <div class="relative">
+          <button id="notifBellBtn" class="p-2.5 rounded-2xl border border-oase-border hover:bg-heather-50 text-oase-muted hover:text-heather-600 transition-all relative">
+            <i data-lucide="bell" class="w-5 h-5"></i>
+            <span id="notifBadge" class="hidden absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-rose-500 rounded-full border-2 border-white"></span>
+          </button>
+
+          <!-- Dropdown Notifikasi -->
+          <div id="notifDropdown" class="hidden absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-3xl border border-heather-100 shadow-2xl p-4 z-50 animate-fadeIn">
+            <div class="flex items-center justify-between pb-3 border-b border-oase-border">
+              <h4 class="text-xs font-bold uppercase tracking-wider text-oase-plum">Pemberitahuan Konseling</h4>
+              <button id="clearNotifBtn" class="text-[11px] text-heather-600 hover:underline">Tandai Dibaca</button>
+            </div>
+            <div id="notifList" class="mt-3 space-y-2 max-h-64 overflow-y-auto pr-1">
+              <p class="text-xs text-center text-oase-muted py-4">Belum ada pemberitahuan baru.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tombol Garis Tiga (Hamburger Menu) -->
+        <button id="hamburgerBtn" aria-label="Buka Menu" class="p-2.5 rounded-2xl bg-heather-50 border border-heather-200 text-heather-700 hover:bg-heather-100 transition-all">
+          <i data-lucide="menu" class="w-6 h-6"></i>
+        </button>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- ======================================================== -->
+  <!-- 2. HAMBURGER SIDEBAR / DRAWER                            -->
+  <!-- ======================================================== -->
+  <div id="hamburgerDrawerOverlay" class="fixed inset-0 bg-oase-plum/50 backdrop-blur-sm z-50 hidden transition-opacity"></div>
+  <div id="hamburgerDrawer" class="fixed top-0 right-0 h-full w-80 sm:w-96 bg-white z-50 shadow-2xl transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col justify-between p-6">
+    
+    <div class="space-y-6 overflow-y-auto">
+      <!-- Drawer Header & Close -->
+      <div class="flex items-center justify-between pb-4 border-b border-oase-border">
+        <h3 class="text-base font-bold text-oase-plum flex items-center gap-2">
+          <i data-lucide="menu" class="w-5 h-5 text-heather-500"></i>
+          <span>Menu Navigasi</span>
+        </h3>
+        <button id="closeDrawerBtn" class="p-1.5 rounded-full hover:bg-heather-50 text-oase-muted hover:text-heather-700 transition-colors">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Info Akun Card -->
+      <div class="bg-gradient-to-br from-heather-50 to-white rounded-2xl p-4 border border-heather-200 space-y-3 shadow-xs">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-heather-600 to-heather-400 text-white flex items-center justify-center font-black text-lg shadow-md">
+            <span id="userInitialLabel">U</span>
+          </div>
+          <div class="overflow-hidden">
+            <span id="userNameLabel" class="text-sm font-bold text-oase-plum block truncate">Siswa OASE</span>
+            <span id="userEmailLabel" class="text-xs text-oase-muted block truncate">siswa@oase.id</span>
+          </div>
+        </div>
+
+        <div class="pt-2 border-t border-heather-100 flex items-center justify-between">
+          <span class="text-xs text-oase-muted font-medium">Peran Akun:</span>
+          <span id="userRoleBadge" class="px-2.5 py-0.5 rounded-full bg-heather-200/60 text-heather-800 text-xs font-bold">
+            User (Siswa)
+          </span>
+        </div>
+
+        <!-- Moderator Approval Notice if applicable -->
+        <div id="modNotice" class="hidden p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-[11px] text-amber-800 space-y-1">
+          <div class="font-bold flex items-center gap-1">
+            <i data-lucide="clock" class="w-3.5 h-3.5"></i>
+            <span>Pengajuan Moderator</span>
+          </div>
+          <p>Permintaan peran moderator Anda sedang menunggu persetujuan dari Moderator Utama.</p>
+        </div>
+      </div>
+
+      <!-- Menu Navigation Items -->
+      <div class="space-y-2">
+        <!-- Settings (Roda Gigi) -->
+        <button id="openSettingsBtn" class="w-full flex items-center justify-between p-3.5 rounded-2xl hover:bg-heather-50 text-left text-sm font-bold text-oase-plum border border-transparent hover:border-heather-200 transition-all group">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-heather-100 text-heather-700 flex items-center justify-center group-hover:scale-105 transition-transform">
+              <i data-lucide="settings" class="w-5 h-5"></i>
+            </div>
+            <span>Pengaturan Akun & API</span>
+          </div>
+          <i data-lucide="chevron-right" class="w-4 h-4 text-oase-muted"></i>
+        </button>
+
+        <!-- Kembali ke Halaman Utama / Beranda -->
+        <a href="index.html" class="w-full flex items-center justify-between p-3.5 rounded-2xl hover:bg-heather-50 text-left text-sm font-bold text-oase-plum border border-transparent hover:border-heather-200 transition-all group">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-heather-100 text-heather-700 flex items-center justify-center group-hover:scale-105 transition-transform">
+              <i data-lucide="home" class="w-5 h-5"></i>
+            </div>
+            <span>Kembali ke Beranda Awal</span>
+          </div>
+          <i data-lucide="chevron-right" class="w-4 h-4 text-oase-muted"></i>
+        </a>
+
+        <!-- Halaman Kirim Cerita -->
+        <a href="kirim-cerita.html" class="w-full flex items-center justify-between p-3.5 rounded-2xl hover:bg-heather-50 text-left text-sm font-bold text-oase-plum border border-transparent hover:border-heather-200 transition-all group">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-heather-100 text-heather-700 flex items-center justify-center group-hover:scale-105 transition-transform">
+              <i data-lucide="send" class="w-5 h-5"></i>
+            </div>
+            <span>Form Kirim Cerita Anonim</span>
+          </div>
+          <i data-lucide="chevron-right" class="w-4 h-4 text-oase-muted"></i>
+        </a>
+      </div>
+    </div>
+
+    <!-- Tombol Logout -->
+    <div class="pt-4 border-t border-oase-border">
+      <button id="logoutDrawerBtn" class="w-full py-3 rounded-2xl bg-rose-50 border border-rose-200 hover:bg-rose-100 text-rose-700 text-sm font-bold transition-all flex items-center justify-center gap-2">
+        <i data-lucide="log-out" class="w-4 h-4"></i>
+        <span>Keluar dari Akun</span>
+      </button>
+    </div>
+
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MAIN CONTENT AREA                                        -->
+  <!-- ======================================================== -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full space-y-10">
+
+    <!-- Welcoming Header Siswa -->
+    <div class="bg-gradient-to-r from-white via-heather-50/50 to-white rounded-3xl p-6 sm:p-8 border border-heather-100 shadow-md relative overflow-hidden">
+      <div class="relative z-10 max-w-2xl space-y-2">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-heather-100 text-heather-800 text-xs font-semibold">
+          <i data-lucide="smile" class="w-3.5 h-3.5 text-heather-600"></i>
+          <span>Halo Teman OASE! Hati ini berhak didengar.</span>
+        </div>
+        <h1 class="text-2xl sm:text-3xl font-extrabold text-oase-plum tracking-tight">
+          Apa yang sedang membebani pikiranmu hari ini?
+        </h1>
+        <p class="text-sm text-oase-muted leading-relaxed">
+          Di sini kamu bebas berekspresi tanpa takut dihakimi. Kamu bisa memilih untuk curhat langsung bersama konselor berlisensi atau bercerita santai dengan AI Sahabat OASE kapan saja.
+        </p>
+      </div>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- 1. DUA AKSI UTAMA: CURHAT KE KONSELOR & CHAT DENGAN AI   -->
+    <!-- ======================================================== -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      
+      <!-- Kartu Aksi 1: Curhat ke Konselor -->
+      <div class="bg-white rounded-3xl p-6 sm:p-8 border border-oase-border hover:border-heather-300 hover:shadow-xl hover:shadow-heather-500/10 transition-all duration-300 flex flex-col justify-between space-y-6 group">
+        <div class="space-y-4">
+          <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-heather-600 to-heather-400 text-white flex items-center justify-center shadow-lg shadow-heather-500/25 group-hover:scale-105 transition-transform">
+            <i data-lucide="heart-handshake" class="w-7 h-7"></i>
+          </div>
+          <div>
+            <h2 class="text-xl font-extrabold text-oase-plum">Curhat ke Konselor</h2>
+            <p class="text-xs text-oase-muted mt-1 leading-relaxed">
+              Konsultasi mendalam dengan psikolog dan konselor bimbingan berpengalaman. Dapatkan panduan empati dan ruang aman seputar akademik, keluarga, dan emosi.
+            </p>
+          </div>
+          <div class="flex flex-wrap gap-2 text-[11px] font-semibold text-heather-700">
+            <span class="px-2.5 py-1 rounded-lg bg-heather-50 border border-heather-200">✓ Kerahasiaan Terjamin</span>
+            <span class="px-2.5 py-1 rounded-lg bg-heather-50 border border-heather-200">✓ Sesi 30 Menit</span>
+          </div>
+        </div>
+
+        <div class="pt-2">
+          <button id="curhatKonselorBtn" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-heather-600 to-heather-500 hover:from-heather-700 hover:to-heather-600 text-white font-bold text-sm shadow-md shadow-heather-500/25 transition-all flex items-center justify-center gap-2 group-hover:shadow-lg">
+            <i data-lucide="message-square-heart" class="w-4 h-4"></i>
+            <span>Curhat ke Konselor Sekarang</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Kartu Aksi 2: Chat dengan AI (Gemini AI Companion) -->
+      <div class="bg-white rounded-3xl p-6 sm:p-8 border border-oase-border hover:border-indigo-300 hover:shadow-xl hover:shadow-indigo-500/10 transition-all duration-300 flex flex-col justify-between space-y-6 group">
+        <div class="space-y-4">
+          <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-indigo-600 to-indigo-400 text-white flex items-center justify-center shadow-lg shadow-indigo-500/25 group-hover:scale-105 transition-transform">
+            <i data-lucide="bot" class="w-7 h-7"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="text-xl font-extrabold text-oase-plum">Chat dengan AI</h2>
+              <span class="px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200 text-[10px] font-bold">Gemini AI</span>
+            </div>
+            <p class="text-xs text-oase-muted mt-1 leading-relaxed">
+              Ngobrol fleksibel bersama Sahabat OASE AI. Siap mendengar keluh kesahmu kapan saja 24/7 dengan respon yang hangat, suportif, dan menenangkan.
+            </p>
+          </div>
+          <div class="flex flex-wrap gap-2 text-[11px] font-semibold text-indigo-700">
+            <span class="px-2.5 py-1 rounded-lg bg-indigo-50 border border-indigo-200">✓ Respon Seketika</span>
+            <span class="px-2.5 py-1 rounded-lg bg-indigo-50 border border-indigo-200">✓ Didukung Google Gemini</span>
+          </div>
+        </div>
+
+        <div class="pt-2">
+          <button id="openAIChatBtn" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-700 hover:to-indigo-600 text-white font-bold text-sm shadow-md shadow-indigo-500/25 transition-all flex items-center justify-center gap-2">
+            <i data-lucide="sparkles" class="w-4 h-4"></i>
+            <span>Mulai Chat Bersama Sahabat AI</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- 3. TOMBOL DI BAWAH: LANJUTKAN CHAT DENGAN KONSELOR        -->
+    <!-- ======================================================== -->
+    <div class="bg-white rounded-3xl p-6 sm:p-8 border border-oase-border shadow-sm space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-oase-border">
+        <div>
+          <h2 class="text-lg sm:text-xl font-extrabold text-oase-plum flex items-center gap-2">
+            <i data-lucide="messages-square" class="w-5 h-5 text-heather-500"></i>
+            <span>Sesi Konseling Aktif (End-to-End ala Halodoc)</span>
+          </h2>
+          <p class="text-xs text-oase-muted mt-0.5">Layanan konsultasi tatap-pesan real-time berdurasi 30 menit dengan fitur pesan teks dan rekaman suara (Voice Note).</p>
+        </div>
+
+        <!-- Tombol Lanjutkan Chat / Booking Baru -->
+        <button id="lanjutkanChatBtn" class="px-5 py-2.5 rounded-2xl bg-heather-500 hover:bg-heather-600 text-white text-xs font-bold shadow-md shadow-heather-500/20 transition-all flex items-center gap-2 self-start sm:self-auto">
+          <i data-lucide="play" class="w-4 h-4"></i>
+          <span>Lanjutkan Chat dengan Konselor</span>
+        </button>
+      </div>
+
+      <!-- Area Tampilan Status Sesi Konseling -->
+      <div id="counselingSessionArea">
+        <!-- Rendered dynamically: Empty State OR Live Chat Room -->
+        <div class="py-12 text-center space-y-3 bg-oase-surface/50 rounded-2xl border border-dashed border-oase-border">
+          <div class="w-12 h-12 rounded-2xl bg-heather-100 text-heather-600 flex items-center justify-center mx-auto">
+            <i data-lucide="calendar-heart" class="w-6 h-6"></i>
+          </div>
+          <h3 class="text-sm font-bold text-oase-plum">Belum Ada Sesi Konseling yang Sedang Berjalan</h3>
+          <p class="text-xs text-oase-muted max-w-md mx-auto">
+            Klik tombol <strong>"Booking Sesi Konseling (30 Menit)"</strong> di bawah untuk memilih konselor dan memulai obrolan langsung.
+          </p>
+          <button id="bookNewSessionBtn" class="mt-2 px-6 py-2.5 rounded-xl bg-heather-500 hover:bg-heather-600 text-white text-xs font-bold transition-all inline-flex items-center gap-2">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            <span>Booking Sesi Konseling Baru</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="mt-12 bg-white/70 border-t border-oase-border py-6 text-center text-xs text-oase-muted">
+    <div class="max-w-7xl mx-auto px-4">
+      <p>&copy; 2026 OASE Cerita. Obrolan Aman Seputar Emosi • Dashboard Siswa.</p>
+    </div>
+  </footer>
+
+  <!-- ======================================================== -->
+  <!-- MODAL: CHAT DENGAN AI (GEMINI AI COMPANION)               -->
+  <!-- ======================================================== -->
+  <div id="aiChatModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-oase-plum/70 backdrop-blur-md hidden animate-fadeIn">
+    <div class="bg-white rounded-3xl max-w-2xl w-full h-[85vh] flex flex-col justify-between border border-indigo-100 shadow-2xl relative overflow-hidden">
+      
+      <!-- Header AI Chat -->
+      <div class="p-4 sm:p-5 border-b border-oase-border flex items-center justify-between bg-gradient-to-r from-indigo-50/70 to-white">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-600 to-indigo-400 text-white flex items-center justify-center shadow-md">
+            <i data-lucide="sparkles" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h3 class="text-sm font-bold text-oase-plum">Sahabat OASE AI</h3>
+              <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold">Online</span>
+            </div>
+            <span class="text-[11px] text-oase-muted">Teman Ngobrol Empatis Ditenagai Gemini API</span>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button id="openApiKeyConfigBtn" title="Atur Gemini API Key" class="p-2 rounded-xl hover:bg-indigo-50 text-indigo-600 border border-indigo-200 text-xs font-semibold flex items-center gap-1">
+            <i data-lucide="key" class="w-3.5 h-3.5"></i>
+            <span class="hidden sm:inline">API Key</span>
+          </button>
+          <button id="closeAIChatBtn" class="p-2 text-oase-muted hover:text-oase-plum rounded-xl hover:bg-heather-50">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Area Bubble Chat AI -->
+      <div id="aiChatMessages" class="flex-grow p-4 sm:p-6 overflow-y-auto space-y-4 bg-oase-surface/50 text-xs leading-relaxed">
+        <div class="flex items-start gap-2.5 max-w-[85%]">
+          <div class="w-7 h-7 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center flex-shrink-0 font-bold text-xs mt-0.5">
+            AI
+          </div>
+          <div class="p-3.5 rounded-2xl bg-white border border-indigo-100 text-oase-plum shadow-xs">
+            Halo! Aku Sahabat OASE. Aku selalu di sini untuk mendengarkan apapun yang ingin kamu ceritakan tanpa menghakimi. Bagaimana kabarmu hari ini?
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer Input Chat AI -->
+      <form id="aiChatForm" class="p-4 border-t border-oase-border bg-white flex items-center gap-2">
+        <input 
+          type="text" 
+          id="aiChatInput" 
+          placeholder="Tulis ceritamu di sini..." 
+          required 
+          class="flex-grow px-4 py-2.5 rounded-2xl border border-oase-border bg-oase-surface/50 text-xs focus:outline-none focus:border-indigo-500 focus:bg-white"
+        >
+        <button 
+          type="submit" 
+          id="aiSendBtn" 
+          class="px-5 py-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md transition-all flex items-center gap-1.5"
+        >
+          <i data-lucide="send" class="w-3.5 h-3.5"></i>
+          <span>Kirim</span>
+        </button>
+      </form>
+
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL: PENGATURAN AKUN & GEMINI API KEY (RODA GERIGI)     -->
+  <!-- ======================================================== -->
+  <div id="settingsModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-oase-plum/70 backdrop-blur-md hidden animate-fadeIn">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 border border-heather-100 shadow-2xl relative space-y-6">
+      
+      <button id="closeSettingsModalBtn" class="absolute top-5 right-5 text-oase-muted hover:text-oase-plum p-1">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div class="space-y-1">
+        <div class="w-10 h-10 rounded-2xl bg-heather-100 text-heather-600 flex items-center justify-center mb-2">
+          <i data-lucide="settings" class="w-5 h-5"></i>
+        </div>
+        <h3 class="text-xl font-bold text-oase-plum">Pengaturan Akun & API</h3>
+        <p class="text-xs text-oase-muted">Kelola kata sandi akun dan kunci API Gemini AI Anda.</p>
+      </div>
+
+      <!-- Form Ganti Password -->
+      <form id="changePasswordForm" class="space-y-3 pt-2 border-t border-oase-border">
+        <h4 class="text-xs font-bold uppercase tracking-wider text-heather-700">Ganti Kata Sandi (Password)</h4>
+        <div>
+          <label class="block text-xs text-oase-muted mb-1">Kata Sandi Baru</label>
+          <input 
+            type="password" 
+            id="newPasswordInput" 
+            required 
+            minlength="6" 
+            placeholder="Minimal 6 karakter" 
+            class="w-full px-3.5 py-2 rounded-xl border border-oase-border text-xs focus:outline-none focus:border-heather-500"
+          >
+        </div>
+        <button type="submit" id="savePasswordBtn" class="w-full py-2.5 rounded-xl bg-heather-600 hover:bg-heather-700 text-white text-xs font-bold transition-all">
+          Perbarui Kata Sandi
+        </button>
+      </form>
+
+      <!-- Form Simpan Gemini API Key -->
+      <form id="saveApiKeyForm" class="space-y-3 pt-2 border-t border-oase-border">
+        <div class="flex items-center justify-between">
+          <h4 class="text-xs font-bold uppercase tracking-wider text-indigo-700">Google Gemini API Key</h4>
+          <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-[10px] text-indigo-600 hover:underline">Dapatkan API Key Gratis &rarr;</a>
+        </div>
+        <div>
+          <input 
+            type="password" 
+            id="geminiApiKeyInput" 
+            placeholder="AIzaSy..." 
+            class="w-full px-3.5 py-2 rounded-xl border border-oase-border text-xs focus:outline-none focus:border-indigo-500 font-mono"
+          >
+        </div>
+        <button type="submit" class="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-all">
+          Simpan API Key Gemini
+        </button>
+      </form>
+
+      <!-- Opsi Ajukan Jadi Moderator -->
+      <div class="pt-2 border-t border-oase-border">
+        <button id="requestModBtn" class="w-full py-2 text-xs font-semibold text-oase-muted hover:text-heather-700 hover:underline text-center">
+          Tertarik berkontribusi? Ajukan Menjadi Moderator OASE
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL: BOOKING SESI KONSELING (30 MENIT)                  -->
+  <!-- ======================================================== -->
+  <div id="bookingModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-oase-plum/70 backdrop-blur-md hidden animate-fadeIn">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 border border-heather-100 shadow-2xl relative space-y-5 max-h-[90vh] overflow-y-auto">
+      
+      <button id="closeBookingModalBtn" class="absolute top-5 right-5 text-oase-muted hover:text-oase-plum p-1">
+        <i data-lucide="x" class="w-6 h-6"></i>
+      </button>
+
+      <div class="space-y-1">
+        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-heather-100 text-heather-800 text-xs font-bold">
+          <i data-lucide="clock" class="w-3.5 h-3.5"></i>
+          <span>1 Sesi Konseling = 30 Menit</span>
+        </div>
+        <h3 class="text-xl font-bold text-oase-plum">Booking Sesi Chat Konseling</h3>
+        <p class="text-xs text-oase-muted">Pilih konselor yang siap mendengarkan dan topik yang ingin kamu ceritakan.</p>
+      </div>
+
+      <form id="bookingForm" class="space-y-4">
+        <!-- Pilih Konselor -->
+        <div class="space-y-1">
+          <label class="block text-xs font-bold text-oase-plum">Pilih Konselor:</label>
+          <select id="bookingCounselorSelect" required class="w-full px-3.5 py-2.5 rounded-xl border border-oase-border text-xs focus:outline-none focus:border-heather-500 bg-white">
+            <!-- Populated via JS -->
+          </select>
+        </div>
+
+        <!-- Topik Masalah -->
+        <div class="space-y-1">
+          <label class="block text-xs font-bold text-oase-plum">Topik Masalah:</label>
+          <select id="bookingTopicSelect" required class="w-full px-3.5 py-2.5 rounded-xl border border-oase-border text-xs focus:outline-none focus:border-heather-500 bg-white">
+            <option value="Masalah Pembelajaran & Akademik">🎓 Pembelajaran & Akademik</option>
+            <option value="Masalah Mental & Emosi">🧠 Mental & Emosi</option>
+            <option value="Masalah Keluarga & Rumah Tangga">🏡 Keluarga & Rumah Tangga</option>
+            <option value="Hubungan & Pertemanan">🤝 Hubungan & Pertemanan</option>
+            <option value="Karier & Rencana Masa Depan">🧭 Karier & Masa Depan</option>
+            <option value="Lainnya">✨ Lainnya</option>
+          </select>
+        </div>
+
+        <!-- Waktu Pelaksanaan -->
+        <div class="p-3 rounded-2xl bg-heather-50 border border-heather-200 text-xs text-heather-900 flex items-center justify-between">
+          <span class="font-medium">Durasi Sesi:</span>
+          <span class="font-bold">30 Menit (Langsung Dimulai)</span>
+        </div>
+
+        <button 
+          type="submit" 
+          id="confirmBookingSubmitBtn" 
+          class="w-full py-3.5 rounded-2xl bg-heather-500 hover:bg-heather-600 text-white font-bold text-xs sm:text-sm shadow-md shadow-heather-500/25 transition-all flex items-center justify-center gap-2"
+        >
+          <i data-lucide="check-circle" class="w-4 h-4"></i>
+          <span>Konfirmasi & Mulai Sesi Chat (30 Menit)</span>
+        </button>
+      </form>
+
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="counselors.js"></script>
+  <script src="supabaseClient.js"></script>
+  <script>
+    lucide.createIcons();
+
+    // State Variables
+    let currentUser = null;
+    let userProfile = null;
+    let activeSession = null;
+    let sessionTimerInterval = null;
+    let aiChatHistory = [];
+
+    // Voice Note Recorder Variables
+    let mediaRecorder = null;
+    let audioChunks = [];
+    let recordStartTime = null;
+    let recordTimerInterval = null;
+
+    // DOM Elements
+    const hamburgerBtn = document.getElementById('hamburgerBtn');
+    const hamburgerDrawer = document.getElementById('hamburgerDrawer');
+    const hamburgerDrawerOverlay = document.getElementById('hamburgerDrawerOverlay');
+    const closeDrawerBtn = document.getElementById('closeDrawerBtn');
+
+    const userInitialLabel = document.getElementById('userInitialLabel');
+    const userNameLabel = document.getElementById('userNameLabel');
+    const userEmailLabel = document.getElementById('userEmailLabel');
+    const userRoleBadge = document.getElementById('userRoleBadge');
+    const modNotice = document.getElementById('modNotice');
+
+    const notifBellBtn = document.getElementById('notifBellBtn');
+    const notifDropdown = document.getElementById('notifDropdown');
+    const notifBadge = document.getElementById('notifBadge');
+    const notifList = document.getElementById('notifList');
+    const clearNotifBtn = document.getElementById('clearNotifBtn');
+
+    const openSettingsBtn = document.getElementById('openSettingsBtn');
+    const settingsModal = document.getElementById('settingsModal');
+    const closeSettingsModalBtn = document.getElementById('closeSettingsModalBtn');
+    const changePasswordForm = document.getElementById('changePasswordForm');
+    const newPasswordInput = document.getElementById('newPasswordInput');
+    const saveApiKeyForm = document.getElementById('saveApiKeyForm');
+    const geminiApiKeyInput = document.getElementById('geminiApiKeyInput');
+    const requestModBtn = document.getElementById('requestModBtn');
+    const logoutDrawerBtn = document.getElementById('logoutDrawerBtn');
+
+    const curhatKonselorBtn = document.getElementById('curhatKonselorBtn');
+    const openAIChatBtn = document.getElementById('openAIChatBtn');
+    const aiChatModal = document.getElementById('aiChatModal');
+    const closeAIChatBtn = document.getElementById('closeAIChatBtn');
+    const openApiKeyConfigBtn = document.getElementById('openApiKeyConfigBtn');
+    const aiChatMessages = document.getElementById('aiChatMessages');
+    const aiChatForm = document.getElementById('aiChatForm');
+    const aiChatInput = document.getElementById('aiChatInput');
+
+    const lanjutkanChatBtn = document.getElementById('lanjutkanChatBtn');
+    const counselingSessionArea = document.getElementById('counselingSessionArea');
+    const bookNewSessionBtn = document.getElementById('bookNewSessionBtn');
+    const bookingModal = document.getElementById('bookingModal');
+    const closeBookingModalBtn = document.getElementById('closeBookingModalBtn');
+    const bookingForm = document.getElementById('bookingForm');
+    const bookingCounselorSelect = document.getElementById('bookingCounselorSelect');
+    const bookingTopicSelect = document.getElementById('bookingTopicSelect');
+
+    // 1. AUTH & SESSION CHECK
+    async function initUser() {
+      const session = await window.AuthService.getSession();
+      if (session && session.user) {
+        currentUser = session.user;
+      } else {
+        // Fallback local session
+        const localEmail = localStorage.getItem('oase_active_user_email') || 'siswa@oase.id';
+        currentUser = { email: localEmail, id: 'user-' + localEmail.replace(/[^a-zA-Z0-9]/g, '') };
+      }
+
+      userProfile = await window.AuthService.getUserProfile(currentUser.id, currentUser.email);
+      updateUserUI();
+      loadNotifications();
+      checkActiveCounselingSession();
+    }
+
+    function updateUserUI() {
+      if (!currentUser) return;
+      const initial = currentUser.email.charAt(0).toUpperCase();
+      userInitialLabel.textContent = initial;
+      userNameLabel.textContent = userProfile.full_name || currentUser.email.split('@')[0];
+      userEmailLabel.textContent = currentUser.email;
+
+      // Role badge
+      if (userProfile.role === 'moderator') {
+        userRoleBadge.textContent = 'Moderator';
+        userRoleBadge.className = 'px-2.5 py-0.5 rounded-full bg-purple-100 text-purple-800 text-xs font-bold';
+        if (userProfile.moderator_approval_status === 'pending') {
+          modNotice.classList.remove('hidden');
+        }
+      } else if (userProfile.role === 'counselor') {
+        userRoleBadge.textContent = 'Konselor';
+        userRoleBadge.className = 'px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold';
+      } else {
+        userRoleBadge.textContent = 'User (Siswa)';
+        userRoleBadge.className = 'px-2.5 py-0.5 rounded-full bg-heather-200/60 text-heather-800 text-xs font-bold';
+      }
+
+      geminiApiKeyInput.value = window.GeminiService.getApiKey();
+    }
+
+    // 2. HAMBURGER DRAWER HANDLERS
+    hamburgerBtn.addEventListener('click', () => {
+      hamburgerDrawerOverlay.classList.remove('hidden');
+      hamburgerDrawer.classList.remove('translate-x-full');
+    });
+
+    function closeDrawer() {
+      hamburgerDrawer.classList.add('translate-x-full');
+      hamburgerDrawerOverlay.classList.add('hidden');
+    }
+    closeDrawerBtn.addEventListener('click', closeDrawer);
+    hamburgerDrawerOverlay.addEventListener('click', closeDrawer);
+
+    // 3. SETTINGS & PASSWORD HANDLERS
+    openSettingsBtn.addEventListener('click', () => {
+      closeDrawer();
+      settingsModal.classList.remove('hidden');
+    });
+    closeSettingsModalBtn.addEventListener('click', () => settingsModal.classList.add('hidden'));
+
+    changePasswordForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const newPass = newPasswordInput.value;
+      try {
+        await window.AuthService.updatePassword(newPass);
+        alert('Kata sandi berhasil diperbarui!');
+        newPasswordInput.value = '';
+        settingsModal.classList.add('hidden');
+      } catch (err) {
+        alert('Gagal memperbarui kata sandi: ' + err.message);
+      }
+    });
+
+    saveApiKeyForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const key = geminiApiKeyInput.value;
+      window.GeminiService.setApiKey(key);
+      alert('Gemini API Key berhasil disimpan di browser Anda.');
+      settingsModal.classList.add('hidden');
+    });
+
+    requestModBtn.addEventListener('click', async () => {
+      if (confirm('Ajukan akun ini sebagai Moderator ke Moderator Utama?')) {
+        await window.AuthService.requestModeratorRole(currentUser.email);
+        alert('Pengajuan peran moderator berhasil dikirim! Menunggu persetujuan.');
+        initUser();
+      }
+    });
+
+    logoutDrawerBtn.addEventListener('click', async () => {
+      if (confirm('Apakah Anda yakin ingin keluar?')) {
+        try { await window.AuthService.signOut(); } catch(e){}
+        localStorage.removeItem('oase_active_user_email');
+        window.location.href = 'index.html';
+      }
+    });
+
+    // 4. NOTIFICATIONS
+    notifBellBtn.addEventListener('click', () => {
+      notifDropdown.classList.toggle('hidden');
+    });
+
+    function loadNotifications() {
+      const notifs = window.ChatSessionService.getNotifications();
+      if (!notifs || notifs.length === 0) {
+        notifList.innerHTML = `<p class="text-xs text-center text-oase-muted py-4">Belum ada pemberitahuan baru.</p>`;
+        notifBadge.classList.add('hidden');
+        return;
+      }
+
+      notifBadge.classList.remove('hidden');
+      notifList.innerHTML = '';
+      notifs.forEach(n => {
+        const item = document.createElement('div');
+        item.className = "p-2.5 rounded-xl bg-heather-50/60 border border-heather-100 text-xs space-y-1";
+        item.innerHTML = `
+          <div class="font-bold text-oase-plum flex items-center justify-between">
+            <span>${n.title || 'Notifikasi Konseling'}</span>
+            <span class="text-[10px] text-oase-muted">${new Date(n.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+          </div>
+          <p class="text-oase-muted leading-relaxed">${n.message}</p>
+        `;
+        notifList.appendChild(item);
+      });
+    }
+
+    clearNotifBtn.addEventListener('click', () => {
+      localStorage.setItem('oase_notifications', '[]');
+      loadNotifications();
+    });
+
+    window.addEventListener('oase_new_notification', () => {
+      loadNotifications();
+    });
+
+    // 5. GEMINI AI CHAT MODAL
+    openAIChatBtn.addEventListener('click', () => {
+      const key = window.GeminiService.getApiKey();
+      if (!key) {
+        if (confirm('Gemini API Key belum dimasukkan. Ingin memasukkannya sekarang di Pengaturan?')) {
+          settingsModal.classList.remove('hidden');
+          return;
+        }
+      }
+      aiChatModal.classList.remove('hidden');
+    });
+
+    closeAIChatBtn.addEventListener('click', () => aiChatModal.classList.add('hidden'));
+    openApiKeyConfigBtn.addEventListener('click', () => {
+      settingsModal.classList.remove('hidden');
+    });
+
+    aiChatForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const text = aiChatInput.value.trim();
+      if (!text) return;
+
+      appendAIMessage('user', text);
+      aiChatInput.value = '';
+
+      const typingId = 'typing-' + Date.now();
+      appendAITyping(typingId);
+
+      try {
+        const reply = await window.GeminiService.chatWithGemini(text, aiChatHistory);
+        removeAITyping(typingId);
+        appendAIMessage('model', reply);
+        aiChatHistory.push({ sender: 'user', text });
+        aiChatHistory.push({ sender: 'model', text: reply });
+      } catch (err) {
+        removeAITyping(typingId);
+        appendAIMessage('model', `Maaf, aku sedang kesulitan merespons: ${err.message}. Pastikan API Key Gemini Anda valid.`);
+      }
+    });
+
+    function appendAIMessage(sender, text) {
+      const isUser = sender === 'user';
+      const msg = document.createElement('div');
+      msg.className = `flex items-start gap-2.5 max-w-[85%] ${isUser ? 'ml-auto flex-row-reverse' : ''}`;
+      msg.innerHTML = `
+        <div class="w-7 h-7 rounded-xl ${isUser ? 'bg-heather-500 text-white' : 'bg-indigo-100 text-indigo-700'} flex items-center justify-center flex-shrink-0 font-bold text-xs mt-0.5">
+          ${isUser ? 'Saya' : 'AI'}
+        </div>
+        <div class="p-3.5 rounded-2xl ${isUser ? 'bg-heather-500 text-white' : 'bg-white border border-indigo-100 text-oase-plum'} shadow-xs whitespace-pre-line">
+          ${text}
+        </div>
+      `;
+      aiChatMessages.appendChild(msg);
+      aiChatMessages.scrollTop = aiChatMessages.scrollHeight;
+    }
+
+    function appendAITyping(id) {
+      const div = document.createElement('div');
+      div.id = id;
+      div.className = "flex items-start gap-2.5 max-w-[85%]";
+      div.innerHTML = `
+        <div class="w-7 h-7 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center flex-shrink-0 font-bold text-xs mt-0.5">
+          AI
+        </div>
+        <div class="p-3.5 rounded-2xl bg-white border border-indigo-100 text-oase-muted shadow-xs flex items-center gap-1.5">
+          <span class="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse"></span>
+          <span class="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse delay-75"></span>
+          <span class="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse delay-150"></span>
+          <span class="text-[11px] ml-1">Sahabat OASE sedang mendengarkan dan merangkai kata...</span>
+        </div>
+      `;
+      aiChatMessages.appendChild(div);
+      aiChatMessages.scrollTop = aiChatMessages.scrollHeight;
+    }
+
+    function removeAITyping(id) {
+      const el = document.getElementById(id);
+      if (el) el.remove();
+    }
+
+    // 6. BOOKING SESI KONSELING 30 MENIT (END-TO-END ALA HALODOC)
+    curhatKonselorBtn.addEventListener('click', openBookingModal);
+    if (bookNewSessionBtn) bookNewSessionBtn.addEventListener('click', openBookingModal);
+    lanjutkanChatBtn.addEventListener('click', () => {
+      if (activeSession) {
+        document.getElementById('counselingSessionArea').scrollIntoView({ behavior: 'smooth' });
+      } else {
+        openBookingModal();
+      }
+    });
+
+    function openBookingModal() {
+      populateBookingCounselors();
+      bookingModal.classList.remove('hidden');
+    }
+    closeBookingModalBtn.addEventListener('click', () => bookingModal.classList.add('hidden'));
+
+    function populateBookingCounselors() {
+      const counselors = window.COUNSELORS_DATA || [];
+      bookingCounselorSelect.innerHTML = '';
+      counselors.forEach(c => {
+        if (c.id === 'auto') return;
+        const opt = document.createElement('option');
+        opt.value = c.id;
+        opt.textContent = `${c.name} • ${c.role}`;
+        bookingCounselorSelect.appendChild(opt);
+      });
+    }
+
+    bookingForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const counselorId = bookingCounselorSelect.value;
+      const counselorObj = (window.COUNSELORS_DATA || []).find(c => c.id === counselorId);
+      const counselorName = counselorObj ? counselorObj.name : 'Konselor OASE';
+      const topic = bookingTopicSelect.value;
+
+      const submitBtn = document.getElementById('confirmBookingSubmitBtn');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Memulai Sesi...';
+
+      try {
+        const session = await window.ChatSessionService.bookSession({
+          userId: currentUser.id,
+          userEmail: currentUser.email,
+          userName: userProfile.full_name || currentUser.email.split('@')[0],
+          counselorId,
+          counselorName,
+          topic,
+          duration: 30
+        });
+
+        alert(`Sesi konseling 30 menit bersama ${counselorName} telah aktif!`);
+        bookingModal.classList.add('hidden');
+        checkActiveCounselingSession();
+      } catch (err) {
+        alert('Gagal memulai booking: ' + err.message);
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = `
+          <i data-lucide="check-circle" class="w-4 h-4"></i>
+          <span>Konfirmasi & Mulai Sesi Chat (30 Menit)</span>
+        `;
+        lucide.createIcons();
+      }
+    });
+
+    // 7. AKTIFKAN RUANG CHAT KONSELING & TIMER 30 MENIT
+    async function checkActiveCounselingSession() {
+      if (!currentUser) return;
+      activeSession = await window.ChatSessionService.getActiveSession(currentUser.email);
+      if (!activeSession) {
+        renderEmptySessionUI();
+        return;
+      }
+      renderActiveSessionRoom(activeSession);
+    }
+
+    function renderEmptySessionUI() {
+      if (sessionTimerInterval) clearInterval(sessionTimerInterval);
+      counselingSessionArea.innerHTML = `
+        <div class="py-12 text-center space-y-3 bg-oase-surface/50 rounded-2xl border border-dashed border-oase-border">
+          <div class="w-12 h-12 rounded-2xl bg-heather-100 text-heather-600 flex items-center justify-center mx-auto">
+            <i data-lucide="calendar-heart" class="w-6 h-6"></i>
+          </div>
+          <h3 class="text-sm font-bold text-oase-plum">Belum Ada Sesi Konseling yang Sedang Berjalan</h3>
+          <p class="text-xs text-oase-muted max-w-md mx-auto">
+            Klik tombol <strong>"Booking Sesi Konseling Baru"</strong> di bawah untuk memilih konselor dan memulai obrolan langsung.
+          </p>
+          <button id="bookNewSessionBtnDynamic" class="mt-2 px-6 py-2.5 rounded-xl bg-heather-500 hover:bg-heather-600 text-white text-xs font-bold transition-all inline-flex items-center gap-2">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            <span>Booking Sesi Konseling Baru</span>
+          </button>
+        </div>
+      `;
+      document.getElementById('bookNewSessionBtnDynamic').addEventListener('click', openBookingModal);
+      lucide.createIcons();
+    }
+
+    function renderActiveSessionRoom(session) {
+      const counselorObj = (window.COUNSELORS_DATA || []).find(c => c.id === session.counselor_id) || {
+        name: session.counselor_name,
+        role: 'Konselor Terverifikasi OASE',
+        avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=200&h=200&q=80'
+      };
+
+      counselingSessionArea.innerHTML = `
+        <div class="rounded-3xl border border-heather-200 bg-white overflow-hidden shadow-sm">
+          
+          <!-- Bar Header Sesi & Countdown Timer 30 Menit -->
+          <div class="p-4 sm:p-5 bg-gradient-to-r from-heather-50 via-white to-heather-50 border-b border-heather-100 flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+              <img src="${counselorObj.avatar}" alt="${counselorObj.name}" class="w-12 h-12 rounded-2xl object-cover border border-heather-200 shadow-xs">
+              <div>
+                <div class="flex items-center gap-2">
+                  <h3 class="text-sm font-bold text-oase-plum">${counselorObj.name}</h3>
+                  <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold">Konselor Terhubung</span>
+                </div>
+                <p class="text-xs text-heather-700 font-medium">Topik: ${session.topic}</p>
+              </div>
+            </div>
+
+            <!-- Countdown Timer 30 Menit -->
+            <div class="flex items-center gap-3 ml-auto sm:ml-0">
+              <div class="flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-white border border-heather-200 shadow-xs text-xs font-bold text-heather-800">
+                <i data-lucide="timer" class="w-4 h-4 text-heather-500"></i>
+                <span id="sessionTimerLabel">30:00</span>
+                <span class="text-[10px] text-oase-muted font-normal">tersisa</span>
+              </div>
+              <button id="endSessionBtn" class="px-3 py-1.5 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold transition-all">
+                Selesaikan
+              </button>
+            </div>
+          </div>
+
+          <!-- Message History Container -->
+          <div id="sessionMessageList" class="p-4 sm:p-6 h-80 overflow-y-auto space-y-3.5 bg-oase-surface/40 text-xs leading-relaxed">
+            <div class="text-center py-2">
+              <span class="px-3 py-1 rounded-full bg-heather-100 text-heather-800 text-[11px] font-semibold">
+                Sesi konseling 30 menit dimulai. Halo dan sampaikan keluh kesahmu dengan leluasa.
+              </span>
+            </div>
+          </div>
+
+          <!-- Live Recording Status Bar (Voice Note) -->
+          <div id="voiceRecordingStatus" class="hidden p-3 bg-rose-50 border-t border-rose-100 flex items-center justify-between text-xs text-rose-700">
+            <div class="flex items-center gap-2 font-semibold">
+              <span class="w-3 h-3 rounded-full bg-rose-500 recording-pulse"></span>
+              <span>Sedang Merekam Pesan Suara...</span>
+              <span id="recordTimerLabel" class="font-mono font-bold">00:00</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <button id="cancelRecordBtn" type="button" class="px-2.5 py-1 rounded-lg border border-rose-200 bg-white hover:bg-rose-100 text-[11px] font-bold">Batal</button>
+              <button id="stopAndSendRecordBtn" type="button" class="px-3 py-1 rounded-lg bg-rose-600 text-white hover:bg-rose-700 text-[11px] font-bold flex items-center gap-1">
+                <i data-lucide="send" class="w-3 h-3"></i>
+                <span>Kirim Voice Note</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Bottom Chat Form & Voice Note Trigger -->
+          <form id="sessionChatForm" class="p-3 sm:p-4 bg-white border-t border-oase-border flex items-center gap-2">
+            <button 
+              type="button" 
+              id="voiceNoteBtn" 
+              title="Kirim Pesan Suara (Voice Note)" 
+              class="p-2.5 rounded-2xl bg-heather-50 hover:bg-heather-100 text-heather-700 border border-heather-200 transition-all flex items-center justify-center flex-shrink-0"
+            >
+              <i data-lucide="mic" class="w-5 h-5"></i>
+            </button>
+
+            <input 
+              type="text" 
+              id="sessionMessageInput" 
+              placeholder="Ketik pesan untuk konselor..." 
+              class="flex-grow px-4 py-2.5 rounded-2xl border border-oase-border bg-oase-surface/50 text-xs focus:outline-none focus:border-heather-500 focus:bg-white"
+            >
+
+            <button 
+              type="submit" 
+              class="px-5 py-2.5 rounded-2xl bg-heather-500 hover:bg-heather-600 text-white font-bold text-xs shadow-md transition-all flex items-center gap-1.5 flex-shrink-0"
+            >
+              <i data-lucide="send" class="w-3.5 h-3.5"></i>
+              <span>Kirim</span>
+            </button>
+          </form>
+
+        </div>
+      `;
+      lucide.createIcons();
+      startSessionTimer(session);
+      loadSessionMessages(session.id);
+      setupChatFormAndVoiceNote(session);
+    }
+
+    // Timer 30 Menit Countdown
+    function startSessionTimer(session) {
+      if (sessionTimerInterval) clearInterval(sessionTimerInterval);
+      const startTime = new Date(session.started_at || session.created_at).getTime();
+      const durationMs = (session.duration_minutes || 30) * 60 * 1000;
+      const endTime = startTime + durationMs;
+
+      const updateTimer = () => {
+        const now = Date.now();
+        const diff = endTime - now;
+        const timerLabel = document.getElementById('sessionTimerLabel');
+
+        if (diff <= 0) {
+          clearInterval(sessionTimerInterval);
+          if (timerLabel) timerLabel.textContent = '00:00 (Selesai)';
+          alert('Sesi konseling 30 menit telah berakhir. Terima kasih sudah bercerita.');
+          window.ChatSessionService.endSession(session.id);
+          renderEmptySessionUI();
+          return;
+        }
+
+        const mins = Math.floor(diff / 60000);
+        const secs = Math.floor((diff % 60000) / 1000);
+        if (timerLabel) {
+          timerLabel.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+        }
+      };
+
+      updateTimer();
+      sessionTimerInterval = setInterval(updateTimer, 1000);
+
+      const endBtn = document.getElementById('endSessionBtn');
+      if (endBtn) {
+        endBtn.addEventListener('click', async () => {
+          if (confirm('Apakah Anda ingin mengakhiri sesi konseling ini sekarang?')) {
+            await window.ChatSessionService.endSession(session.id);
+            renderEmptySessionUI();
+          }
+        });
+      }
+    }
+
+    // 8. CHAT & VOICE NOTE HANDLERS
+    async function loadSessionMessages(sessionId) {
+      const messages = await window.ChatSessionService.getMessages(sessionId);
+      const list = document.getElementById('sessionMessageList');
+      if (!list) return;
+
+      list.innerHTML = `
+        <div class="text-center py-2">
+          <span class="px-3 py-1 rounded-full bg-heather-100 text-heather-800 text-[11px] font-semibold">
+            Sesi konseling 30 menit dimulai. Halo dan sampaikan keluh kesahmu dengan leluasa.
+          </span>
+        </div>
+      `;
+
+      messages.forEach(m => {
+        const isUser = m.sender_type === 'user';
+        const item = document.createElement('div');
+        item.className = `flex items-start gap-2.5 max-w-[80%] ${isUser ? 'ml-auto flex-row-reverse' : ''}`;
+        
+        let contentHtml = '';
+        if (m.message_type === 'voice' && m.audio_data) {
+          contentHtml = `
+            <div class="flex items-center gap-2">
+              <audio controls class="h-8 max-w-[200px] sm:max-w-[240px]">
+                <source src="${m.audio_data}">
+                Browser tidak mendukung audio.
+              </audio>
+            </div>
+          `;
+        } else {
+          contentHtml = `<span>${m.message_text}</span>`;
+        }
+
+        item.innerHTML = `
+          <div class="w-7 h-7 rounded-xl ${isUser ? 'bg-heather-500 text-white' : 'bg-heather-100 text-heather-700'} flex items-center justify-center flex-shrink-0 font-bold text-xs mt-0.5">
+            ${isUser ? 'Saya' : 'K'}
+          </div>
+          <div class="p-3 rounded-2xl ${isUser ? 'bg-heather-500 text-white' : 'bg-white border border-heather-200 text-oase-plum'} shadow-xs">
+            ${contentHtml}
+            <span class="block text-[9px] mt-1 text-right ${isUser ? 'text-heather-200' : 'text-oase-muted'}">
+              ${new Date(m.created_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}
+            </span>
+          </div>
+        `;
+        list.appendChild(item);
+      });
+
+      list.scrollTop = list.scrollHeight;
+    }
+
+    function setupChatFormAndVoiceNote(session) {
+      const form = document.getElementById('sessionChatForm');
+      const input = document.getElementById('sessionMessageInput');
+      const voiceBtn = document.getElementById('voiceNoteBtn');
+      const statusBox = document.getElementById('voiceRecordingStatus');
+      const recordTimerLabel = document.getElementById('recordTimerLabel');
+      const cancelRecordBtn = document.getElementById('cancelRecordBtn');
+      const stopAndSendRecordBtn = document.getElementById('stopAndSendRecordBtn');
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const text = input.value.trim();
+        if (!text) return;
+        input.value = '';
+
+        await window.ChatSessionService.sendMessage({
+          sessionId: session.id,
+          senderId: currentUser.id,
+          senderName: userProfile.full_name || currentUser.email.split('@')[0],
+          senderType: 'user',
+          messageType: 'text',
+          messageText: text
+        });
+
+        loadSessionMessages(session.id);
+      });
+
+      // Voice Note HTML5 MediaRecorder API
+      voiceBtn.addEventListener('click', async () => {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          alert('Peramban Anda tidak mendukung perekaman mikrofon.');
+          return;
+        }
+
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          mediaRecorder = new MediaRecorder(stream);
+          audioChunks = [];
+
+          mediaRecorder.ondataavailable = (ev) => {
+            if (ev.data.size > 0) audioChunks.push(ev.data);
+          };
+
+          mediaRecorder.start();
+          recordStartTime = Date.now();
+          statusBox.classList.remove('hidden');
+
+          if (recordTimerInterval) clearInterval(recordTimerInterval);
+          recordTimerInterval = setInterval(() => {
+            const diff = Math.floor((Date.now() - recordStartTime) / 1000);
+            const m = String(Math.floor(diff / 60)).padStart(2, '0');
+            const s = String(diff % 60).padStart(2, '0');
+            recordTimerLabel.textContent = `${m}:${s}`;
+          }, 1000);
+
+        } catch (err) {
+          alert('Izin akses mikrofon ditolak atau tidak tersedia: ' + err.message);
+        }
+      });
+
+      cancelRecordBtn.addEventListener('click', () => {
+        if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+          mediaRecorder.stop();
+          mediaRecorder.stream.getTracks().forEach(t => t.stop());
+        }
+        clearInterval(recordTimerInterval);
+        statusBox.classList.add('hidden');
+      });
+
+      stopAndSendRecordBtn.addEventListener('click', () => {
+        if (!mediaRecorder || mediaRecorder.state === 'inactive') return;
+
+        mediaRecorder.onstop = async () => {
+          clearInterval(recordTimerInterval);
+          statusBox.classList.add('hidden');
+          const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+          const reader = new FileReader();
+          reader.readAsDataURL(audioBlob);
+          reader.onloadend = async () => {
+            const base64Audio = reader.result;
+            await window.ChatSessionService.sendMessage({
+              sessionId: session.id,
+              senderId: currentUser.id,
+              senderName: userProfile.full_name || currentUser.email.split('@')[0],
+              senderType: 'user',
+              messageType: 'voice',
+              audioData: base64Audio
+            });
+            loadSessionMessages(session.id);
+          };
+          mediaRecorder.stream.getTracks().forEach(t => t.stop());
+        };
+
+        mediaRecorder.stop();
+      });
+    }
+
+    // Run on startup
+    initUser();
+  </script>
+</body>
+</html>
