@@ -37,10 +37,10 @@
             },
             oase: {
               cream: '#FDFBF7',
-              surface: '#FCF9FA',
-              border: '#F0E2EC',
-              plum: '#311027',
-              muted: '#7A6273'
+              surface: '#FDF7FB',
+              border: '#CCA8C5',
+              plum: '#240B1D',
+              muted: '#553D4F'
             }
           }
         }
@@ -332,16 +332,24 @@
 
       <form id="counselorLoginForm" class="space-y-4">
         <div class="space-y-1 text-left">
-          <label class="block text-xs font-bold text-oase-plum">Email Konselor</label>
+          <label class="block text-xs font-bold text-oase-plum">Email atau Nama Konselor</label>
           <div class="relative">
-            <i data-lucide="mail" class="w-4 h-4 text-oase-muted absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+            <i data-lucide="user" class="w-4 h-4 text-oase-muted absolute left-3.5 top-1/2 -translate-y-1/2"></i>
             <input 
-              type="email" 
+              type="text" 
               id="counselorEmailInput" 
               required 
-              placeholder="sarah@oase.id" 
+              placeholder="sarah@oase.id atau nama konselor" 
               class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-oase-border text-sm focus:outline-none focus:border-heather-500 focus:ring-2 focus:ring-heather-100"
             >
+          </div>
+        </div>
+
+        <!-- Quick Fill Akun Konselor Terdaftar -->
+        <div class="space-y-1.5 text-left pt-1">
+          <span class="block text-[11px] font-bold text-heather-800 uppercase tracking-wider">Pilih Cepat Akun Terdaftar:</span>
+          <div id="counselorQuickFillContainer" class="flex flex-wrap gap-1.5">
+            <!-- Diisi otomatis dari counselors.js -->
           </div>
         </div>
 
@@ -585,6 +593,7 @@
       currentSession = window.CounselingService.getCurrentCounselorSession();
       if (!currentSession || currentSession.role !== 'counselor') {
         counselorLoginModal.classList.remove('hidden');
+        populateQuickFillCounselors();
         return false;
       }
 
@@ -592,6 +601,24 @@
       setupGreeting();
       loadQueue();
       return true;
+    }
+
+    function populateQuickFillCounselors() {
+      const container = document.getElementById('counselorQuickFillContainer');
+      if (!container) return;
+      const counselors = (window.COUNSELORS_DATA || []).filter(c => c.id !== 'auto' && c.email);
+      container.innerHTML = counselors.map(c => `
+        <button type="button" class="quick-counselor-login-btn px-2.5 py-1 rounded-xl bg-heather-50 hover:bg-heather-100 text-heather-900 text-[11px] font-bold border border-heather-300 transition-all flex items-center gap-1 shadow-2xs" data-email="${c.email}" data-pass="${c.password || 'konselor123'}">
+          <span>${c.name.split(',')[0]}</span>
+        </button>
+      `).join('');
+
+      container.querySelectorAll('.quick-counselor-login-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          counselorEmailInput.value = btn.getAttribute('data-email');
+          counselorPasswordInput.value = btn.getAttribute('data-pass');
+        });
+      });
     }
 
     // Greet counselor warmly based on local time
@@ -1093,7 +1120,10 @@
             </span>
             <span class="text-[11px] text-oase-muted font-medium">${getRelativeTime(s.started_at)}</span>
           </div>
-          <h3 class="text-sm font-bold text-oase-plum">${s.user_name} (${s.user_email})</h3>
+          <div class="flex items-center gap-2">
+            <h3 class="text-sm font-extrabold text-oase-plum">${s.user_name || 'Siswa Anonim'}</h3>
+            <span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-300 text-[10px] font-bold">🔒 Anonim</span>
+          </div>
           <p class="text-xs text-heather-700 font-semibold bg-heather-50 p-2 rounded-xl border border-heather-100">Topik: ${s.topic}</p>
         </div>
         <div class="pt-2 border-t border-oase-border flex items-center justify-between">
@@ -1184,7 +1214,10 @@
               <span class="text-[11px] text-oase-muted font-medium">${dateStr}</span>
             </div>
             <div>
-              <h3 class="text-sm font-bold text-oase-plum">${s.user_name} (${s.user_email})</h3>
+              <div class="flex items-center gap-2">
+                <h3 class="text-sm font-extrabold text-oase-plum">${s.user_name || 'Siswa Anonim'}</h3>
+                <span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-300 text-[10px] font-bold">🔒 Anonim</span>
+              </div>
               <p class="text-xs text-heather-700 font-semibold mt-0.5">Topik: ${s.topic}</p>
             </div>
             ${motivationHtml}

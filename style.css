@@ -1,22 +1,27 @@
-/* Custom Styling for OASE Cerita */
+/* Custom Styling for OASE Cerita - High Contrast & Accessibility */
 
 :root {
   --heather-mauve: #A14189;
   --heather-mauve-light: #C78CBB;
   --heather-mauve-dark: #752A62;
-  --heather-soft-bg: #FCF9FA;
-  --plum-text: #311027;
+  --heather-soft-bg: #F8EFF6;
+  --plum-text: #240B1D;
+  --oase-border: #D8BDD3;
+  --oase-border-strong: #C49FBD;
+  --oase-muted: #553D4F;
+  --oase-dark: #1E0717;
 }
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
+  height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #F8F1F6;
+  background: #F4E8F2;
 }
 ::-webkit-scrollbar-thumb {
-  background: #DCB8D4;
+  background: #C49FBD;
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
@@ -42,9 +47,89 @@
 /* Emotion & Story Tag Button Active State */
 .emotion-btn.active,
 .story-tag-btn.active {
-  border-color: #A14189 !important;
+  border-color: #752A62 !important;
   background-color: #F5EBF3 !important;
-  color: #752A62 !important;
-  box-shadow: 0 4px 14px 0 rgba(161, 65, 137, 0.18);
+  color: #5F244F !important;
+  box-shadow: 0 4px 14px 0 rgba(161, 65, 137, 0.22);
 }
 
+/* ========================================================
+   HIGH CONTRAST & ELEMENT CLARITY ENHANCEMENTS (ISSUE #13)
+   Mempertegas elemen-elemen agar tidak menyatu dengan background
+   ======================================================== */
+
+/* Kartu / Card yang lebih kontras dan terdefinisi jelas */
+.bg-white\/80,
+.bg-white\/90,
+.bg-white\/70,
+.bg-white\/60 {
+  background-color: #FFFFFF !important;
+  border-color: #D8BDD3 !important;
+  box-shadow: 0 4px 16px -2px rgba(36, 11, 29, 0.08), 0 2px 6px -1px rgba(36, 11, 29, 0.05) !important;
+}
+
+/* Tebalkan border yang sebelumnya terlalu pudar */
+.border-oase-border,
+.border-white\/60,
+.border-white\/80 {
+  border-color: #D8BDD3 !important;
+}
+
+.border-heather-100 {
+  border-color: #E2C9DE !important;
+}
+
+.border-heather-200 {
+  border-color: #CCA8C5 !important;
+}
+
+/* Perjelas teks muted agar kontras dengan latar belakang */
+.text-oase-muted {
+  color: #553D4F !important;
+  font-weight: 500;
+}
+
+.text-oase-plum {
+  color: #240B1D !important;
+}
+
+/* Perjelas Form Inputs, Selects, & Textarea */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+select,
+textarea {
+  border-color: #CCA8C5 !important;
+  color: #240B1D !important;
+  font-weight: 500;
+  background-color: #FFFFFF !important;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: #A14189 !important;
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(161, 65, 137, 0.25) !important;
+}
+
+/* Tombol dan Interaksi */
+button:not(:disabled),
+a[role="button"] {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Badge & Pill High Contrast */
+.badge-anon {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.625rem;
+  border-radius: 9999px;
+  background-color: #F0FDF4;
+  color: #166534;
+  border: 1px solid #86EFAC;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
