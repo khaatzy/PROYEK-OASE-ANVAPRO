@@ -303,6 +303,24 @@ const CounselingService = {
     if (!ticketCode) return null;
     const cleanCode = ticketCode.trim().toUpperCase();
 
+    const counselors = window.COUNSELORS_DATA || [];
+    const resolveItem = (item) => {
+      if (!item) return item;
+      let name = item.counselor_name || 'Konselor OASE';
+      if (item.counselor_id && item.counselor_id !== 'auto') {
+        const cObj = counselors.find(c => c.id === item.counselor_id);
+        if (cObj) name = cObj.name;
+      } else if (name.includes('Sarah Maulida')) {
+        const c1 = counselors.find(c => c.id === 'counselor-1');
+        if (c1) name = c1.name;
+      }
+      let content = item.story_content || '';
+      if (content.includes('Kak Sarah')) {
+        content = content.replace(/Kak Sarah/g, 'Kak Rachma');
+      }
+      return { ...item, counselor_name: name, story_content: content };
+    };
+
     if (supabaseClient) {
       const { data, error } = await supabaseClient
         .from('counseling_submissions')
@@ -310,16 +328,35 @@ const CounselingService = {
         .eq('ticket_code', cleanCode)
         .single();
 
-      if (!error && data) return data;
+      if (!error && data) return resolveItem(data);
     }
 
     // Fallback cek di localStorage
     const localStories = JSON.parse(localStorage.getItem('oase_counseling_submissions') || '[]');
-    return localStories.find(s => s.ticket_code === cleanCode) || null;
+    const found = localStories.find(s => s.ticket_code === cleanCode) || null;
+    return resolveItem(found);
   },
 
   // Dapatkan seluruh antrean cerita konseling (filter kategori & status)
   async getAllSubmissions({ category = 'all', status = 'all' } = {}) {
+    const counselors = window.COUNSELORS_DATA || [];
+    const resolveItem = (item) => {
+      if (!item) return item;
+      let name = item.counselor_name || 'Konselor OASE';
+      if (item.counselor_id && item.counselor_id !== 'auto') {
+        const cObj = counselors.find(c => c.id === item.counselor_id);
+        if (cObj) name = cObj.name;
+      } else if (name.includes('Sarah Maulida')) {
+        const c1 = counselors.find(c => c.id === 'counselor-1');
+        if (c1) name = c1.name;
+      }
+      let content = item.story_content || '';
+      if (content.includes('Kak Sarah')) {
+        content = content.replace(/Kak Sarah/g, 'Kak Rachma');
+      }
+      return { ...item, counselor_name: name, story_content: content };
+    };
+
     if (supabaseClient) {
       try {
         let query = supabaseClient
@@ -336,7 +373,7 @@ const CounselingService = {
 
         const { data, error } = await query;
         if (!error && data && data.length > 0) {
-          return data;
+          return data.map(resolveItem);
         }
       } catch (err) {
         console.warn('Gagal mengambil antrean dari Supabase:', err);
@@ -345,6 +382,9 @@ const CounselingService = {
 
     // Fallback penyimpanan lokal
     let localSubmissions = JSON.parse(localStorage.getItem('oase_counseling_submissions') || '[]');
+    const counselor1 = counselors.find(c => c.id === 'counselor-1') || { name: 'Rachma Murtisari Prihastanti, S.Pd' };
+    const counselor3 = counselors.find(c => c.id === 'counselor-3') || { name: 'Ningsih, S.Pd' };
+
     if (localSubmissions.length === 0) {
       localSubmissions = [
         {
@@ -355,8 +395,8 @@ const CounselingService = {
           gender: 'Perempuan',
           category: 'Masalah Pembelajaran & Akademik',
           counselor_id: 'counselor-1',
-          counselor_name: 'Kak Sarah Maulida, S.Psi.',
-          story_content: 'Halo Kak Sarah, aku merasa sangat cemas menghadapi ujian kelulusan dan seleksi masuk perguruan tinggi bulan depan. Rasanya orang tua punya ekspektasi sangat tinggi, sementara nilaiku sering pas-pasan. Aku susah tidur setiap malam...',
+          counselor_name: counselor1.name,
+          story_content: 'Halo Kak Rachma, aku merasa sangat cemas menghadapi ujian kelulusan dan seleksi masuk perguruan tinggi bulan depan. Rasanya orang tua punya ekspektasi sangat tinggi, sementara nilaiku sering pas-pasan. Aku susah tidur setiap malam...',
           status: 'menunggu_tanggapan',
           created_at: new Date(Date.now() - 35 * 60 * 1000).toISOString()
         },
@@ -381,16 +421,40 @@ const CounselingService = {
           gender: 'Laki-laki',
           category: 'Karier & Rencana Masa Depan',
           counselor_id: 'counselor-3',
-          counselor_name: 'Ibu Ningsih Rahayu, M.Pd.',
+          counselor_name: counselor3.name,
           story_content: 'Saya merasa salah mengambil jurusan kuliah. Memasuki semester akhir ini tugas magang dan skripsi terasa begitu hampa. Apakah wajar merasa seperti ini di usia 21 tahun?',
           status: 'menunggu_tanggapan',
           created_at: new Date(Date.now() - 300 * 60 * 1000).toISOString()
         }
       ];
       localStorage.setItem('oase_counseling_submissions', JSON.stringify(localSubmissions));
+    } else {
+      // Perbarui data lawas di localStorage jika masih tersimpan nama lama
+      let updatedStorage = false;
+      localSubmissions.forEach(item => {
+        if (item.counselor_id && item.counselor_id !== 'auto') {
+          const cObj = counselors.find(c => c.id === item.counselor_id);
+          if (cObj && item.counselor_name !== cObj.name) {
+            item.counselor_name = cObj.name;
+            updatedStorage = true;
+          }
+        } else if (item.counselor_name && item.counselor_name.includes('Sarah Maulida')) {
+          const c1 = counselors.find(c => c.id === 'counselor-1');
+          item.counselor_name = c1 ? c1.name : counselor1.name;
+          updatedStorage = true;
+        }
+        if (item.story_content && item.story_content.includes('Kak Sarah')) {
+          item.story_content = item.story_content.replace(/Kak Sarah/g, 'Kak Rachma');
+          updatedStorage = true;
+        }
+      });
+      if (updatedStorage) {
+        localStorage.setItem('oase_counseling_submissions', JSON.stringify(localSubmissions));
+      }
     }
 
-    let filtered = [...localSubmissions];
+    let filtered = localSubmissions.map(resolveItem);
+
     if (category && category !== 'all') {
       filtered = filtered.filter(item => item.category === category);
     }
@@ -470,6 +534,27 @@ const CounselingService = {
       return local[idx];
     }
     return null;
+  },
+
+  // Hapus curhatan yang sudah dibalas oleh konselor
+  async deleteSubmission(ticketCode) {
+    if (!ticketCode) throw new Error('Kode tiket tidak valid.');
+
+    if (supabaseClient) {
+      try {
+        await supabaseClient
+          .from('counseling_submissions')
+          .delete()
+          .eq('ticket_code', ticketCode);
+      } catch (e) {
+        console.warn('Gagal menghapus curhatan dari Supabase:', e);
+      }
+    }
+
+    const local = JSON.parse(localStorage.getItem('oase_counseling_submissions') || '[]');
+    const filtered = local.filter(s => s.ticket_code !== ticketCode);
+    localStorage.setItem('oase_counseling_submissions', JSON.stringify(filtered));
+    return { success: true };
   },
 
   // Autentikasi Khusus Konselor (mendukung login via email maupun nama konselor)

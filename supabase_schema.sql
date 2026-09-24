@@ -85,9 +85,9 @@ USING (true);
 INSERT INTO public.counseling_submissions 
 (ticket_code, author_name, education_level, grade_class, gender, category, counselor_id, counselor_name, story_content, status, created_at)
 VALUES
-('OASE-2941-KB', 'User104', 'SMA / SMK / MA', 'Kelas 12', 'Perempuan', 'Masalah Pembelajaran & Akademik', 'counselor-1', 'Kak Sarah Maulida, S.Psi.', 'Halo Kak Sarah, aku merasa sangat cemas menghadapi ujian kelulusan dan seleksi masuk perguruan tinggi bulan depan. Rasanya orang tua punya ekspektasi sangat tinggi, sementara nilaiku sering pas-pasan. Aku susah tidur setiap malam...', 'menunggu_tanggapan', NOW() - INTERVAL '35 minutes'),
+('OASE-2941-KB', 'User104', 'SMA / SMK / MA', 'Kelas 12', 'Perempuan', 'Masalah Pembelajaran & Akademik', 'counselor-1', 'Rachma Murtisari Prihastanti, S.Pd', 'Halo Kak Rachma, aku merasa sangat cemas menghadapi ujian kelulusan dan seleksi masuk perguruan tinggi bulan depan. Rasanya orang tua punya ekspektasi sangat tinggi, sementara nilaiku sering pas-pasan. Aku susah tidur setiap malam...', 'menunggu_tanggapan', NOW() - INTERVAL '35 minutes'),
 ('OASE-5820-MN', 'Bunga Lavender', 'SMP / MTs', 'Kelas 9', 'Perempuan', 'Masalah Keluarga & Rumah Tangga', 'auto', 'Pilihkan Otomatis', 'Di rumah suasana sedang tidak nyaman karena orang tua sering bertengkar hebat akhir-akhir ini. Aku merasa sendirian di kamar dan tidak tahu harus bercerita ke siapa. Takut mengganggu teman...', 'menunggu_tanggapan', NOW() - INTERVAL '2 hours'),
-('OASE-7731-XT', 'Pejuang Senja', 'Perguruan Tinggi / Mahasiswa', 'Semester 6', 'Laki-laki', 'Karier & Rencana Masa Depan', 'counselor-3', 'Ibu Ningsih Rahayu, M.Pd.', 'Saya merasa salah mengambil jurusan kuliah. Memasuki semester akhir ini tugas magang dan skripsi terasa begitu hampa. Apakah wajar merasa seperti ini di usia 21 tahun?', 'menunggu_tanggapan', NOW() - INTERVAL '5 hours');
+('OASE-7731-XT', 'Pejuang Senja', 'Perguruan Tinggi / Mahasiswa', 'Semester 6', 'Laki-laki', 'Karier & Rencana Masa Depan', 'counselor-3', 'Ningsih, S.Pd', 'Saya merasa salah mengambil jurusan kuliah. Memasuki semester akhir ini tugas magang dan skripsi terasa begitu hampa. Apakah wajar merasa seperti ini di usia 21 tahun?', 'menunggu_tanggapan', NOW() - INTERVAL '5 hours');
 
 -- ========================================================
 -- 5. Tabel Profil Pengguna & Role Akun (profiles)

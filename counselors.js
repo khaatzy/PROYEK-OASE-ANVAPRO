@@ -38,7 +38,7 @@
     },
     {
       id: 'counselor-1',
-      name: 'Rachma Murtisari Prihastanti, S.Pd.',
+      name: 'Rachma Murtisari Prihastanti, S.Pd',
       role: 'Psikolog & Konselor Remaja',
       email: 'rachma@oase.id',
       password: 'konselor1',
@@ -50,7 +50,7 @@
     },
     {
       id: 'counselor-2',
-      name: 'Ida Liyatul Ulyah.',
+      name: 'Ida Liyatul Ulyah, S.Pd',
       role: 'Konselor Hubungan & Keluarga',
       email: 'ida@oase.id',
       password: 'konselor2',
