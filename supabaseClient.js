@@ -472,16 +472,30 @@ const CounselingService = {
     return null;
   },
 
-  // Autentikasi Khusus Konselor (dengan fitur Tetap Login / Remember Me)
+  // Autentikasi Khusus Konselor (mendukung login via email maupun nama konselor)
   loginCounselor({ email, password, rememberMe = true }) {
     const counselors = window.COUNSELORS_DATA || [];
-    const counselor = counselors.find(c => c.email && c.email.toLowerCase() === email.trim().toLowerCase());
+    const query = (email || '').trim().toLowerCase();
+
+    // Cari berdasarkan email, nama lengkap, atau ID konselor
+    const counselor = counselors.find(c => {
+      if (!c || c.id === 'auto') return false;
+      const matchEmail = c.email && c.email.trim().toLowerCase() === query;
+      const matchName = c.name && c.name.trim().toLowerCase() === query;
+      const matchPartialName = c.name && c.name.trim().toLowerCase().includes(query);
+      const matchId = c.id && c.id.trim().toLowerCase() === query;
+      return matchEmail || matchName || matchPartialName || matchId;
+    });
 
     if (!counselor) {
-      throw new Error('Email konselor tidak terdaftar.');
+      const availableList = counselors
+        .filter(c => c.id !== 'auto' && c.email)
+        .map(c => `${c.name} (${c.email})`)
+        .join(', ');
+      throw new Error(`Akun konselor "${email}" tidak ditemukan. Pastikan email atau nama konselor sesuai dengan yang terdaftar di counselors.js.\n\nAkun yang terdaftar:\n${availableList}`);
     }
     if (counselor.password && counselor.password !== password) {
-      throw new Error('Password yang dimasukkan salah.');
+      throw new Error(`Password untuk ${counselor.name} salah. Periksa kembali password yang terdaftar di counselors.js.`);
     }
 
     const sessionData = {
