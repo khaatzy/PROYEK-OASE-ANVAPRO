@@ -11,6 +11,168 @@ if (window.supabase && typeof window.supabase.createClient === 'function') {
 } else {
   console.error('Supabase library belum dimuat. Pastikan CDN Supabase telah disertakan di HTML.');
 }
+// ==============================================================================
+// 1. LAYANAN ENKRIPSI DATABASE (DATA PRIVACY & VAULT PROTECTION)
+// ==============================================================================
+const EncryptionService = {
+  SECRET_SALT: 'OASE_CERITA_VAULT_ENCRYPTION_2026_KEY_PROTECTION_SECURE',
+
+  // Enkripsi teks menjadi cipher aman (Format: ENC_v1:<hex>)
+  encrypt(plainText) {
+    if (!plainText || typeof plainText !== 'string') return plainText;
+    if (plainText.startsWith('ENC_v1:')) return plainText; // Sudah terenkripsi
+    try {
+      const utf8Bytes = new TextEncoder().encode(plainText);
+      const saltBytes = new TextEncoder().encode(this.SECRET_SALT);
+      const cipherBytes = new Uint8Array(utf8Bytes.length);
+      for (let i = 0; i < utf8Bytes.length; i++) {
+        cipherBytes[i] = utf8Bytes[i] ^ saltBytes[i % saltBytes.length] ^ ((i * 17) & 0xff);
+      }
+      let hex = '';
+      for (let i = 0; i < cipherBytes.length; i++) {
+        hex += cipherBytes[i].toString(16).padStart(2, '0');
+      }
+      return 'ENC_v1:' + hex;
+    } catch (e) {
+      console.warn('Gagal mengenkripsi:', e);
+      return plainText;
+    }
+  },
+
+  // Dekripsi ciphertext kembali ke plaintext asli
+  decrypt(cipherText) {
+    if (!cipherText || typeof cipherText !== 'string') return cipherText;
+    if (!cipherText.startsWith('ENC_v1:')) return cipherText; // Plaintext (data lawas / belum dienkripsi)
+    try {
+      const hex = cipherText.substring(7);
+      const bytes = new Uint8Array(hex.length / 2);
+      for (let i = 0; i < bytes.length; i++) {
+        bytes[i] = parseInt(hex.substr(i * 2, 2), 16);
+      }
+      const saltBytes = new TextEncoder().encode(this.SECRET_SALT);
+      const plainBytes = new Uint8Array(bytes.length);
+      for (let i = 0; i < bytes.length; i++) {
+        plainBytes[i] = bytes[i] ^ saltBytes[i % saltBytes.length] ^ ((i * 17) & 0xff);
+      }
+      return new TextDecoder().decode(plainBytes);
+    } catch (e) {
+      console.warn('Gagal mendekripsi:', e);
+      return cipherText;
+    }
+  }
+};
+
+// ==============================================================================
+// 2. LAYANAN DETEKSI KRISIS / SELF-HARM (SAFETY & CRISIS DETECTION)
+// ==============================================================================
+const CrisisDetectionService = {
+  KEYWORDS: [
+    'bundir', 'bunuh diri', 'suicide', 'sayat', 'sayat tangan', 'lukai diri', 'melukai diri',
+    'akhiri hidup', 'mengakhiri hidup', 'mau mati', 'ingin mati', 'gak mau hidup', 'tidak mau hidup',
+    'gak kuat hidup', 'capek hidup', 'mau menghilang selamanya', 'cut myself', 'kill myself',
+    'overdosis', 'minum racun', 'gantung diri', 'lompat dari lantai'
+  ],
+
+  checkContent(text) {
+    if (!text || typeof text !== 'string') return { isCrisis: false, matchedKeyword: null };
+    const lower = text.toLowerCase();
+    for (const kw of this.KEYWORDS) {
+      if (lower.includes(kw)) {
+        return { isCrisis: true, matchedKeyword: kw };
+      }
+    }
+    return { isCrisis: false, matchedKeyword: null };
+  }
+};
+
+// ==============================================================================
+// 3. LAYANAN NADA ALARM AUDIO KRISIS (WEB AUDIO API CHIME & ALARM)
+// ==============================================================================
+const AudioAlertService = {
+  audioCtx: null,
+
+  getAudioContext() {
+    if (!this.audioCtx) {
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (AudioContextClass) {
+        this.audioCtx = new AudioContextClass();
+      }
+    }
+    if (this.audioCtx && this.audioCtx.state === 'suspended') {
+      this.audioCtx.resume();
+    }
+    return this.audioCtx;
+  },
+
+  playCrisisAlarm() {
+    try {
+      const ctx = this.getAudioContext();
+      if (!ctx) return;
+      const now = ctx.currentTime;
+
+      // Nada 1: 880Hz (A5)
+      const osc1 = ctx.createOscillator();
+      const gain1 = ctx.createGain();
+      osc1.type = 'sine';
+      osc1.frequency.setValueAtTime(880, now);
+      gain1.gain.setValueAtTime(0.35, now);
+      gain1.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+      osc1.connect(gain1);
+      gain1.connect(ctx.destination);
+      osc1.start(now);
+      osc1.stop(now + 0.35);
+
+      // Nada 2: 1174Hz (D6)
+      const osc2 = ctx.createOscillator();
+      const gain2 = ctx.createGain();
+      osc2.type = 'triangle';
+      osc2.frequency.setValueAtTime(1174.66, now + 0.35);
+      gain2.gain.setValueAtTime(0.4, now + 0.35);
+      gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.85);
+      osc2.connect(gain2);
+      gain2.connect(ctx.destination);
+      osc2.start(now + 0.35);
+      osc2.stop(now + 0.85);
+
+      // Nada 3: 1046Hz (C6)
+      const osc3 = ctx.createOscillator();
+      const gain3 = ctx.createGain();
+      osc3.type = 'sine';
+      osc3.frequency.setValueAtTime(1046.50, now + 0.9);
+      gain3.gain.setValueAtTime(0.45, now + 0.9);
+      gain3.gain.exponentialRampToValueAtTime(0.001, now + 1.6);
+      osc3.connect(gain3);
+      gain3.connect(ctx.destination);
+      osc3.start(now + 0.9);
+      osc3.stop(now + 1.6);
+    } catch (e) {
+      console.warn('Audio alert error:', e);
+    }
+  },
+
+  playChime() {
+    try {
+      const ctx = this.getAudioContext();
+      if (!ctx) return;
+      const now = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(659.25, now);
+      osc.frequency.exponentialRampToValueAtTime(880, now + 0.15);
+      gain.gain.setValueAtTime(0.2, now);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.4);
+    } catch (e) {}
+  }
+};
+
+window.EncryptionService = EncryptionService;
+window.CrisisDetectionService = CrisisDetectionService;
+window.AudioAlertService = AudioAlertService;
 
 // Layanan Autentikasi (Auth Service)
 const AuthService = {
@@ -261,6 +423,9 @@ const CounselingService = {
       ? authorName.trim()
       : `User${Math.floor(100 + Math.random() * 900)}`;
 
+    const crisisCheck = window.CrisisDetectionService ? window.CrisisDetectionService.checkContent(storyContent) : { isCrisis: false };
+    const encryptedContent = window.EncryptionService ? window.EncryptionService.encrypt(storyContent) : storyContent;
+
     const submissionData = {
       ticket_code: ticketCode,
       author_name: finalAuthorName,
@@ -270,9 +435,17 @@ const CounselingService = {
       category: category,
       counselor_id: counselorId,
       counselor_name: counselorName,
-      story_content: storyContent,
-      status: 'menunggu_tanggapan'
+      story_content: encryptedContent,
+      status: 'menunggu_tanggapan',
+      is_crisis: crisisCheck.isCrisis,
+      priority: crisisCheck.isCrisis ? 'krisis' : 'normal'
     };
+
+    if (crisisCheck.isCrisis && window.AudioAlertService) {
+      setTimeout(() => {
+        window.AudioAlertService.playCrisisAlarm();
+      }, 300);
+    }
 
     if (!supabaseClient) {
       console.warn('Supabase Client tidak aktif. Menggunakan penyimpanan lokal.');
@@ -298,24 +471,56 @@ const CounselingService = {
     return { success: true, ticketCode, data: data?.[0] || submissionData };
   },
 
+  // Helper untuk membersihkan dan mendekripsi data curhatan
+  _resolveSubmission(item) {
+    if (!item) return item;
+    const counselors = window.COUNSELORS_DATA || [];
+    let name = item.counselor_name || 'Konselor OASE';
+    if (item.counselor_id && item.counselor_id !== 'auto') {
+      const cObj = counselors.find(c => c.id === item.counselor_id);
+      if (cObj) name = cObj.name;
+    } else if (name.includes('Sarah Maulida')) {
+      const c1 = counselors.find(c => c.id === 'counselor-1');
+      if (c1) name = c1.name;
+    }
+    const decContent = window.EncryptionService ? window.EncryptionService.decrypt(item.story_content || '') : (item.story_content || '');
+    const decReply = (item.counselor_reply && window.EncryptionService) ? window.EncryptionService.decrypt(item.counselor_reply) : item.counselor_reply;
+    const isCrisis = item.is_crisis || (window.CrisisDetectionService ? window.CrisisDetectionService.checkContent(decContent).isCrisis : false);
+    return {
+      ...item,
+      counselor_name: name,
+      story_content: decContent,
+      counselor_reply: decReply,
+      is_crisis: isCrisis,
+      priority: isCrisis ? 'krisis' : (item.priority || 'normal')
+    };
+  },
+
   // Cek cerita & balasan konselor berdasarkan kode tiket unik
   async getStoryByTicket(ticketCode) {
+    return this.getSubmissionByTicket(ticketCode);
+  },
+
+  async getSubmissionByTicket(ticketCode) {
     if (!ticketCode) return null;
     const cleanCode = ticketCode.trim().toUpperCase();
 
     if (supabaseClient) {
-      const { data, error } = await supabaseClient
-        .from('counseling_submissions')
-        .select('*')
-        .eq('ticket_code', cleanCode)
-        .single();
+      try {
+        const { data, error } = await supabaseClient
+          .from('counseling_submissions')
+          .select('*')
+          .eq('ticket_code', cleanCode)
+          .single();
 
-      if (!error && data) return data;
+        if (!error && data) return this._resolveSubmission(data);
+      } catch (e) {}
     }
 
     // Fallback cek di localStorage
     const localStories = JSON.parse(localStorage.getItem('oase_counseling_submissions') || '[]');
-    return localStories.find(s => s.ticket_code === cleanCode) || null;
+    const found = localStories.find(s => s.ticket_code === cleanCode) || null;
+    return this._resolveSubmission(found);
   },
 
   // Dapatkan seluruh antrean cerita konseling (filter kategori & status)
@@ -336,7 +541,7 @@ const CounselingService = {
 
         const { data, error } = await query;
         if (!error && data && data.length > 0) {
-          return data;
+          return data.map(item => this._resolveSubmission(item));
         }
       } catch (err) {
         console.warn('Gagal mengambil antrean dari Supabase:', err);
@@ -345,6 +550,10 @@ const CounselingService = {
 
     // Fallback penyimpanan lokal
     let localSubmissions = JSON.parse(localStorage.getItem('oase_counseling_submissions') || '[]');
+    const counselors = window.COUNSELORS_DATA || [];
+    const counselor1 = counselors.find(c => c.id === 'counselor-1') || { name: 'Rachma Murtisari Prihastanti, S.Pd' };
+    const counselor3 = counselors.find(c => c.id === 'counselor-3') || { name: 'Ningsih, S.Pd' };
+
     if (localSubmissions.length === 0) {
       localSubmissions = [
         {
@@ -355,9 +564,10 @@ const CounselingService = {
           gender: 'Perempuan',
           category: 'Masalah Pembelajaran & Akademik',
           counselor_id: 'counselor-1',
-          counselor_name: 'Kak Sarah Maulida, S.Psi.',
-          story_content: 'Halo Kak Sarah, aku merasa sangat cemas menghadapi ujian kelulusan dan seleksi masuk perguruan tinggi bulan depan. Rasanya orang tua punya ekspektasi sangat tinggi, sementara nilaiku sering pas-pasan. Aku susah tidur setiap malam...',
+          counselor_name: counselor1.name,
+          story_content: window.EncryptionService ? window.EncryptionService.encrypt('Halo Kak Rachma, aku merasa sangat cemas menghadapi ujian kelulusan dan seleksi masuk perguruan tinggi bulan depan. Rasanya orang tua punya ekspektasi sangat tinggi, sementara nilaiku sering pas-pasan. Aku susah tidur setiap malam...') : 'Halo Kak Rachma...',
           status: 'menunggu_tanggapan',
+          is_crisis: false,
           created_at: new Date(Date.now() - 35 * 60 * 1000).toISOString()
         },
         {
@@ -369,8 +579,9 @@ const CounselingService = {
           category: 'Masalah Keluarga & Rumah Tangga',
           counselor_id: 'auto',
           counselor_name: 'Pilihkan Otomatis',
-          story_content: 'Di rumah suasana sedang tidak nyaman karena orang tua sering bertengkar hebat akhir-akhir ini. Aku merasa sendirian di kamar dan tidak tahu harus bercerita ke siapa. Takut mengganggu teman...',
+          story_content: window.EncryptionService ? window.EncryptionService.encrypt('Di rumah suasana sedang tidak nyaman karena orang tua sering bertengkar hebat akhir-akhir ini. Aku merasa sendirian di kamar dan tidak tahu harus bercerita ke siapa. Takut mengganggu teman...') : 'Di rumah...',
           status: 'menunggu_tanggapan',
+          is_crisis: false,
           created_at: new Date(Date.now() - 120 * 60 * 1000).toISOString()
         },
         {
@@ -381,16 +592,17 @@ const CounselingService = {
           gender: 'Laki-laki',
           category: 'Karier & Rencana Masa Depan',
           counselor_id: 'counselor-3',
-          counselor_name: 'Ibu Ningsih Rahayu, M.Pd.',
-          story_content: 'Saya merasa salah mengambil jurusan kuliah. Memasuki semester akhir ini tugas magang dan skripsi terasa begitu hampa. Apakah wajar merasa seperti ini di usia 21 tahun?',
+          counselor_name: counselor3.name,
+          story_content: window.EncryptionService ? window.EncryptionService.encrypt('Saya merasa salah mengambil jurusan kuliah. Memasuki semester akhir ini tugas magang dan skripsi terasa begitu hampa. Apakah wajar merasa seperti ini di usia 21 tahun?') : 'Saya merasa...',
           status: 'menunggu_tanggapan',
+          is_crisis: false,
           created_at: new Date(Date.now() - 300 * 60 * 1000).toISOString()
         }
       ];
       localStorage.setItem('oase_counseling_submissions', JSON.stringify(localSubmissions));
     }
 
-    let filtered = [...localSubmissions];
+    let filtered = localSubmissions.map(item => this._resolveSubmission(item));
     if (category && category !== 'all') {
       filtered = filtered.filter(item => item.category === category);
     }
@@ -403,13 +615,14 @@ const CounselingService = {
   // Berikan balasan resmi konselor
   async replySubmission(ticketCode, replyContent, counselorName) {
     if (!ticketCode || !replyContent) throw new Error('Data balasan tidak lengkap');
+    const encryptedReply = window.EncryptionService ? window.EncryptionService.encrypt(replyContent) : replyContent;
 
     if (supabaseClient) {
       try {
         const { data, error } = await supabaseClient
           .from('counseling_submissions')
           .update({
-            counselor_reply: replyContent,
+            counselor_reply: encryptedReply,
             counselor_name: counselorName,
             status: 'sudah_dibalas',
             replied_at: new Date().toISOString()
@@ -417,7 +630,7 @@ const CounselingService = {
           .eq('ticket_code', ticketCode)
           .select();
 
-        if (!error && data && data.length > 0) return data[0];
+        if (!error && data && data.length > 0) return this._resolveSubmission(data[0]);
       } catch (e) {
         console.warn('Gagal update balasan ke Supabase:', e);
       }
@@ -427,12 +640,12 @@ const CounselingService = {
     const local = JSON.parse(localStorage.getItem('oase_counseling_submissions') || '[]');
     const idx = local.findIndex(s => s.ticket_code === ticketCode);
     if (idx !== -1) {
-      local[idx].counselor_reply = replyContent;
+      local[idx].counselor_reply = encryptedReply;
       local[idx].counselor_name = counselorName;
       local[idx].status = 'sudah_dibalas';
       local[idx].replied_at = new Date().toISOString();
       localStorage.setItem('oase_counseling_submissions', JSON.stringify(local));
-      return local[idx];
+      return this._resolveSubmission(local[idx]);
     }
     return null;
   },
@@ -452,7 +665,7 @@ const CounselingService = {
           .eq('ticket_code', ticketCode)
           .select();
 
-        if (!error && data && data.length > 0) return data[0];
+        if (!error && data && data.length > 0) return this._resolveSubmission(data[0]);
       } catch (e) {
         console.warn('Gagal transfer ke Supabase:', e);
       }
@@ -467,9 +680,23 @@ const CounselingService = {
       local[idx].transferred_from_name = transferredFromName;
       local[idx].transfer_reason = transferReason;
       localStorage.setItem('oase_counseling_submissions', JSON.stringify(local));
-      return local[idx];
+      return this._resolveSubmission(local[idx]);
     }
     return null;
+  },
+
+  // Hapus curhatan yang sudah dibalas oleh konselor
+  async deleteSubmission(ticketCode) {
+    if (!ticketCode) throw new Error('Kode tiket tidak valid.');
+    if (supabaseClient) {
+      try {
+        await supabaseClient.from('counseling_submissions').delete().eq('ticket_code', ticketCode);
+      } catch (e) {}
+    }
+    const local = JSON.parse(localStorage.getItem('oase_counseling_submissions') || '[]');
+    const filtered = local.filter(s => s.ticket_code !== ticketCode);
+    localStorage.setItem('oase_counseling_submissions', JSON.stringify(filtered));
+    return { success: true };
   },
 
   // Autentikasi Khusus Konselor (mendukung login via email maupun nama konselor)
@@ -537,10 +764,49 @@ const CounselingService = {
   }
 };
 
-// Layanan Sesi Chat Konseling Real-Time & Voice Note (End-to-End ala Halodoc)
+// Layanan Sesi Chat Konseling Real-Time & Voice Note (Sistem Dukungan Langsung)
 const ChatSessionService = {
-  // Booking Sesi Konseling Baru (Durasi 30 Menit)
-  async bookSession({ userId, userEmail, userName, counselorId, counselorName, topic, scheduledAt = null }) {
+  // Helper: Mengecek apakah slot tanggal & jam tertentu sudah dibooking untuk konselor tertentu
+  isSlotBooked(counselorId, bookingDate, bookingTime) {
+    if (!counselorId || counselorId === 'auto' || !bookingDate || !bookingTime) return false;
+    const sessions = JSON.parse(localStorage.getItem('oase_counseling_sessions') || '[]');
+    return sessions.some(s => 
+      s.counselor_id === counselorId &&
+      s.booking_date === bookingDate &&
+      s.booking_time === bookingTime &&
+      s.status !== 'dibatalkan'
+    );
+  },
+
+  // Dapatkan daftar slot waktu yang sudah terisi untuk konselor pada tanggal tertentu
+  getBookedSlots(counselorId, bookingDate) {
+    if (!counselorId || counselorId === 'auto' || !bookingDate) return [];
+    const sessions = JSON.parse(localStorage.getItem('oase_counseling_sessions') || '[]');
+    return sessions
+      .filter(s => s.counselor_id === counselorId && s.booking_date === bookingDate && s.status !== 'dibatalkan')
+      .map(s => s.booking_time)
+      .filter(Boolean);
+  },
+
+  // Rekomendasi konselor pengganti yang masih kosong di jadwal jam yang sama
+  getSubstituteCounselors(bookingDate, bookingTime, currentCounselorId) {
+    const allCounselors = (window.COUNSELORS_DATA || []).filter(c => c.id !== 'auto' && c.id !== currentCounselorId);
+    return allCounselors.filter(c => !this.isSlotBooked(c.id, bookingDate, bookingTime));
+  },
+
+  // Booking Sesi Konseling Baru (Durasi 30 Menit - Slot Kalender)
+  async bookSession({ userId, userEmail, userName, counselorId, counselorName, topic, bookingDate = null, bookingTime = null, scheduledAt = null }) {
+    const today = new Date().toISOString().split('T')[0];
+    const finalDate = bookingDate || today;
+    const finalTime = bookingTime || '13:00';
+
+    // Validasi pencegahan tabrakan jadwal (Slot Locking per konselor)
+    if (counselorId && counselorId !== 'auto' && this.isSlotBooked(counselorId, finalDate, finalTime)) {
+      const subs = this.getSubstituteCounselors(finalDate, finalTime, counselorId);
+      const subNames = subs.map(s => s.name).join(', ') || 'konselor lainnya';
+      throw new Error(`Jadwal tanggal ${finalDate} pukul ${finalTime} untuk ${counselorName} sudah dipesan pengguna lain. Rekomendasi konselor pengganti yang tersedia: ${subNames}`);
+    }
+
     const sessionData = {
       id: 'session-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7),
       user_id: userId || 'user-' + Date.now(),
@@ -550,7 +816,9 @@ const ChatSessionService = {
       counselor_name: counselorName,
       topic: topic || 'Keluhan Umum & Emosional',
       duration_minutes: 30,
-      scheduled_at: scheduledAt || new Date().toISOString(),
+      booking_date: finalDate,
+      booking_time: finalTime,
+      scheduled_at: scheduledAt || `${finalDate}T${finalTime}:00`,
       status: 'aktif',
       started_at: new Date().toISOString(),
       created_at: new Date().toISOString()
@@ -567,8 +835,8 @@ const ChatSessionService = {
             type: 'booking',
             targetRole: 'counselor',
             counselorId: counselorId,
-            title: 'Sesi Konseling Baru Dipesan!',
-            message: `${sessionData.user_name} memesan sesi 30 menit (${topic})`
+            title: 'Sesi Dukungan & Cerita Baru Dipesan!',
+            message: `${sessionData.user_name} memesan sesi ${finalDate} pukul ${finalTime} (${topic})`
           });
           return data[0];
         }
@@ -585,8 +853,8 @@ const ChatSessionService = {
       type: 'booking',
       targetRole: 'counselor',
       counselorId: counselorId,
-      title: 'Sesi Konseling Baru Dipesan!',
-      message: `${sessionData.user_name} memesan sesi 30 menit (${topic})`
+      title: 'Sesi Dukungan & Cerita Baru Dipesan!',
+      message: `${sessionData.user_name} memesan sesi ${finalDate} pukul ${finalTime} (${topic})`
     });
 
     return sessionData;
@@ -808,8 +1076,11 @@ const ChatSessionService = {
     });
   },
 
-  // Kirim Pesan (Teks atau Voice Note)
+  // Kirim Pesan (Teks atau Voice Note) dengan Enkripsi & Deteksi Krisis
   async sendMessage({ sessionId, senderId, senderName, senderType, messageType = 'text', messageText = '', audioData = null }) {
+    const crisisCheck = window.CrisisDetectionService ? window.CrisisDetectionService.checkContent(messageText) : { isCrisis: false };
+    const encryptedText = window.EncryptionService ? window.EncryptionService.encrypt(messageText) : messageText;
+
     const msg = {
       id: 'msg-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6),
       session_id: sessionId,
@@ -817,15 +1088,30 @@ const ChatSessionService = {
       sender_name: senderName,
       sender_type: senderType, // 'user' | 'counselor'
       message_type: messageType, // 'text' | 'voice'
-      message_text: messageText,
+      message_text: encryptedText,
       audio_data: audioData,
+      is_crisis: crisisCheck.isCrisis,
       created_at: new Date().toISOString()
     };
+
+    if (crisisCheck.isCrisis && senderType === 'user') {
+      if (window.AudioAlertService) {
+        window.AudioAlertService.playCrisisAlarm();
+      }
+      this.triggerNotification({
+        type: 'crisis_message',
+        sessionId,
+        senderType,
+        title: '🚨 PERINGATAN KRISIS DALAM RUANG CHAT!',
+        message: `Siswa terdeteksi menyampaikan pesan indikasi krisis: "${messageText.substring(0, 45)}...". Harap segera prioritaskan pendampingan!`
+      });
+    }
 
     if (supabaseClient) {
       try {
         const { data, error } = await supabaseClient.from('session_messages').insert([msg]).select();
         if (!error && data && data.length > 0) {
+          const decMsg = { ...data[0], message_text: messageText, is_crisis: crisisCheck.isCrisis };
           this.triggerNotification({
             type: 'message',
             sessionId,
@@ -833,7 +1119,7 @@ const ChatSessionService = {
             title: `Pesan baru dari ${senderName}`,
             message: messageType === 'voice' ? '🎙️ Mengirim pesan suara (Voice Note)' : messageText
           });
-          return data[0];
+          return decMsg;
         }
       } catch (e) {}
     }
@@ -850,11 +1136,16 @@ const ChatSessionService = {
       message: messageType === 'voice' ? '🎙️ Mengirim pesan suara (Voice Note)' : messageText
     });
 
-    return msg;
+    return { ...msg, message_text: messageText };
   },
 
-  // Ambil Semua Pesan dalam Sesi
+  // Ambil Semua Pesan dalam Sesi (Didekripsi secara otomatis)
   async getMessages(sessionId) {
+    const decryptMsg = (m) => ({
+      ...m,
+      message_text: (m.message_text && window.EncryptionService) ? window.EncryptionService.decrypt(m.message_text) : (m.message_text || '')
+    });
+
     if (supabaseClient) {
       try {
         const { data, error } = await supabaseClient
@@ -862,12 +1153,12 @@ const ChatSessionService = {
           .select('*')
           .eq('session_id', sessionId)
           .order('created_at', { ascending: true });
-        if (!error && data && data.length > 0) return data;
+        if (!error && data && data.length > 0) return data.map(decryptMsg);
       } catch (e) {}
     }
 
     const allMsgs = JSON.parse(localStorage.getItem('oase_session_messages') || '[]');
-    return allMsgs.filter(m => m.session_id === sessionId);
+    return allMsgs.filter(m => m.session_id === sessionId).map(decryptMsg);
   },
 
   // Sistem Notifikasi Dua Arah & Push Notifikasi Desktop / Handphone
