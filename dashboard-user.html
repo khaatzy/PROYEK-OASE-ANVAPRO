@@ -37,10 +37,10 @@
             },
             oase: {
               cream: '#FDFBF7',
-              surface: '#FCF9FA',
-              border: '#F0E2EC',
-              plum: '#311027',
-              muted: '#7A6273'
+              surface: '#FDF7FB',
+              border: '#CCA8C5',
+              plum: '#240B1D',
+              muted: '#553D4F'
             }
           }
         }
@@ -88,21 +88,28 @@
         </a>
       </div>
 
-      <!-- Right Header Actions (Notifikasi & Hamburger Menu) -->
+      <!-- Right Header Actions (Notifikasi Push, Lonceng, & Hamburger Menu) -->
       <div class="flex items-center gap-2 sm:gap-3">
+
+        <!-- Tombol Aktifkan Notifikasi Desktop & HP -->
+        <button id="togglePushNotifBtn" class="px-2.5 sm:px-3.5 py-2 rounded-2xl border-2 border-heather-300 bg-white hover:bg-heather-50 text-heather-900 text-[11px] sm:text-xs font-extrabold transition-all flex items-center gap-1.5 shadow-sm">
+          <i data-lucide="bell-ring" class="w-3.5 h-3.5 text-heather-600"></i>
+          <span id="pushNotifBtnLabel" class="hidden sm:inline">Push Notifikasi</span>
+          <span id="pushNotifStatusBadge" class="w-2 h-2 rounded-full bg-amber-400"></span>
+        </button>
         
         <!-- Tombol Lonceng Notifikasi -->
         <div class="relative">
-          <button id="notifBellBtn" class="p-2 sm:p-2.5 rounded-2xl border border-oase-border hover:bg-heather-50 text-oase-muted hover:text-heather-600 transition-all relative">
+          <button id="notifBellBtn" class="p-2 sm:p-2.5 rounded-2xl border-2 border-heather-300 bg-white hover:bg-heather-50 text-oase-plum hover:text-heather-600 transition-all relative shadow-sm">
             <i data-lucide="bell" class="w-4 h-4 sm:w-5 sm:h-5"></i>
             <span id="notifBadge" class="hidden absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-rose-500 rounded-full border-2 border-white"></span>
           </button>
 
           <!-- Dropdown Notifikasi -->
-          <div id="notifDropdown" class="hidden absolute right-0 mt-2 w-[calc(100vw-2rem)] max-w-sm bg-white rounded-3xl border border-heather-100 shadow-2xl p-4 z-50 animate-fadeIn">
-            <div class="flex items-center justify-between pb-3 border-b border-oase-border">
-              <h4 class="text-xs font-bold uppercase tracking-wider text-oase-plum">Pemberitahuan Konseling</h4>
-              <button id="clearNotifBtn" class="text-[11px] text-heather-600 hover:underline">Tandai Dibaca</button>
+          <div id="notifDropdown" class="hidden absolute right-0 mt-2 w-[calc(100vw-2rem)] max-w-sm bg-white rounded-3xl border-2 border-heather-300 shadow-2xl p-4 z-50 animate-fadeIn">
+            <div class="flex items-center justify-between pb-3 border-b border-heather-200">
+              <h4 class="text-xs font-extrabold uppercase tracking-wider text-oase-plum">Pemberitahuan Konseling</h4>
+              <button id="clearNotifBtn" class="text-[11px] text-heather-700 font-bold hover:underline">Tandai Dibaca</button>
             </div>
             <div id="notifList" class="mt-3 space-y-2 max-h-64 overflow-y-auto pr-1">
               <p class="text-xs text-center text-oase-muted py-4">Belum ada pemberitahuan baru.</p>
@@ -111,7 +118,7 @@
         </div>
 
         <!-- Tombol Garis Tiga (Hamburger Menu) -->
-        <button id="hamburgerBtn" aria-label="Buka Menu" class="p-2 sm:p-2.5 rounded-2xl bg-heather-50 border border-heather-200 text-heather-700 hover:bg-heather-100 transition-all">
+        <button id="hamburgerBtn" aria-label="Buka Menu" class="p-2 sm:p-2.5 rounded-2xl bg-heather-50 border-2 border-heather-300 text-heather-800 hover:bg-heather-100 transition-all shadow-sm">
           <i data-lucide="menu" class="w-5 h-5 sm:w-6 sm:h-6"></i>
         </button>
 
@@ -123,41 +130,56 @@
   <!-- 2. HAMBURGER SIDEBAR / DRAWER                            -->
   <!-- ======================================================== -->
   <div id="hamburgerDrawerOverlay" class="fixed inset-0 bg-oase-plum/50 backdrop-blur-sm z-50 hidden transition-opacity"></div>
-  <div id="hamburgerDrawer" class="fixed top-0 right-0 h-full w-[85vw] max-w-sm bg-white z-50 shadow-2xl transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col justify-between p-5 sm:p-6">
+  <div id="hamburgerDrawer" class="fixed top-0 right-0 h-full w-[85vw] max-w-sm bg-white z-50 shadow-2xl transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col justify-between p-5 sm:p-6 border-l-2 border-heather-300">
     
     <div class="space-y-6 overflow-y-auto">
       <!-- Drawer Header & Close -->
-      <div class="flex items-center justify-between pb-4 border-b border-oase-border">
-        <h3 class="text-base font-bold text-oase-plum flex items-center gap-2">
-          <i data-lucide="menu" class="w-5 h-5 text-heather-500"></i>
+      <div class="flex items-center justify-between pb-4 border-b border-heather-200">
+        <h3 class="text-base font-extrabold text-oase-plum flex items-center gap-2">
+          <i data-lucide="menu" class="w-5 h-5 text-heather-600"></i>
           <span>Menu Navigasi</span>
         </h3>
-        <button id="closeDrawerBtn" class="p-1.5 rounded-full hover:bg-heather-50 text-oase-muted hover:text-heather-700 transition-colors">
+        <button id="closeDrawerBtn" class="p-1.5 rounded-full hover:bg-heather-50 text-oase-muted hover:text-heather-800 transition-colors">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
 
-      <!-- Info Akun Card -->
-      <div class="bg-gradient-to-br from-heather-50 to-white rounded-2xl p-4 border border-heather-200 space-y-3 shadow-xs">
+      <!-- Info Akun Card (Proteksi Privasi Siswa & Display Name) -->
+      <div class="bg-white rounded-2xl p-4 border-2 border-heather-300 space-y-3 shadow-md">
         <div class="flex items-center gap-3">
-          <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-heather-600 to-heather-400 text-white flex items-center justify-center font-black text-lg shadow-md">
-            <span id="userInitialLabel">U</span>
+          <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-heather-600 to-heather-400 text-white flex items-center justify-center font-black text-lg shadow-md border-2 border-white flex-shrink-0">
+            <span id="userInitialLabel">S</span>
           </div>
-          <div class="overflow-hidden">
-            <span id="userNameLabel" class="text-sm font-bold text-oase-plum block truncate">Siswa OASE</span>
-            <span id="userEmailLabel" class="text-xs text-oase-muted block truncate">siswa@oase.id</span>
+          <div class="overflow-hidden flex-1 min-w-0">
+            <div class="flex items-center justify-between gap-1">
+              <span id="userNameLabel" class="text-sm font-extrabold text-oase-plum block truncate">Sahabat OASE</span>
+              <button id="openChangeDisplayNameDrawerBtn" title="Ganti Nama Samaran" class="p-1 rounded-lg text-heather-700 hover:bg-heather-100 transition-colors">
+                <i data-lucide="edit-2" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+            <div class="flex items-center gap-1.5 mt-0.5">
+              <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-300 text-[10px] font-bold">
+                <i data-lucide="shield-check" class="w-3 h-3 text-emerald-600"></i> Anonim Aktif
+              </span>
+              <span id="userEmailLabel" class="text-[10px] text-oase-muted truncate font-medium">Email Terproteksi</span>
+            </div>
           </div>
         </div>
 
-        <div class="pt-2 border-t border-heather-100 flex items-center justify-between">
-          <span class="text-xs text-oase-muted font-medium">Peran Akun:</span>
-          <span id="userRoleBadge" class="px-2.5 py-0.5 rounded-full bg-heather-200/60 text-heather-800 text-xs font-bold">
+        <button id="quickChangeDisplayNameBtn" class="w-full py-2 px-3 rounded-xl border border-heather-300 bg-heather-50 hover:bg-heather-100 text-heather-900 text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-2xs">
+          <i data-lucide="user-check" class="w-3.5 h-3.5 text-heather-600"></i>
+          <span>Ganti Display Name / Samaran</span>
+        </button>
+
+        <div class="pt-2 border-t border-heather-200 flex items-center justify-between">
+          <span class="text-xs text-oase-muted font-bold">Peran Akun:</span>
+          <span id="userRoleBadge" class="px-2.5 py-0.5 rounded-full bg-heather-100 text-heather-800 border border-heather-300 text-xs font-bold">
             User (Siswa)
           </span>
         </div>
 
         <!-- Moderator Approval Notice if applicable -->
-        <div id="modNotice" class="hidden p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-[11px] text-amber-800 space-y-1">
+        <div id="modNotice" class="hidden p-2.5 rounded-xl bg-amber-50 border border-amber-300 text-[11px] text-amber-900 space-y-1">
           <div class="font-bold flex items-center gap-1">
             <i data-lucide="clock" class="w-3.5 h-3.5"></i>
             <span>Pengajuan Moderator</span>
@@ -240,25 +262,25 @@
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
       
       <!-- Kartu Aksi 1: Curhat Langsung ke Konselor -->
-      <div class="bg-white rounded-3xl p-6 sm:p-7 border border-oase-border hover:border-heather-300 hover:shadow-xl hover:shadow-heather-500/10 transition-all duration-300 flex flex-col justify-between space-y-6 group">
+      <div class="bg-white rounded-3xl p-6 sm:p-7 border-2 border-heather-300 shadow-md hover:border-heather-600 hover:shadow-xl hover:shadow-heather-500/15 transition-all duration-300 flex flex-col justify-between space-y-6 group">
         <div class="space-y-4">
           <div class="w-13 h-13 rounded-2xl bg-gradient-to-tr from-heather-600 to-heather-400 text-white flex items-center justify-center shadow-lg shadow-heather-500/25 group-hover:scale-105 transition-transform">
             <i data-lucide="heart-handshake" class="w-6 h-6"></i>
           </div>
           <div>
             <h2 class="text-lg font-extrabold text-oase-plum">Curhat ke Konselor</h2>
-            <p class="text-xs text-oase-muted mt-1 leading-relaxed">
+            <p class="text-xs text-oase-muted mt-1 leading-relaxed font-medium">
               Konsultasi langsung dengan psikolog dan konselor berlisensi melalui obrolan real-time 30 menit dan pesan suara.
             </p>
           </div>
-          <div class="flex flex-wrap gap-1.5 text-[10px] font-semibold text-heather-700">
-            <span class="px-2 py-0.5 rounded-lg bg-heather-50 border border-heather-200">✓ Sesi 30 Menit</span>
-            <span class="px-2 py-0.5 rounded-lg bg-heather-50 border border-heather-200">✓ Voice Note</span>
+          <div class="flex flex-wrap gap-1.5 text-[10px] font-bold text-heather-800">
+            <span class="px-2.5 py-1 rounded-lg bg-heather-50 border border-heather-300">✓ Sesi 30 Menit</span>
+            <span class="px-2.5 py-1 rounded-lg bg-heather-50 border border-heather-300">✓ Voice Note</span>
           </div>
         </div>
 
         <div class="pt-2">
-          <button id="curhatKonselorBtn" class="w-full py-3 rounded-2xl bg-gradient-to-r from-heather-600 to-heather-500 hover:from-heather-700 hover:to-heather-600 text-white font-bold text-xs sm:text-sm shadow-md shadow-heather-500/25 transition-all flex items-center justify-center gap-2 group-hover:shadow-lg">
+          <button id="curhatKonselorBtn" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-heather-600 to-heather-500 hover:from-heather-700 hover:to-heather-600 text-white font-extrabold text-xs sm:text-sm shadow-md shadow-heather-500/25 transition-all flex items-center justify-center gap-2 group-hover:shadow-lg">
             <i data-lucide="message-square-heart" class="w-4 h-4"></i>
             <span>Curhat Langsung</span>
           </button>
@@ -266,7 +288,7 @@
       </div>
 
       <!-- Kartu Aksi 2: Curhat Anonim ke Konselor (Fitur Baru) -->
-      <div class="bg-white rounded-3xl p-6 sm:p-7 border border-oase-border hover:border-rose-300 hover:shadow-xl hover:shadow-rose-500/10 transition-all duration-300 flex flex-col justify-between space-y-6 group">
+      <div class="bg-white rounded-3xl p-6 sm:p-7 border-2 border-rose-300 shadow-md hover:border-rose-600 hover:shadow-xl hover:shadow-rose-500/15 transition-all duration-300 flex flex-col justify-between space-y-6 group">
         <div class="space-y-4">
           <div class="w-13 h-13 rounded-2xl bg-gradient-to-tr from-rose-600 to-rose-400 text-white flex items-center justify-center shadow-lg shadow-rose-500/25 group-hover:scale-105 transition-transform">
             <i data-lucide="shield-check" class="w-6 h-6"></i>
@@ -274,20 +296,20 @@
           <div>
             <div class="flex items-center gap-2">
               <h2 class="text-lg font-extrabold text-oase-plum">Curhat Anonim</h2>
-              <span class="px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200 text-[10px] font-bold">Privat</span>
+              <span class="px-2 py-0.5 rounded-full bg-rose-50 text-rose-800 border border-rose-300 text-[10px] font-extrabold">100% Privat</span>
             </div>
-            <p class="text-xs text-oase-muted mt-1 leading-relaxed">
+            <p class="text-xs text-oase-muted mt-1 leading-relaxed font-medium">
               Kirim ceritamu ke konselor dengan identitas disamarkan sepenuhnya. Nama samaran unik otomatis menjaga privasimu.
             </p>
           </div>
-          <div class="flex flex-wrap gap-1.5 text-[10px] font-semibold text-rose-700">
-            <span class="px-2 py-0.5 rounded-lg bg-rose-50 border border-rose-200">✓ 100% Tanpa Nama Asli</span>
-            <span class="px-2 py-0.5 rounded-lg bg-rose-50 border border-rose-200">✓ Kode Tiket</span>
+          <div class="flex flex-wrap gap-1.5 text-[10px] font-bold text-rose-800">
+            <span class="px-2.5 py-1 rounded-lg bg-rose-50 border border-rose-300">✓ 100% Tanpa Nama Asli</span>
+            <span class="px-2.5 py-1 rounded-lg bg-rose-50 border border-rose-300">✓ Kode Tiket</span>
           </div>
         </div>
 
         <div class="pt-2">
-          <button id="openAnonCurhatBtn" class="w-full py-3 rounded-2xl bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-700 hover:to-rose-600 text-white font-bold text-xs sm:text-sm shadow-md shadow-rose-500/25 transition-all flex items-center justify-center gap-2">
+          <button id="openAnonCurhatBtn" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-700 hover:to-rose-600 text-white font-extrabold text-xs sm:text-sm shadow-md shadow-rose-500/25 transition-all flex items-center justify-center gap-2">
             <i data-lucide="send" class="w-4 h-4"></i>
             <span>Curhat Anonim</span>
           </button>
@@ -295,7 +317,7 @@
       </div>
 
       <!-- Kartu Aksi 3: Chat dengan AI (Gemini AI Companion) -->
-      <div class="bg-white rounded-3xl p-6 sm:p-7 border border-oase-border hover:border-indigo-300 hover:shadow-xl hover:shadow-indigo-500/10 transition-all duration-300 flex flex-col justify-between space-y-6 group">
+      <div class="bg-white rounded-3xl p-6 sm:p-7 border-2 border-indigo-300 shadow-md hover:border-indigo-600 hover:shadow-xl hover:shadow-indigo-500/15 transition-all duration-300 flex flex-col justify-between space-y-6 group">
         <div class="space-y-4">
           <div class="w-13 h-13 rounded-2xl bg-gradient-to-tr from-indigo-600 to-indigo-400 text-white flex items-center justify-center shadow-lg shadow-indigo-500/25 group-hover:scale-105 transition-transform">
             <i data-lucide="bot" class="w-6 h-6"></i>
@@ -706,6 +728,71 @@
     </div>
   </div>
 
+  <!-- ======================================================== -->
+  <!-- MODAL: GANTI DISPLAY NAME / NAMA SAMARAN (ANONIMITAS)    -->
+  <!-- ======================================================== -->
+  <div id="changeDisplayNameModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-oase-plum/75 backdrop-blur-md hidden animate-fadeIn">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-7 border-2 border-heather-300 shadow-2xl relative space-y-5 text-left">
+      <button id="closeDisplayNameModalBtn" class="absolute top-5 right-5 text-oase-muted hover:text-oase-plum p-1 transition-colors">
+        <i data-lucide="x" class="w-6 h-6"></i>
+      </button>
+
+      <div class="space-y-1">
+        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 text-xs font-bold border border-emerald-300">
+          <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-600"></i>
+          <span>100% Privasi & Anonimitas Siswa</span>
+        </div>
+        <h3 class="text-xl font-extrabold text-oase-plum">Ganti Display Name / Samaran</h3>
+        <p class="text-xs text-oase-muted leading-relaxed font-medium">
+          Nama ini yang akan dilihat oleh konselor saat chat maupun saat mengirim cerita. Alamat email/Gmail Anda <strong>tidak akan pernah</strong> dimunculkan ke konselor.
+        </p>
+      </div>
+
+      <form id="changeDisplayNameForm" class="space-y-4">
+        <div class="space-y-1.5">
+          <label class="block text-xs font-extrabold text-oase-plum">Nama Tampilan Baru:</label>
+          <input 
+            type="text" 
+            id="newDisplayNameInput" 
+            required 
+            maxlength="30"
+            placeholder="Contoh: Sahabat Senja, Lentera Hati, dll."
+            class="w-full px-4 py-3 rounded-2xl border-2 border-heather-300 text-sm focus:outline-none focus:border-heather-500 font-bold text-oase-plum bg-white shadow-2xs"
+          >
+        </div>
+
+        <!-- Rekomendasi Nama Samaran Cepat -->
+        <div class="space-y-2">
+          <span class="block text-[11px] font-bold text-heather-800 uppercase tracking-wider">Pilih Cepat Nama Samaran Keren:</span>
+          <div class="flex flex-wrap gap-1.5">
+            <button type="button" class="quick-pseudonym-btn px-2.5 py-1 rounded-xl bg-heather-50 hover:bg-heather-100 text-heather-800 text-xs font-bold border border-heather-300 transition-all">Sahabat Damai</button>
+            <button type="button" class="quick-pseudonym-btn px-2.5 py-1 rounded-xl bg-heather-50 hover:bg-heather-100 text-heather-800 text-xs font-bold border border-heather-300 transition-all">Bintang Harapan</button>
+            <button type="button" class="quick-pseudonym-btn px-2.5 py-1 rounded-xl bg-heather-50 hover:bg-heather-100 text-heather-800 text-xs font-bold border border-heather-300 transition-all">Kancil Bijak</button>
+            <button type="button" class="quick-pseudonym-btn px-2.5 py-1 rounded-xl bg-heather-50 hover:bg-heather-100 text-heather-800 text-xs font-bold border border-heather-300 transition-all">Lentera Hati</button>
+            <button type="button" class="quick-pseudonym-btn px-2.5 py-1 rounded-xl bg-heather-50 hover:bg-heather-100 text-heather-800 text-xs font-bold border border-heather-300 transition-all">Sobat Damai</button>
+          </div>
+        </div>
+
+        <div class="p-3 rounded-xl bg-emerald-50 border border-emerald-300 text-[11px] text-emerald-900 space-y-0.5">
+          <p class="font-bold flex items-center gap-1">
+            <i data-lucide="lock" class="w-3.5 h-3.5 text-emerald-700"></i> Jaminan Perlindungan Privasi:
+          </p>
+          <p>Alamat Gmail Anda diproteksi dan digantikan sepenuhnya dengan Display Name ini di semua ruang obrolan konseling dan curhat anonim.</p>
+        </div>
+
+        <div class="flex items-center gap-2 pt-2">
+          <button id="cancelDisplayNameBtn" type="button" class="flex-1 py-3 rounded-xl border border-heather-300 hover:bg-heather-50 text-xs font-bold text-oase-muted transition-all">
+            Batal
+          </button>
+          <button id="saveDisplayNameBtn" type="submit" class="flex-1 py-3 rounded-xl bg-gradient-to-r from-heather-600 to-heather-500 hover:from-heather-700 hover:to-heather-600 text-white text-xs font-bold transition-all shadow-md flex items-center justify-center gap-1.5">
+            <i data-lucide="check" class="w-4 h-4"></i>
+            <span>Simpan Display Name</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- Scripts -->
   <script src="counselors.js"></script>
   <script src="supabaseClient.js"></script>
@@ -816,31 +903,147 @@
       loadCompletedSessions();
       setupAnonCurhat();
       setupDashRating();
+      setupChangeDisplayName();
+      setupPushNotificationUI();
     }
 
     function updateUserUI() {
       if (!currentUser) return;
-      const initial = currentUser.email.charAt(0).toUpperCase();
-      userInitialLabel.textContent = initial;
-      userNameLabel.textContent = userProfile.full_name || currentUser.email.split('@')[0];
-      userEmailLabel.textContent = currentUser.email;
+      const displayName = userProfile.display_name || userProfile.full_name || 'Sahabat OASE';
+      userInitialLabel.textContent = displayName.charAt(0).toUpperCase();
+      userNameLabel.textContent = displayName;
+      userEmailLabel.textContent = '🔒 Mode Anonim Aktif';
 
       // Role badge
       if (userProfile.role === 'moderator') {
         userRoleBadge.textContent = 'Moderator';
-        userRoleBadge.className = 'px-2.5 py-0.5 rounded-full bg-purple-100 text-purple-800 text-xs font-bold';
+        userRoleBadge.className = 'px-2.5 py-0.5 rounded-full bg-purple-100 text-purple-900 border border-purple-300 text-xs font-bold';
         if (userProfile.moderator_approval_status === 'pending') {
           modNotice.classList.remove('hidden');
         }
       } else if (userProfile.role === 'counselor') {
         userRoleBadge.textContent = 'Konselor';
-        userRoleBadge.className = 'px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold';
+        userRoleBadge.className = 'px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-900 border border-emerald-300 text-xs font-bold';
       } else {
         userRoleBadge.textContent = 'User (Siswa)';
-        userRoleBadge.className = 'px-2.5 py-0.5 rounded-full bg-heather-200/60 text-heather-800 text-xs font-bold';
+        userRoleBadge.className = 'px-2.5 py-0.5 rounded-full bg-heather-100 text-heather-900 border border-heather-300 text-xs font-bold';
       }
 
       geminiApiKeyInput.value = window.GeminiService.getApiKey();
+    }
+
+    // SETUP FITUR GANTI DISPLAY NAME (ANONIMITAS SISWA)
+    function setupChangeDisplayName() {
+      const modal = document.getElementById('changeDisplayNameModal');
+      const form = document.getElementById('changeDisplayNameForm');
+      const input = document.getElementById('newDisplayNameInput');
+      const closeBtn = document.getElementById('closeDisplayNameModalBtn');
+      const cancelBtn = document.getElementById('cancelDisplayNameBtn');
+      const openDrawerBtn = document.getElementById('openChangeDisplayNameDrawerBtn');
+      const quickBtn = document.getElementById('quickChangeDisplayNameBtn');
+      const quickPseudonymBtns = document.querySelectorAll('.quick-pseudonym-btn');
+
+      const openModal = () => {
+        if (input) input.value = userProfile.display_name || userProfile.full_name || '';
+        if (modal) modal.classList.remove('hidden');
+        if (input) input.focus();
+      };
+
+      const closeModal = () => {
+        if (modal) modal.classList.add('hidden');
+      };
+
+      if (openDrawerBtn) openDrawerBtn.addEventListener('click', openModal);
+      if (quickBtn) quickBtn.addEventListener('click', openModal);
+      if (closeBtn) closeBtn.addEventListener('click', closeModal);
+      if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
+
+      quickPseudonymBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          if (input) input.value = btn.textContent.trim();
+        });
+      });
+
+      if (form) {
+        form.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const newName = input.value.trim();
+          if (!newName) return;
+
+          const saveBtn = document.getElementById('saveDisplayNameBtn');
+          saveBtn.disabled = true;
+          saveBtn.textContent = 'Menyimpan...';
+
+          try {
+            await window.AuthService.updateDisplayName(currentUser.id, currentUser.email, newName);
+            userProfile.display_name = newName;
+            userProfile.full_name = newName;
+            updateUserUI();
+            closeModal();
+            if (window.NotificationService) {
+              window.NotificationService.showInAppToast('Display Name Diperbarui', `Identitas Anda sekarang tampil sebagai "${newName}".`);
+            } else {
+              alert(`Display Name berhasil diganti menjadi "${newName}". Anonimitas Anda terjaga.`);
+            }
+          } catch (err) {
+            alert('Gagal mengganti display name: ' + err.message);
+          } finally {
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = `<i data-lucide="check" class="w-4 h-4"></i><span>Simpan Display Name</span>`;
+            lucide.createIcons();
+          }
+        });
+      }
+    }
+
+    // SETUP FITUR PUSH NOTIFIKASI DESKTOP & HANDPHONE
+    function setupPushNotificationUI() {
+      const toggleBtn = document.getElementById('togglePushNotifBtn');
+      const statusBadge = document.getElementById('pushNotifStatusBadge');
+      const btnLabel = document.getElementById('pushNotifBtnLabel');
+      if (!toggleBtn) return;
+
+      const updateBtnStatus = () => {
+        if (!window.NotificationService || !window.NotificationService.isSupported()) {
+          if (btnLabel) btnLabel.textContent = 'Notifikasi T/A';
+          if (statusBadge) statusBadge.className = 'w-2 h-2 rounded-full bg-gray-400';
+          return;
+        }
+        const perm = window.NotificationService.getPermissionStatus();
+        if (perm === 'granted') {
+          if (btnLabel) btnLabel.textContent = 'Notifikasi Aktif';
+          if (statusBadge) statusBadge.className = 'w-2 h-2 rounded-full bg-emerald-500 shadow-xs';
+        } else if (perm === 'denied') {
+          if (btnLabel) btnLabel.textContent = 'Notifikasi Diblokir';
+          if (statusBadge) statusBadge.className = 'w-2 h-2 rounded-full bg-rose-500';
+        } else {
+          if (btnLabel) btnLabel.textContent = 'Push Notifikasi';
+          if (statusBadge) statusBadge.className = 'w-2 h-2 rounded-full bg-amber-400 animate-pulse';
+        }
+      };
+
+      updateBtnStatus();
+
+      toggleBtn.addEventListener('click', async () => {
+        if (!window.NotificationService || !window.NotificationService.isSupported()) {
+          alert('Browser atau perangkat ini belum mendukung fitur Push Notifikasi.');
+          return;
+        }
+        try {
+          const perm = await window.NotificationService.requestPermission();
+          updateBtnStatus();
+          if (perm === 'granted') {
+            await window.NotificationService.sendNotification('Notifikasi OASE Aktif 🎉', {
+              body: 'Anda akan menerima pemberitahuan langsung di layar desktop atau handphone saat ada balasan konselor atau pesan baru.',
+              tag: 'oase-welcome-notif'
+            });
+          } else if (perm === 'denied') {
+            alert('Izin notifikasi belum diizinkan di browser. Silakan izinkan notifikasi pada ikon gembok di bilah alamat browser.');
+          }
+        } catch (e) {
+          alert('Gagal mengaktifkan notifikasi: ' + e.message);
+        }
+      });
     }
 
     // 2. HAMBURGER DRAWER HANDLERS
@@ -1353,7 +1556,7 @@
         const session = await window.ChatSessionService.bookSession({
           userId: currentUser.id,
           userEmail: currentUser.email,
-          userName: userProfile.full_name || currentUser.email.split('@')[0],
+          userName: userProfile.display_name || userProfile.full_name || 'Sahabat Anonim',
           counselorId,
           counselorName,
           topic,
