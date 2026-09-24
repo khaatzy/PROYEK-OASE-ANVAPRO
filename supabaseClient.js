@@ -573,24 +573,183 @@ const ChatSessionService = {
     return sessions.filter(s => s.counselor_id === counselorId);
   },
 
-  // Selesaikan Sesi
-  async endSession(sessionId) {
-    if (supabaseClient) {
-      try {
-        await supabaseClient.from('counseling_sessions').update({
-          status: 'selesai',
-          ended_at: new Date().toISOString()
-        }).eq('id', sessionId);
-      } catch (e) {}
-    }
-
+  // Selesaikan Sesi dengan opsi pesan motivasi konselor
+  async endSession(sessionId, motivationalMessage = null) {
+    let targetSession = null;
     const sessions = JSON.parse(localStorage.getItem('oase_counseling_sessions') || '[]');
     const idx = sessions.findIndex(s => s.id === sessionId);
     if (idx !== -1) {
       sessions[idx].status = 'selesai';
       sessions[idx].ended_at = new Date().toISOString();
+      if (motivationalMessage) {
+        sessions[idx].motivational_message = motivationalMessage;
+      }
+      targetSession = sessions[idx];
       localStorage.setItem('oase_counseling_sessions', JSON.stringify(sessions));
     }
+
+    if (supabaseClient) {
+      try {
+        const updateData = {
+          status: 'selesai',
+          ended_at: new Date().toISOString()
+        };
+        if (motivationalMessage) {
+          updateData.motivational_message = motivationalMessage;
+        }
+        await supabaseClient.from('counseling_sessions').update(updateData).eq('id', sessionId);
+      } catch (e) {}
+    }
+
+    // Jika ada pesan motivasi saat menyelesaikan sesi, simpan juga sebagai pesan spesial
+    if (motivationalMessage && targetSession) {
+      await this.submitMotivationalMessage(sessionId, motivationalMessage, targetSession.counselor_name);
+    }
+
+    // Picu notifikasi bahwa sesi telah diselesaikan
+    this.triggerNotification({
+      type: 'session_ended',
+      sessionId,
+      title: 'Sesi Konseling Telah Selesai',
+      message: 'Sesi konseling 30 menit telah berakhir dan diarsipkan ke riwayat.'
+    });
+
+    return targetSession;
+  },
+
+  // Kirim Pesan Motivasi & Semangat Penutup oleh Konselor
+  async submitMotivationalMessage(sessionId, messageText, counselorName = 'Konselor OASE') {
+    const sessions = JSON.parse(localStorage.getItem('oase_counseling_sessions') || '[]');
+    const idx = sessions.findIndex(s => s.id === sessionId);
+    let targetSession = null;
+    if (idx !== -1) {
+      sessions[idx].motivational_message = messageText;
+      sessions[idx].motivational_sent_at = new Date().toISOString();
+      targetSession = sessions[idx];
+      localStorage.setItem('oase_counseling_sessions', JSON.stringify(sessions));
+    }
+
+    // Masukkan ke riwayat pesan sebagai jenis 'motivation'
+    const msg = {
+      id: 'msg-mot-' + Date.now(),
+      session_id: sessionId,
+      sender_id: targetSession ? targetSession.counselor_id : 'counselor',
+      sender_name: counselorName,
+      sender_type: 'counselor',
+      message_type: 'motivation',
+      message_text: messageText,
+      created_at: new Date().toISOString()
+    };
+
+    const allMsgs = JSON.parse(localStorage.getItem('oase_session_messages') || '[]');
+    allMsgs.push(msg);
+    localStorage.setItem('oase_session_messages', JSON.stringify(allMsgs));
+
+    if (supabaseClient) {
+      try {
+        await supabaseClient.from('counseling_sessions').update({ motivational_message: messageText }).eq('id', sessionId);
+        await supabaseClient.from('session_messages').insert([msg]);
+      } catch (e) {}
+    }
+
+    this.triggerNotification({
+      type: 'motivation',
+      sessionId,
+      title: `Pesan Semangat dari ${counselorName}`,
+      message: `💌 "${messageText.substring(0, 60)}${messageText.length > 60 ? '...' : ''}"`
+    });
+
+    return msg;
+  },
+
+  // Simpan Rating & Ulasan Konselor oleh Siswa (Bintang 1-5)
+  async rateSession(sessionId, rating, reviewText = '') {
+    const starNum = Math.min(5, Math.max(1, parseInt(rating) || 5));
+    const sessions = JSON.parse(localStorage.getItem('oase_counseling_sessions') || '[]');
+    const idx = sessions.findIndex(s => s.id === sessionId);
+    let counselorId = null;
+
+    if (idx !== -1) {
+      sessions[idx].rating = starNum;
+      sessions[idx].review = reviewText.trim();
+      sessions[idx].rated_at = new Date().toISOString();
+      counselorId = sessions[idx].counselor_id;
+      localStorage.setItem('oase_counseling_sessions', JSON.stringify(sessions));
+    }
+
+    if (supabaseClient) {
+      try {
+        await supabaseClient.from('counseling_sessions').update({
+          rating: starNum,
+          review: reviewText.trim(),
+          rated_at: new Date().toISOString()
+        }).eq('id', sessionId);
+      } catch (e) {}
+    }
+
+    // Rekalkulasi akumulasi rating konselor
+    if (counselorId) {
+      this.recalculateCounselorRating(counselorId);
+    }
+
+    return { success: true, rating: starNum, review: reviewText };
+  },
+
+  // Hitung ulang akumulasi rating konselor
+  recalculateCounselorRating(counselorId) {
+    const sessions = JSON.parse(localStorage.getItem('oase_counseling_sessions') || '[]');
+    const ratedSessions = sessions.filter(s => s.counselor_id === counselorId && s.rating);
+    
+    // Rating default awal jika belum ada
+    let totalScore = ratedSessions.reduce((acc, curr) => acc + (curr.rating || 5), 0);
+    let totalCount = ratedSessions.length;
+
+    // Tambahkan bobot default reputasi profesional awal (5 bintang x 5 review)
+    const baseCount = 5;
+    const baseScore = 25; // 5.0
+    const finalScore = totalScore + baseScore;
+    const finalCount = totalCount + baseCount;
+    const avg = (finalScore / finalCount).toFixed(1);
+
+    const ratingsMap = JSON.parse(localStorage.getItem('oase_counselor_ratings') || '{}');
+    ratingsMap[counselorId] = {
+      average: avg,
+      totalCount: finalCount,
+      realReviewsCount: totalCount
+    };
+    localStorage.setItem('oase_counselor_ratings', JSON.stringify(ratingsMap));
+    return ratingsMap[counselorId];
+  },
+
+  // Dapatkan Rating Konselor
+  getCounselorRating(counselorId) {
+    const ratingsMap = JSON.parse(localStorage.getItem('oase_counselor_ratings') || '{}');
+    if (ratingsMap[counselorId]) {
+      return ratingsMap[counselorId];
+    }
+    // Jika belum ada, hitung atau berikan default 5.0
+    return this.recalculateCounselorRating(counselorId);
+  },
+
+  // Dapatkan Sesi Konseling yang Telah Selesai (Riwayat)
+  async getCompletedSessions(userEmail = null, counselorId = null) {
+    if (supabaseClient) {
+      try {
+        let query = supabaseClient.from('counseling_sessions').select('*').eq('status', 'selesai');
+        if (userEmail) query = query.eq('user_email', userEmail);
+        if (counselorId) query = query.eq('counselor_id', counselorId);
+        const { data, error } = await query.order('ended_at', { ascending: false });
+        if (!error && data) return data;
+      } catch (e) {}
+    }
+
+    const sessions = JSON.parse(localStorage.getItem('oase_counseling_sessions') || '[]');
+    return sessions.filter(s => {
+      const matchStatus = s.status === 'selesai';
+      const matchUser = userEmail ? s.user_email === userEmail : true;
+      const matchCounselor = counselorId ? s.counselor_id === counselorId : true;
+      return matchStatus && matchUser && matchCounselor;
+    });
   },
 
   // Kirim Pesan (Teks atau Voice Note)
@@ -676,6 +835,60 @@ const GeminiService = {
 
   setApiKey(key) {
     localStorage.setItem('oase_gemini_api_key', key.trim());
+    localStorage.removeItem('oase_gemini_active_model');
+  },
+
+  async discoverWorkingModel(apiKey) {
+    const key = apiKey || this.getApiKey();
+    if (!key) throw new Error('API Key belum diisi.');
+
+    try {
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${key}`);
+      if (res.ok) {
+        const data = await res.json();
+        const available = (data.models || [])
+          .filter(m => Array.isArray(m.supportedGenerationMethods) && m.supportedGenerationMethods.includes('generateContent'))
+          .map(m => m.name.replace(/^models\//, ''));
+
+        if (available.length > 0) {
+          // Prioritas model Google Gemini termurah, paling hemat token, dan anti-antrean (Flash-Lite)
+          const preferredOrder = [
+            'gemini-2.5-flash-lite',
+            'gemini-3.5-flash-lite',
+            'gemini-3.1-flash-lite',
+            'gemini-2.5-flash',
+            'gemini-3.8-flash',
+            'gemini-flash-latest',
+            'gemini-2.0-flash',
+            'gemini-1.5-flash'
+          ];
+
+          for (const pref of preferredOrder) {
+            if (available.includes(pref)) {
+              localStorage.setItem('oase_gemini_active_model', pref);
+              return pref;
+            }
+          }
+
+          // Jika tidak ada di daftar prioritas, gunakan model flash-lite/flash apa saja yang ada
+          const anyModel = available.find(m => m.includes('lite')) || available.find(m => m.includes('flash')) || available[0];
+          localStorage.setItem('oase_gemini_active_model', anyModel);
+          return anyModel;
+        }
+      } else {
+        const errJson = await res.json().catch(() => ({}));
+        if (errJson.error?.message) {
+          throw new Error(errJson.error.message);
+        }
+      }
+    } catch (e) {
+      console.warn('Auto-discovery model info:', e.message);
+      if (e.message && (e.message.includes('API key') || e.message.includes('API_KEY'))) {
+        throw e;
+      }
+    }
+
+    return 'gemini-2.5-flash-lite';
   },
 
   async chatWithGemini(userMessage, chatHistory = []) {
@@ -717,28 +930,100 @@ Gunakan bahasa Indonesia yang akrab, sopan, santun, dan menyentuh hati. Jangan m
       });
     }
 
-    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-    const response = await fetch(endpoint, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: contents,
-        generationConfig: {
-          temperature: 0.7,
-          maxOutputTokens: 800
-        }
-      })
-    });
-
-    if (!response.ok) {
-      const errData = await response.json().catch(() => ({}));
-      throw new Error(errData.error?.message || `Gagal menghubungi Gemini API (Status: ${response.status})`);
+    // Dapatkan model aktif dari discovery atau cache
+    let primaryModel = localStorage.getItem('oase_gemini_active_model');
+    if (!primaryModel) {
+      primaryModel = await this.discoverWorkingModel(apiKey);
     }
 
-    const data = await response.json();
-    const replyText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (!replyText) throw new Error('Tidak ada respon yang diterima dari Gemini AI.');
-    return replyText;
+    // Urutan prioritas model Gemini: Model termurah, paling hemat token, dan anti high-demand (Flash-Lite)
+    const candidateModels = [
+      primaryModel,
+      'gemini-2.5-flash-lite',
+      'gemini-3.5-flash-lite',
+      'gemini-3.1-flash-lite',
+      'gemini-2.5-flash',
+      'gemini-3.8-flash',
+      'gemini-flash-latest',
+      'gemini-2.0-flash',
+      'gemini-1.5-flash'
+    ].filter(Boolean);
+    const modelsToTry = [...new Set(candidateModels)];
+
+    let lastError = null;
+
+    for (const model of modelsToTry) {
+      try {
+        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: contents,
+            generationConfig: {
+              temperature: 0.7,
+              maxOutputTokens: 800
+            }
+          })
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          const replyText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (replyText) {
+            localStorage.setItem('oase_gemini_active_model', model);
+            return replyText;
+          }
+        } else {
+          const errData = await response.json().catch(() => ({}));
+          const errMsg = errData.error?.message || `Status ${response.status}`;
+          lastError = new Error(errMsg);
+
+          // Jika model tidak ditemukan / tidak didukung di tier API key, lanjut coba model berikutnya
+          if (response.status === 404 || errMsg.toLowerCase().includes('not found') || errMsg.toLowerCase().includes('not supported')) {
+            console.warn(`Model ${model} tidak aktif pada kunci ini, mencoba model alternatif...`);
+            continue;
+          }
+          // Jika masalah autentikasi atau kuota, lempar error langsung
+          throw new Error(errMsg);
+        }
+      } catch (err) {
+        if (err.message && (err.message.toLowerCase().includes('not found') || err.message.toLowerCase().includes('not supported'))) {
+          continue;
+        }
+        throw err;
+      }
+    }
+
+    // Jika model di atas belum ada yang cocok, lakukan discovery ulang secara eksplisit
+    try {
+      localStorage.removeItem('oase_gemini_active_model');
+      const fallbackDiscovered = await this.discoverWorkingModel(apiKey);
+      if (fallbackDiscovered && !modelsToTry.includes(fallbackDiscovered)) {
+        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${fallbackDiscovered}:generateContent?key=${apiKey}`;
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: contents,
+            generationConfig: {
+              temperature: 0.7,
+              maxOutputTokens: 800
+            }
+          })
+        });
+        if (response.ok) {
+          const data = await response.json();
+          const replyText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (replyText) {
+            localStorage.setItem('oase_gemini_active_model', fallbackDiscovered);
+            return replyText;
+          }
+        }
+      }
+    } catch (e) {}
+
+    throw lastError || new Error('Tidak ada model Gemini yang didukung oleh API Key ini. Pastikan API Key valid dan aktif di Google AI Studio.');
   }
 };
 

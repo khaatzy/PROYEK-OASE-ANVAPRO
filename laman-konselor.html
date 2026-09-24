@@ -147,24 +147,28 @@
         </div>
 
         <!-- Quick Summary Stats Cards -->
-        <div class="grid grid-cols-3 gap-3 flex-shrink-0">
-          <div class="bg-white p-3.5 sm:p-4 rounded-2xl border border-oase-border text-center shadow-xs">
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 flex-shrink-0">
+          <div class="bg-white p-3.5 rounded-2xl border border-oase-border text-center shadow-xs">
             <span id="statQueueCount" class="text-xl sm:text-2xl font-black text-amber-600 block">0</span>
-            <span class="text-[11px] font-semibold text-oase-muted">Menunggu</span>
+            <span class="text-[10px] sm:text-[11px] font-semibold text-oase-muted">Menunggu</span>
           </div>
-          <div class="bg-white p-3.5 sm:p-4 rounded-2xl border border-oase-border text-center shadow-xs">
+          <div class="bg-white p-3.5 rounded-2xl border border-oase-border text-center shadow-xs">
             <span id="statAnsweredCount" class="text-xl sm:text-2xl font-black text-emerald-600 block">0</span>
-            <span class="text-[11px] font-semibold text-oase-muted">Sudah Dibalas</span>
+            <span class="text-[10px] sm:text-[11px] font-semibold text-oase-muted">Sudah Dibalas</span>
           </div>
-          <div class="bg-white p-3.5 sm:p-4 rounded-2xl border border-oase-border text-center shadow-xs">
+          <div class="bg-white p-3.5 rounded-2xl border border-oase-border text-center shadow-xs">
             <span id="statTotalCount" class="text-xl sm:text-2xl font-black text-heather-600 block">0</span>
-            <span class="text-[11px] font-semibold text-oase-muted">Total Kasus</span>
+            <span class="text-[10px] sm:text-[11px] font-semibold text-oase-muted">Total Kasus</span>
+          </div>
+          <div class="bg-white p-3.5 rounded-2xl border border-oase-border text-center shadow-xs">
+            <span id="statCounselorRating" class="text-xl sm:text-2xl font-black text-amber-500 block">⭐ 5.0</span>
+            <span class="text-[10px] sm:text-[11px] font-semibold text-oase-muted">Rating Kinerja</span>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Tab Navigasi Mode Konselor: Antrean Cerita vs Sesi Chat Langsung -->
+    <!-- Tab Navigasi Mode Konselor: Antrean Cerita vs Sesi Chat Langsung vs Riwayat Selesai -->
     <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 border-b border-oase-border pb-2">
       <button id="tabModeQueue" class="px-5 py-2.5 rounded-2xl bg-heather-500 text-white font-bold text-xs shadow-sm flex items-center justify-center sm:justify-start gap-2 transition-all">
         <i data-lucide="inbox" class="w-4 h-4"></i>
@@ -174,6 +178,11 @@
         <i data-lucide="messages-square" class="w-4 h-4"></i>
         <span>Sesi Chat Langsung Siswa (Live 30 Menit)</span>
         <span id="liveChatCountBadge" class="hidden px-2 py-0.5 rounded-full bg-rose-500 text-white text-[10px] font-black">0</span>
+      </button>
+      <button id="tabModeHistory" class="px-5 py-2.5 rounded-2xl bg-white border border-oase-border hover:bg-heather-50 text-oase-muted font-bold text-xs flex items-center justify-center sm:justify-start gap-2 transition-all relative">
+        <i data-lucide="history" class="w-4 h-4"></i>
+        <span>Riwayat Sesi Selesai</span>
+        <span id="historyCountBadge" class="hidden px-2 py-0.5 rounded-full bg-slate-200 text-slate-700 text-[10px] font-bold">0</span>
       </button>
     </div>
 
@@ -199,6 +208,28 @@
       </div>
     </div>
 
+    <!-- Section Riwayat Sesi Selesai (Default Hidden) -->
+    <div id="historySection" class="hidden space-y-6">
+      <div class="bg-white rounded-3xl p-6 border border-oase-border shadow-sm space-y-4">
+        <div class="flex items-center justify-between pb-3 border-b border-oase-border">
+          <div>
+            <h2 class="text-base sm:text-lg font-bold text-oase-plum flex items-center gap-2">
+              <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-500"></i>
+              <span>Riwayat Sesi Konseling Selesai</span>
+            </h2>
+            <p class="text-xs text-oase-muted">Arsip sesi konseling lampau, evaluasi rating bintang siswa, dan pesan motivasi penutup yang pernah Anda berikan.</p>
+          </div>
+          <button id="refreshHistorySessionsBtn" class="p-2.5 rounded-xl border border-oase-border hover:bg-heather-50 text-heather-700" title="Segarkan Riwayat">
+            <i data-lucide="rotate-cw" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+        <div id="historySessionsListContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+    </div>
+
     <!-- Container Antrean Cerita Biasa -->
     <div id="queueSection" class="space-y-6">
       <!-- Filter & Kontrol Antrean -->
@@ -211,8 +242,6 @@
             </h2>
             <p class="text-xs text-oase-muted">Disusun berurutan berdasarkan waktu masuk. Kamu bebas memilih kasus mana yang ingin direspons lebih dulu.</p>
           </div>
-          </h2>
-          <p class="text-xs text-oase-muted">Disusun berurutan berdasarkan waktu masuk. Kamu bebas memilih kasus mana yang ingin direspons lebih dulu.</p>
         </div>
 
         <!-- Search Bar & Refresh -->
@@ -577,7 +606,18 @@
       greetingHeading.innerHTML = `${timeGreeting}, <span class="text-heather-600">${currentSession.name}</span>.`;
       navCounselorAvatar.src = currentSession.avatar || 'https://images.unsplash.com/photo-1544027993-37dbfe43562a?auto=format&fit=crop&w=200&h=200&q=80';
       navCounselorName.textContent = currentSession.name;
-      navCounselorRole.textContent = currentSession.email;
+
+      // Ambil dan tampilkan rating dinamis konselor
+      if (window.getCounselorRatingInfo && currentSession.id) {
+        const rInfo = window.getCounselorRatingInfo(currentSession.id);
+        const statCounselorRating = document.getElementById('statCounselorRating');
+        if (statCounselorRating) {
+          statCounselorRating.textContent = `⭐ ${rInfo.average}`;
+        }
+        navCounselorRole.textContent = `⭐ ${rInfo.average} • ${currentSession.email}`;
+      } else {
+        navCounselorRole.textContent = currentSession.email;
+      }
     }
 
     // Helper: Relative time format
@@ -664,11 +704,15 @@
         card.className = "bg-white rounded-3xl p-5 sm:p-6 border border-oase-border/90 hover:border-heather-300 hover:shadow-lg hover:shadow-heather-500/5 transition-all space-y-4 flex flex-col justify-between";
 
         const relativeTime = getRelativeTime(story.created_at);
+        const isAnon = story.is_anonymous || story.grade_class === 'Anonim' || (story.author_name && story.author_name.startsWith('Sahabat Anonim'));
 
         card.innerHTML = `
           <div class="space-y-3">
             <div class="flex items-center justify-between gap-2">
-              <span class="font-mono text-xs font-bold text-heather-700 bg-heather-50 px-2.5 py-1 rounded-lg border border-heather-200">${story.ticket_code}</span>
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <span class="font-mono text-xs font-bold text-heather-700 bg-heather-50 px-2.5 py-1 rounded-lg border border-heather-200">${story.ticket_code}</span>
+                ${isAnon ? '<span class="px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 text-[10px] font-bold flex items-center gap-1"><i data-lucide="shield-check" class="w-3 h-3 text-rose-600"></i> Curhat Anonim</span>' : ''}
+              </div>
               ${isAnswered 
                 ? '<span class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[11px] font-bold">✓ Sudah Dibalas</span>'
                 : '<span class="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[11px] font-bold">⏳ Menunggu Respons</span>'
@@ -898,14 +942,19 @@
       }
     });
 
-    // 8. NOTIFIKASI & MODE TAB LIVE CHAT UNTUK KONSELOR
+    // 8. NOTIFIKASI & MODE TAB LIVE CHAT & RIWAYAT SELESAI
     const tabModeQueue = document.getElementById('tabModeQueue');
     const tabModeLiveChat = document.getElementById('tabModeLiveChat');
+    const tabModeHistory = document.getElementById('tabModeHistory');
     const queueSection = document.getElementById('queueSection');
     const liveChatSection = document.getElementById('liveChatSection');
+    const historySection = document.getElementById('historySection');
     const liveChatCountBadge = document.getElementById('liveChatCountBadge');
+    const historyCountBadge = document.getElementById('historyCountBadge');
     const liveSessionsListContainer = document.getElementById('liveSessionsListContainer');
+    const historySessionsListContainer = document.getElementById('historySessionsListContainer');
     const refreshLiveSessionsBtn = document.getElementById('refreshLiveSessionsBtn');
+    const refreshHistorySessionsBtn = document.getElementById('refreshHistorySessionsBtn');
 
     const counselorNotifBellBtn = document.getElementById('counselorNotifBellBtn');
     const counselorNotifDropdown = document.getElementById('counselorNotifDropdown');
@@ -913,23 +962,29 @@
     const counselorNotifList = document.getElementById('counselorNotifList');
     const clearCounselorNotifBtn = document.getElementById('clearCounselorNotifBtn');
 
-    // Tab Switching
-    if (tabModeQueue && tabModeLiveChat) {
-      tabModeQueue.addEventListener('click', () => {
-        tabModeQueue.className = 'px-5 py-2.5 rounded-2xl bg-heather-500 text-white font-bold text-xs shadow-sm flex items-center gap-2 transition-all';
-        tabModeLiveChat.className = 'px-5 py-2.5 rounded-2xl bg-white border border-oase-border hover:bg-heather-50 text-oase-muted font-bold text-xs flex items-center gap-2 transition-all relative';
-        queueSection.classList.remove('hidden');
-        liveChatSection.classList.add('hidden');
-      });
+    // 3-Way Tab Switching
+    function switchCounselorTab(target) {
+      const activeClass = 'px-5 py-2.5 rounded-2xl bg-heather-500 text-white font-bold text-xs shadow-sm flex items-center justify-center sm:justify-start gap-2 transition-all relative';
+      const inactiveClass = 'px-5 py-2.5 rounded-2xl bg-white border border-oase-border hover:bg-heather-50 text-oase-muted font-bold text-xs flex items-center justify-center sm:justify-start gap-2 transition-all relative';
 
-      tabModeLiveChat.addEventListener('click', () => {
-        tabModeLiveChat.className = 'px-5 py-2.5 rounded-2xl bg-heather-500 text-white font-bold text-xs shadow-sm flex items-center gap-2 transition-all relative';
-        tabModeQueue.className = 'px-5 py-2.5 rounded-2xl bg-white border border-oase-border hover:bg-heather-50 text-oase-muted font-bold text-xs flex items-center gap-2 transition-all';
-        queueSection.classList.add('hidden');
-        liveChatSection.classList.remove('hidden');
-        loadLiveSessions();
-      });
+      if (tabModeQueue) tabModeQueue.className = target === 'queue' ? activeClass : inactiveClass;
+      if (tabModeLiveChat) tabModeLiveChat.className = target === 'live' ? activeClass : inactiveClass;
+      if (tabModeHistory) tabModeHistory.className = target === 'history' ? activeClass : inactiveClass;
+
+      if (queueSection) queueSection.classList.toggle('hidden', target !== 'queue');
+      if (liveChatSection) liveChatSection.classList.toggle('hidden', target !== 'live');
+      if (historySection) historySection.classList.toggle('hidden', target !== 'history');
+
+      if (target === 'live') loadLiveSessions();
+      if (target === 'history') loadHistorySessions();
     }
+
+    if (tabModeQueue) tabModeQueue.addEventListener('click', () => switchCounselorTab('queue'));
+    if (tabModeLiveChat) tabModeLiveChat.addEventListener('click', () => switchCounselorTab('live'));
+    if (tabModeHistory) tabModeHistory.addEventListener('click', () => switchCounselorTab('history'));
+
+    if (refreshLiveSessionsBtn) refreshLiveSessionsBtn.addEventListener('click', loadLiveSessions);
+    if (refreshHistorySessionsBtn) refreshHistorySessionsBtn.addEventListener('click', loadHistorySessions);
 
     // Notifications
     if (counselorNotifBellBtn) {
@@ -982,6 +1037,7 @@
     window.addEventListener('oase_new_notification', () => {
       loadCounselorNotifs();
       loadLiveSessions();
+      loadHistorySessions();
     });
 
     // Load Live Sessions for this counselor & all active students
@@ -1055,10 +1111,107 @@
       return card;
     }
 
+    // 9. RIWAYAT SESI KONSELING SELESAI
+    async function loadHistorySessions() {
+      if (!currentSession || !historySessionsListContainer) return;
+      let completed = [];
+      if (window.ChatSessionService) {
+        completed = await window.ChatSessionService.getCompletedSessions(null, currentSession.id);
+        if (!completed || completed.length === 0) {
+          completed = await window.ChatSessionService.getCompletedSessions(null, null);
+        }
+      }
+
+      if (historyCountBadge) {
+        if (completed.length > 0) {
+          historyCountBadge.textContent = completed.length;
+          historyCountBadge.classList.remove('hidden');
+        } else {
+          historyCountBadge.classList.add('hidden');
+        }
+      }
+
+      if (!completed || completed.length === 0) {
+        historySessionsListContainer.innerHTML = `
+          <div class="col-span-full py-12 text-center space-y-2 bg-oase-surface/50 rounded-2xl border border-dashed border-oase-border">
+            <div class="w-10 h-10 rounded-xl bg-heather-100 text-heather-600 flex items-center justify-center mx-auto">
+              <i data-lucide="archive" class="w-5 h-5"></i>
+            </div>
+            <p class="text-sm font-bold text-oase-plum">Belum Ada Sesi Konseling yang Selesai</p>
+            <p class="text-xs text-oase-muted">Sesi konseling 30 menit yang telah diselesaikan akan tercatat rapi di sini bersama penilaian rating siswa.</p>
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
+      historySessionsListContainer.innerHTML = '';
+      completed.forEach(s => {
+        const card = document.createElement('div');
+        card.className = "bg-white p-5 rounded-2xl border border-heather-200 hover:shadow-md transition-all space-y-3.5 flex flex-col justify-between";
+        const dateStr = s.ended_at ? new Date(s.ended_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Selesai';
+
+        let ratingHtml = '';
+        if (s.rating) {
+          ratingHtml = `
+            <div class="flex items-center gap-1.5 text-xs">
+              <span class="text-amber-500 font-bold">${'★'.repeat(s.rating)}${'☆'.repeat(5 - s.rating)}</span>
+              <span class="text-oase-muted text-[11px]">(${s.rating}/5)</span>
+            </div>
+          `;
+        } else {
+          ratingHtml = `<span class="text-[11px] text-oase-muted italic">Belum dinilai siswa</span>`;
+        }
+
+        let motivationHtml = '';
+        if (s.motivational_message) {
+          motivationHtml = `
+            <div class="p-2.5 rounded-xl bg-heather-50/70 border border-heather-100 text-xs text-oase-plum space-y-1">
+              <span class="text-[10px] font-bold text-heather-700 uppercase tracking-wider flex items-center gap-1">
+                <i data-lucide="sparkles" class="w-3 h-3 text-amber-500"></i> Motivasi Penutup:
+              </span>
+              <p class="italic text-[11px] leading-relaxed">"${s.motivational_message}"</p>
+            </div>
+          `;
+        }
+
+        card.innerHTML = `
+          <div class="space-y-2.5">
+            <div class="flex items-center justify-between">
+              <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 text-[10px] font-bold">
+                ✓ Selesai
+              </span>
+              <span class="text-[11px] text-oase-muted font-medium">${dateStr}</span>
+            </div>
+            <div>
+              <h3 class="text-sm font-bold text-oase-plum">${s.user_name} (${s.user_email})</h3>
+              <p class="text-xs text-heather-700 font-semibold mt-0.5">Topik: ${s.topic}</p>
+            </div>
+            ${motivationHtml}
+            <div class="flex items-center justify-between text-xs pt-1">
+              <span class="text-oase-muted font-medium text-[11px]">Rating Siswa:</span>
+              ${ratingHtml}
+            </div>
+            ${s.review ? `<p class="text-[11px] text-oase-muted italic bg-oase-surface p-2 rounded-lg border border-oase-border">"${s.review}"</p>` : ''}
+          </div>
+          <div class="pt-2 border-t border-oase-border flex items-center justify-between">
+            <span class="text-xs text-oase-muted">Durasi: 30 Menit</span>
+            <a href="ruang-chat.html?sessionId=${s.id}&role=counselor&readonly=true" onclick="sessionStorage.setItem('oase_active_chat_role', 'counselor')" class="px-3.5 py-1.5 rounded-xl border border-heather-200 bg-heather-50 hover:bg-heather-100 text-heather-800 text-xs font-bold transition-all flex items-center gap-1">
+              <i data-lucide="messages-square" class="w-3.5 h-3.5"></i>
+              <span>Lihat Riwayat Chat</span>
+            </a>
+          </div>
+        `;
+        historySessionsListContainer.appendChild(card);
+      });
+      lucide.createIcons();
+    }
+
     // Run on start
     checkAuth();
     loadCounselorNotifs();
     loadLiveSessions();
+    loadHistorySessions();
   </script>
 </body>
 </html>

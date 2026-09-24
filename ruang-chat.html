@@ -172,8 +172,134 @@
         </button>
       </form>
 
+      <!-- Panel Sesi Terkunci (Ketika Salah Satu Selesai / Waktu Habis) -->
+      <div id="lockedChatNotice" class="hidden p-4 rounded-2xl bg-white border border-heather-200 shadow-xs text-center space-y-2 animate-fadeIn">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-heather-100 text-heather-800 text-xs font-bold">
+          <i data-lucide="lock" class="w-3.5 h-3.5 text-heather-600"></i>
+          <span>Sesi Konseling Telah Selesai & Obrolan Dikunci</span>
+        </div>
+        <p class="text-xs text-oase-muted max-w-md mx-auto">
+          Ruang obrolan telah dinonaktifkan demi menjaga privasi dan keamanan Anda. Rekaman percakapan telah tersimpan rapi di riwayat.
+        </p>
+        <div class="flex flex-wrap items-center justify-center gap-2 pt-1">
+          <button id="lockedBackBtn" class="px-4 py-2 rounded-xl bg-heather-500 hover:bg-heather-600 text-white text-xs font-bold transition-all flex items-center gap-1.5">
+            <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+            <span>Kembali ke Dashboard</span>
+          </button>
+          <button id="lockedRatingActionBtn" class="hidden px-4 py-2 rounded-xl border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-800 text-xs font-bold transition-all flex items-center gap-1.5">
+            <i data-lucide="star" class="w-3.5 h-3.5 fill-amber-400 text-amber-500"></i>
+            <span id="lockedRatingActionLabel">Beri Rating Konselor</span>
+          </button>
+          <button id="lockedMotivationActionBtn" class="hidden px-4 py-2 rounded-xl border border-heather-300 bg-heather-50 hover:bg-heather-100 text-heather-800 text-xs font-bold transition-all flex items-center gap-1.5">
+            <i data-lucide="heart" class="w-3.5 h-3.5 text-rose-500"></i>
+            <span>Beri Pesan Semangat Siswa</span>
+          </button>
+        </div>
+      </div>
+
     </div>
   </footer>
+
+  <!-- ======================================================== -->
+  <!-- MODAL: PESAN SEMANGAT & MOTIVASI DARI KONSELOR           -->
+  <!-- ======================================================== -->
+  <div id="counselorMotivationModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-oase-plum/70 backdrop-blur-md hidden animate-fadeIn">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-7 border border-heather-200 shadow-2xl relative space-y-4">
+      <div class="space-y-1">
+        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-heather-600 to-rose-400 text-white flex items-center justify-center shadow-md">
+          <i data-lucide="heart-handshake" class="w-5 h-5"></i>
+        </div>
+        <h3 class="text-lg font-bold text-oase-plum">Pesan Semangat Penutup</h3>
+        <p class="text-xs text-oase-muted">Sebelum mengakhiri sesi, berikan kata-kata penguatan, empati, atau motivasi yang menenangkan bagi siswa.</p>
+      </div>
+
+      <!-- Quick Template Chips -->
+      <div class="space-y-1.5">
+        <label class="block text-[11px] font-bold text-heather-800 uppercase tracking-wider">Pilih Template Cepat:</label>
+        <div class="flex flex-wrap gap-1.5">
+          <button type="button" class="quick-motivation-chip px-2.5 py-1 rounded-xl bg-heather-50 hover:bg-heather-100 border border-heather-200 text-[11px] text-heather-800 transition-all text-left">
+            🌟 Kamu sangat berani bercerita hari ini!
+          </button>
+          <button type="button" class="quick-motivation-chip px-2.5 py-1 rounded-xl bg-heather-50 hover:bg-heather-100 border border-heather-200 text-[11px] text-heather-800 transition-all text-left">
+            💪 Tetap semangat, setiap langkah kecilmu sangat berarti.
+          </button>
+          <button type="button" class="quick-motivation-chip px-2.5 py-1 rounded-xl bg-heather-50 hover:bg-heather-100 border border-heather-200 text-[11px] text-heather-800 transition-all text-left">
+            🌱 Ingat, kamu tidak sendirian. Pintu OASE selalu terbuka.
+          </button>
+        </div>
+      </div>
+
+      <!-- Custom Motivation Input -->
+      <div>
+        <textarea 
+          id="counselorMotivationInput" 
+          rows="3" 
+          placeholder="Tulis pesan semangat personal untuk siswa..." 
+          class="w-full p-3 rounded-2xl border border-oase-border bg-oase-surface/50 text-xs focus:outline-none focus:border-heather-500 focus:bg-white resize-none"
+        ></textarea>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center gap-2 pt-1">
+        <button id="skipMotivationEndBtn" type="button" class="flex-1 py-2.5 rounded-xl border border-oase-border hover:bg-heather-50 text-xs font-semibold text-oase-muted transition-all">
+          Selesaikan Tanpa Pesan
+        </button>
+        <button id="sendMotivationEndBtn" type="button" class="flex-1 py-2.5 rounded-xl bg-heather-500 hover:bg-heather-600 text-white text-xs font-bold transition-all shadow-md flex items-center justify-center gap-1.5">
+          <i data-lucide="send" class="w-3.5 h-3.5"></i>
+          <span>Kirim & Selesaikan</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL: RATING KONSELOR OLEH SISWA (BINTANG 1 - 5)        -->
+  <!-- ======================================================== -->
+  <div id="userRatingModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-oase-plum/70 backdrop-blur-md hidden animate-fadeIn">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-7 border border-heather-200 shadow-2xl relative space-y-4 text-center">
+      <div class="w-12 h-12 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center mx-auto shadow-sm">
+        <i data-lucide="star" class="w-6 h-6 fill-amber-400"></i>
+      </div>
+
+      <div class="space-y-1">
+        <h3 class="text-lg font-bold text-oase-plum">Bagaimana Pengalaman Konselingmu?</h3>
+        <p class="text-xs text-oase-muted">Penilaianmu sangat berarti untuk membantu kami menjaga kualitas dan kinerja konselor OASE.</p>
+      </div>
+
+      <!-- Star Rating Interactive Selector -->
+      <div class="py-2">
+        <div id="starContainer" class="flex items-center justify-center gap-2 text-3xl cursor-pointer">
+          <span class="star-btn text-amber-400 transition-transform hover:scale-125" data-val="1">★</span>
+          <span class="star-btn text-amber-400 transition-transform hover:scale-125" data-val="2">★</span>
+          <span class="star-btn text-amber-400 transition-transform hover:scale-125" data-val="3">★</span>
+          <span class="star-btn text-amber-400 transition-transform hover:scale-125" data-val="4">★</span>
+          <span class="star-btn text-amber-400 transition-transform hover:scale-125" data-val="5">★</span>
+        </div>
+        <p id="starLabel" class="text-xs font-bold text-amber-700 mt-1.5">Sangat Puas & Membantu (5 Bintang)</p>
+      </div>
+
+      <!-- Review Input (Optional) -->
+      <div>
+        <textarea 
+          id="ratingReviewInput" 
+          rows="2" 
+          placeholder="Tulis ulasan atau hal yang paling membantumu (opsional)..." 
+          class="w-full p-3 rounded-2xl border border-oase-border bg-oase-surface/50 text-xs focus:outline-none focus:border-heather-500 focus:bg-white resize-none"
+        ></textarea>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center gap-2 pt-1">
+        <button id="closeRatingModalBtn" type="button" class="flex-1 py-2.5 rounded-xl border border-oase-border hover:bg-heather-50 text-xs font-semibold text-oase-muted transition-all">
+          Nanti Saja
+        </button>
+        <button id="submitRatingBtn" type="button" class="flex-1 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold transition-all shadow-md flex items-center justify-center gap-1.5">
+          <i data-lucide="check" class="w-3.5 h-3.5"></i>
+          <span>Kirim Penilaian</span>
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- Scripts -->
   <script src="counselors.js"></script>
@@ -193,6 +319,7 @@
     const sessionTimerLabel = document.getElementById('sessionTimerLabel');
     const resetSessionChatBtn = document.getElementById('resetSessionChatBtn');
     const endSessionBtn = document.getElementById('endSessionBtn');
+    const sessionStatusPill = document.getElementById('sessionStatusPill');
 
     const chatMessagesContainer = document.getElementById('chatMessagesContainer');
     const chatForm = document.getElementById('chatForm');
@@ -205,6 +332,27 @@
     const cancelRecordBtn = document.getElementById('cancelRecordBtn');
     const sendRecordBtn = document.getElementById('sendRecordBtn');
 
+    // Locked Chat Elements
+    const lockedChatNotice = document.getElementById('lockedChatNotice');
+    const lockedBackBtn = document.getElementById('lockedBackBtn');
+    const lockedRatingActionBtn = document.getElementById('lockedRatingActionBtn');
+    const lockedRatingActionLabel = document.getElementById('lockedRatingActionLabel');
+    const lockedMotivationActionBtn = document.getElementById('lockedMotivationActionBtn');
+
+    // Motivation Modal Elements
+    const counselorMotivationModal = document.getElementById('counselorMotivationModal');
+    const counselorMotivationInput = document.getElementById('counselorMotivationInput');
+    const sendMotivationEndBtn = document.getElementById('sendMotivationEndBtn');
+    const skipMotivationEndBtn = document.getElementById('skipMotivationEndBtn');
+
+    // Rating Modal Elements
+    const userRatingModal = document.getElementById('userRatingModal');
+    const starContainer = document.getElementById('starContainer');
+    const starLabel = document.getElementById('starLabel');
+    const ratingReviewInput = document.getElementById('ratingReviewInput');
+    const closeRatingModalBtn = document.getElementById('closeRatingModalBtn');
+    const submitRatingBtn = document.getElementById('submitRatingBtn');
+
     // State Variables
     let currentRole = 'user'; // 'user' (siswa) or 'counselor' (konselor)
     let currentUserSession = null;
@@ -212,6 +360,9 @@
     let activeSession = null;
     let timerInterval = null;
     let lastRenderedMessageIds = new Set();
+    let isSessionLocked = false;
+    let selectedRating = 5;
+    let hasPromptedRating = false;
 
     // Voice Note variables
     let mediaRecorder = null;
@@ -227,7 +378,6 @@
         currentRole = explicitRole;
         sessionStorage.setItem('oase_active_chat_role', explicitRole);
       } else if (sessionStorage.getItem('oase_active_chat_role')) {
-        // Prioritas 2: Peran tab yang sudah tersimpan di sessionStorage tab saat ini
         currentRole = sessionStorage.getItem('oase_active_chat_role');
       } else if (document.referrer && document.referrer.includes('laman-konselor')) {
         currentRole = 'counselor';
@@ -236,7 +386,6 @@
         currentRole = 'user';
         sessionStorage.setItem('oase_active_chat_role', 'user');
       } else {
-        // Default aman: 'user' (siswa). Jangan baca oase_counselor_session dari localStorage yang dapat mengacaukan tab siswa
         currentRole = 'user';
         sessionStorage.setItem('oase_active_chat_role', 'user');
       }
@@ -253,14 +402,16 @@
 
       updateRoleUI();
 
-      // Atur tombol kembali ke dashboard yang sesuai peran
-      backDashboardBtn.addEventListener('click', () => {
+      // Navigasi Kembali ke Dashboard
+      const goBack = () => {
         if (currentRole === 'counselor') {
           window.location.href = 'laman-konselor.html';
         } else {
           window.location.href = 'dashboard-user.html';
         }
-      });
+      };
+      backDashboardBtn.addEventListener('click', goBack);
+      if (lockedBackBtn) lockedBackBtn.addEventListener('click', goBack);
 
       // Tombol Reset Sesi Chat untuk Pengujian
       resetSessionChatBtn.addEventListener('click', () => {
@@ -279,28 +430,32 @@
         activeSession = sessions.find(s => s.id === targetSessionId);
       }
       if (!activeSession) {
-        // Ambil sesi aktif pertama yang ada
         activeSession = sessions.find(s => s.status === 'aktif');
       }
 
       if (!activeSession) {
         alert('Sesi konseling tidak ditemukan atau telah berakhir.');
-        if (currentRole === 'counselor') {
-          window.location.href = 'laman-konselor.html';
-        } else {
-          window.location.href = 'dashboard-user.html';
-        }
+        goBack();
         return;
       }
 
       setupOpponentProfile();
-      startSessionTimer();
+      setupRatingModal();
+      setupMotivationModal();
+
+      // Cek apakah sesi sudah selesai sejak awal atau parameter readonly
+      if (activeSession.status === 'selesai' || urlParams.get('readonly') === 'true') {
+        lockChatUI(activeSession);
+      } else {
+        startSessionTimer();
+      }
+
       await syncMessages(true);
 
       // Mulai sinkronisasi berkala setiap 1000ms (1 detik)
       setInterval(() => syncMessages(false), 1000);
 
-      // Listener storage event antar-tab browser (seketika saat ada pesan baru di tab lawan)
+      // Listener storage event antar-tab browser (seketika saat ada pesan baru atau sesi diakhiri di tab lawan)
       window.addEventListener('storage', (e) => {
         if (e.key === 'oase_session_messages' || e.key === 'oase_counseling_sessions') {
           syncMessages(false);
@@ -325,12 +480,10 @@
       if (!activeSession) return;
 
       if (currentRole === 'counselor') {
-        // Di layar konselor: Lawan bicaranya adalah Siswa
         opponentName.textContent = `${activeSession.user_name} (${activeSession.user_email})`;
         sessionTopicMeta.textContent = `Topik: ${activeSession.topic}`;
         opponentAvatar.src = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&h=200&q=80';
       } else {
-        // Di layar siswa: Lawan bicaranya adalah Konselor
         const counselorObj = (window.COUNSELORS_DATA || []).find(c => c.id === activeSession.counselor_id) || {
           name: activeSession.counselor_name || 'Kak Sarah Maulida, S.Psi.',
           role: 'Konselor Terverifikasi OASE',
@@ -342,7 +495,67 @@
       }
     }
 
-    // 3. COUNTDOWN TIMER 30 MENIT
+    // 3. PENGUNCIAN OBROLAN DUA ARAH (LOCK CHAT SYNCHRONOUSLY)
+    function lockChatUI(sessionData) {
+      isSessionLocked = true;
+      if (timerInterval) clearInterval(timerInterval);
+
+      // Ubah status dan timer di header
+      sessionTimerLabel.textContent = '00:00 (Selesai)';
+      if (sessionStatusPill) {
+        sessionStatusPill.textContent = '● Selesai';
+        sessionStatusPill.className = 'px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 text-[9px] sm:text-[10px] font-bold flex-shrink-0';
+      }
+
+      // Ubah tombol Selesaikan jadi tombol Kembali
+      endSessionBtn.innerHTML = `
+        <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+        <span class="hidden sm:inline">Kembali</span>
+      `;
+      endSessionBtn.className = "px-2.5 sm:px-3.5 py-1.5 rounded-xl border border-oase-border bg-white hover:bg-heather-50 text-oase-muted hover:text-heather-700 text-xs font-bold transition-all flex items-center gap-1";
+      endSessionBtn.onclick = () => {
+        if (currentRole === 'counselor') {
+          window.location.href = 'laman-konselor.html';
+        } else {
+          window.location.href = 'dashboard-user.html';
+        }
+      };
+
+      // Sembunyikan form chat & rekam suara, tampilkan panel terkunci
+      chatForm.classList.add('hidden');
+      voiceRecordBar.classList.add('hidden');
+      lockedChatNotice.classList.remove('hidden');
+
+      // Tampilkan tombol aksi rating atau motivasi sesuai peran
+      if (currentRole === 'user') {
+        lockedRatingActionBtn.classList.remove('hidden');
+        if (sessionData && sessionData.rating) {
+          lockedRatingActionLabel.textContent = `Rating: ${'★'.repeat(sessionData.rating)} (${sessionData.rating}/5)`;
+          lockedRatingActionBtn.onclick = () => userRatingModal.classList.remove('hidden');
+        } else {
+          lockedRatingActionLabel.textContent = 'Beri Rating Konselor';
+          lockedRatingActionBtn.onclick = () => userRatingModal.classList.remove('hidden');
+          // Munculkan otomatis modal rating sekali jika belum pernah dinilai
+          if (!hasPromptedRating) {
+            hasPromptedRating = true;
+            setTimeout(() => {
+              userRatingModal.classList.remove('hidden');
+            }, 600);
+          }
+        }
+      } else if (currentRole === 'counselor') {
+        if (!sessionData || !sessionData.motivational_message) {
+          lockedMotivationActionBtn.classList.remove('hidden');
+          lockedMotivationActionBtn.onclick = () => counselorMotivationModal.classList.remove('hidden');
+        } else {
+          lockedMotivationActionBtn.classList.add('hidden');
+        }
+      }
+
+      lucide.createIcons();
+    }
+
+    // 4. COUNTDOWN TIMER 30 MENIT & AKSI AKHIRI SESI
     function startSessionTimer() {
       if (timerInterval) clearInterval(timerInterval);
       const startTime = new Date(activeSession.started_at || activeSession.created_at).getTime();
@@ -353,13 +566,9 @@
         const diff = endTime - Date.now();
         if (diff <= 0) {
           clearInterval(timerInterval);
-          sessionTimerLabel.textContent = '00:00 (Selesai)';
-          alert('Sesi konseling 30 menit telah berakhir. Terima kasih.');
           window.ChatSessionService.endSession(activeSession.id);
-          messageInput.disabled = true;
-          messageInput.placeholder = 'Sesi konseling telah selesai.';
-          micBtn.disabled = true;
-          sendMessageBtn.disabled = true;
+          activeSession.status = 'selesai';
+          lockChatUI(activeSession);
           return;
         }
         const m = Math.floor(diff / 60000);
@@ -371,21 +580,124 @@
       timerInterval = setInterval(update, 1000);
 
       endSessionBtn.addEventListener('click', async () => {
-        if (confirm('Apakah Anda yakin ingin menyelesaikan sesi konseling 30 menit ini?')) {
-          await window.ChatSessionService.endSession(activeSession.id);
-          alert('Sesi telah diselesaikan.');
-          if (currentRole === 'counselor') {
-            window.location.href = 'laman-konselor.html';
-          } else {
-            window.location.href = 'dashboard-user.html';
+        if (isSessionLocked) return;
+
+        if (currentRole === 'counselor') {
+          // Konselor membuka formulir pesan semangat penutup terlebih dahulu
+          counselorMotivationModal.classList.remove('hidden');
+        } else {
+          // Siswa mengonfirmasi penyelesaian sesi
+          if (confirm('Apakah Anda yakin ingin menyelesaikan sesi konseling 30 menit ini?')) {
+            await window.ChatSessionService.endSession(activeSession.id);
+            activeSession.status = 'selesai';
+            lockChatUI(activeSession);
           }
         }
       });
     }
 
-    // 4. REAL-TIME MESSAGE SYNC & RENDER (ALIRAN ALAMI: SAYA DI KANAN, LAWAN DI KIRI)
+    // 5. MODAL PESAN SEMANGAT DARI KONSELOR
+    function setupMotivationModal() {
+      // Quick chips template
+      document.querySelectorAll('.quick-motivation-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+          counselorMotivationInput.value = chip.textContent.trim().replace(/^🌟\s*|^💪\s*|^🌱\s*/, '');
+        });
+      });
+
+      sendMotivationEndBtn.addEventListener('click', async () => {
+        const msg = counselorMotivationInput.value.trim();
+        sendMotivationEndBtn.disabled = true;
+        sendMotivationEndBtn.textContent = 'Menyimpan...';
+
+        await window.ChatSessionService.endSession(activeSession.id, msg);
+        activeSession.status = 'selesai';
+        activeSession.motivational_message = msg;
+        counselorMotivationModal.classList.add('hidden');
+        lockChatUI(activeSession);
+        await syncMessages(true);
+        sendMotivationEndBtn.disabled = false;
+        sendMotivationEndBtn.innerHTML = `<i data-lucide="send" class="w-3.5 h-3.5"></i><span>Kirim & Selesaikan</span>`;
+        lucide.createIcons();
+      });
+
+      skipMotivationEndBtn.addEventListener('click', async () => {
+        skipMotivationEndBtn.disabled = true;
+        await window.ChatSessionService.endSession(activeSession.id, null);
+        activeSession.status = 'selesai';
+        counselorMotivationModal.classList.add('hidden');
+        lockChatUI(activeSession);
+        skipMotivationEndBtn.disabled = false;
+      });
+    }
+
+    // 6. MODAL RATING KONSELOR OLEH SISWA
+    function setupRatingModal() {
+      const starBtns = document.querySelectorAll('.star-btn');
+      const starTexts = {
+        1: 'Kurang Puas (1 Bintang)',
+        2: 'Cukup Membantu (2 Bintang)',
+        3: 'Baik (3 Bintang)',
+        4: 'Sangat Baik (4 Bintang)',
+        5: 'Sangat Puas & Membantu (5 Bintang)'
+      };
+
+      const updateStarDisplay = (val) => {
+        starBtns.forEach(btn => {
+          const btnVal = parseInt(btn.getAttribute('data-val'));
+          if (btnVal <= val) {
+            btn.className = 'star-btn text-amber-400 transition-transform hover:scale-125';
+          } else {
+            btn.className = 'star-btn text-gray-300 transition-transform hover:scale-125';
+          }
+        });
+        starLabel.textContent = starTexts[val] || `${val} Bintang`;
+      };
+
+      starBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          selectedRating = parseInt(btn.getAttribute('data-val'));
+          updateStarDisplay(selectedRating);
+        });
+      });
+
+      closeRatingModalBtn.addEventListener('click', () => {
+        userRatingModal.classList.add('hidden');
+      });
+
+      submitRatingBtn.addEventListener('click', async () => {
+        submitRatingBtn.disabled = true;
+        submitRatingBtn.textContent = 'Menyimpan...';
+
+        const review = ratingReviewInput.value.trim();
+        await window.ChatSessionService.rateSession(activeSession.id, selectedRating, review);
+        
+        activeSession.rating = selectedRating;
+        activeSession.review = review;
+        userRatingModal.classList.add('hidden');
+        
+        alert(`Terima kasih banyak! Penilaian ${selectedRating} bintang telah berhasil dikirimkan.`);
+        lockedRatingActionLabel.textContent = `Rating: ${'★'.repeat(selectedRating)} (${selectedRating}/5)`;
+        submitRatingBtn.disabled = false;
+        submitRatingBtn.innerHTML = `<i data-lucide="check" class="w-3.5 h-3.5"></i><span>Kirim Penilaian</span>`;
+        lucide.createIcons();
+      });
+    }
+
+    // 7. REAL-TIME MESSAGE SYNC & RENDER (ALIRAN ALAMI: SAYA DI KANAN, LAWAN DI KIRI)
     async function syncMessages(forceScroll = false) {
       if (!activeSession) return;
+
+      // Cek status sesi terkini dari penyimpanan lokal (apakah sesi diakhiri oleh lawan bicara)
+      const sessions = JSON.parse(localStorage.getItem('oase_counseling_sessions') || '[]');
+      const fresh = sessions.find(s => s.id === activeSession.id);
+      if (fresh) {
+        activeSession = fresh;
+        if (activeSession.status === 'selesai' && !isSessionLocked) {
+          lockChatUI(activeSession);
+        }
+      }
+
       const messages = await window.ChatSessionService.getMessages(activeSession.id);
 
       // Cek apakah ada pesan baru
@@ -423,6 +735,24 @@
       let opponentPhoto = currentRole === 'counselor' ? userPhoto : cObj.avatar;
 
       messages.forEach(m => {
+        // Jika pesan motivasi khusus dari konselor
+        if (m.message_type === 'motivation') {
+          const card = document.createElement('div');
+          card.className = "w-full my-3 p-4 sm:p-5 rounded-3xl bg-gradient-to-br from-amber-50 via-rose-50/60 to-heather-50 border border-heather-200 shadow-xs text-center space-y-2 animate-fadeIn";
+          card.innerHTML = `
+            <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/90 border border-heather-200 text-heather-800 text-xs font-bold shadow-2xs">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-500"></i>
+              <span>Pesan Semangat Penutup dari Konselor</span>
+            </div>
+            <p class="text-xs sm:text-sm text-oase-plum font-semibold italic whitespace-pre-line leading-relaxed max-w-md mx-auto">
+              "${m.message_text}"
+            </p>
+            <span class="text-[10px] text-oase-muted block font-medium">— ${m.sender_name}</span>
+          `;
+          chatMessagesContainer.appendChild(card);
+          return;
+        }
+
         // isMe bernilai true jika sender_type persis sama dengan peran tab saat ini
         const isMe = m.sender_type === currentRole;
         const msgDiv = document.createElement('div');
@@ -477,6 +807,7 @@
 
         chatMessagesContainer.appendChild(msgDiv);
       });
+      lucide.createIcons();
     }
 
     // 5. SEND TEXT MESSAGE (OTOMATIS SESUAI PERAN TAB INI)

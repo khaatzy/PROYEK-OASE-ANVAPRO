@@ -39,7 +39,9 @@ const COUNSELORS_DATA = [
     password: 'konselor123',
     avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=200&h=200&q=80',
     specialties: ['Kesehatan Mental', 'Akademik & Pembelajaran'],
-    status: 'Siap Mendengarkan'
+    status: 'Siap Mendengarkan',
+    rating: 4.9,
+    total_reviews: 18
   },
   {
     id: 'counselor-2',
@@ -49,7 +51,9 @@ const COUNSELORS_DATA = [
     password: 'konselor123',
     avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&h=200&q=80',
     specialties: ['Masalah Keluarga', 'Pertemanan & Sosial'],
-    status: 'Siap Mendengarkan'
+    status: 'Siap Mendengarkan',
+    rating: 5.0,
+    total_reviews: 14
   },
   {
     id: 'counselor-3',
@@ -59,9 +63,30 @@ const COUNSELORS_DATA = [
     password: 'konselor123',
     avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=200&h=200&q=80',
     specialties: ['Pengembangan Diri', 'Kecemasan Belajar'],
-    status: 'Siap Mendengarkan'
+    status: 'Siap Mendengarkan',
+    rating: 4.8,
+    total_reviews: 16
   }
 ];
 
-// Menjadikan data tersedia secara global di window agar bisa diakses oleh seluruh halaman OASE
+// Helper untuk mengambil rating dinamis konselor
+function getCounselorRatingInfo(counselorId) {
+  if (window.ChatSessionService && typeof window.ChatSessionService.getCounselorRating === 'function') {
+    const liveRating = window.ChatSessionService.getCounselorRating(counselorId);
+    if (liveRating) {
+      return {
+        average: parseFloat(liveRating.average) || 5.0,
+        totalReviews: liveRating.totalCount || 5
+      };
+    }
+  }
+  const counselor = COUNSELORS_DATA.find(c => c.id === counselorId);
+  return {
+    average: counselor ? counselor.rating : 5.0,
+    totalReviews: counselor ? counselor.total_reviews : 10
+  };
+}
+
+// Menjadikan data dan helper tersedia secara global di window
 window.COUNSELORS_DATA = COUNSELORS_DATA;
+window.getCounselorRatingInfo = getCounselorRatingInfo;
