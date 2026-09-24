@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="id" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ruang Chat Konseling - OASE Cerita</title>
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Tailwind Config -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            heather: {
+              50: '#FBF5F9',
+              100: '#F5EBF3',
+              200: '#EBD8E7',
+              300: '#DCB8D4',
+              400: '#C78CBB',
+              500: '#A14189', /* HEATHER MAUVE PRIMARY */
+              600: '#8E3476',
+              700: '#752A62',
+              800: '#5F244F',
+              900: '#3D1533',
+            },
+            oase: {
+              cream: '#FDFBF7',
+              surface: '#FCF9FA',
+              border: '#F0E2EC',
+              plum: '#311027',
+              muted: '#7A6273'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    @keyframes pulse-ring {
+      0% { transform: scale(0.95); opacity: 0.8; }
+      50% { transform: scale(1.15); opacity: 0.4; }
+      100% { transform: scale(0.95); opacity: 0.8; }
+    }
+    .recording-pulse {
+      animation: pulse-ring 1.5s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body class="bg-oase-surface text-oase-plum font-sans antialiased h-full flex flex-col justify-between selection:bg-heather-200 selection:text-heather-900">
+
+  <!-- Header Ruang Konsultasi -->
+  <header class="bg-white border-b border-oase-border shadow-xs sticky top-0 z-30">
+    <div class="max-w-5xl mx-auto px-3 sm:px-6 h-18 sm:h-20 flex items-center justify-between gap-3">
+      
+      <!-- Back Button & Opponent Info -->
+      <div class="flex items-center gap-2.5 sm:gap-4 overflow-hidden">
+        <button id="backDashboardBtn" class="p-2 sm:p-2.5 rounded-2xl hover:bg-heather-50 text-oase-muted hover:text-heather-700 transition-colors flex-shrink-0" title="Kembali ke Dashboard">
+          <i data-lucide="arrow-left" class="w-5 h-5"></i>
+        </button>
+
+        <div class="flex items-center gap-2.5 sm:gap-3 overflow-hidden">
+          <img id="opponentAvatar" src="" alt="Avatar" class="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl object-cover border border-heather-200 shadow-xs flex-shrink-0">
+          <div class="overflow-hidden">
+            <div class="flex items-center gap-1.5 sm:gap-2">
+              <h2 id="opponentName" class="text-xs sm:text-sm font-bold text-oase-plum truncate">Nama Lawan Bicara</h2>
+              <span id="sessionStatusPill" class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[9px] sm:text-[10px] font-bold flex-shrink-0">
+                ● Live 30m
+              </span>
+            </div>
+            <p id="sessionTopicMeta" class="text-[11px] sm:text-xs text-heather-700 font-medium truncate">Topik Konseling</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sesi Timer 30 Menit, Reset & Tombol Selesaikan -->
+      <div class="flex items-center gap-1.5 sm:gap-2.5 flex-shrink-0">
+        <!-- Live Countdown Timer -->
+        <div class="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-2xl bg-heather-50 border border-heather-200 text-xs font-bold text-heather-800 shadow-2xs">
+          <i data-lucide="timer" class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-heather-600"></i>
+          <span id="sessionTimerLabel">30:00</span>
+          <span class="hidden sm:inline text-[10px] text-oase-muted font-normal">tersisa</span>
+        </div>
+
+        <!-- Tombol Reset Sesi (Membersihkan pesan lama uji coba) -->
+        <button id="resetSessionChatBtn" class="p-2 sm:p-2.5 rounded-xl border border-oase-border hover:border-heather-300 bg-white hover:bg-heather-50 text-oase-muted hover:text-heather-700 transition-all flex items-center gap-1" title="Bersihkan riwayat pesan pada sesi ini (Mulai uji coba baru)">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+        </button>
+
+        <!-- Tombol Selesaikan Sesi -->
+        <button id="endSessionBtn" class="px-2.5 sm:px-3.5 py-1.5 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold transition-all flex items-center gap-1">
+          <i data-lucide="phone-off" class="w-3.5 h-3.5"></i>
+          <span class="hidden sm:inline">Selesaikan</span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Area Chat Messages (Full-Height Scrollable) -->
+  <main class="flex-grow max-w-5xl w-full mx-auto p-3 sm:p-6 overflow-y-auto space-y-3.5" id="chatMessagesContainer">
+    <!-- Notice Sesi -->
+    <div class="text-center py-2">
+      <span class="px-3.5 py-1 rounded-full bg-white border border-heather-200 text-heather-800 text-[10px] sm:text-[11px] font-semibold shadow-2xs inline-block">
+        🔒 Sesi konseling 30 menit dimulai secara aman dan rahasia. Sampaikan cerita dengan tenang.
+      </span>
+    </div>
+
+    <!-- Message bubbles will be populated dynamically -->
+  </main>
+
+  <!-- Footer Input & Voice Note Bar -->
+  <footer class="bg-white border-t border-oase-border sticky bottom-0 z-30">
+    <div class="max-w-5xl mx-auto p-2.5 sm:p-4 space-y-2">
+      
+      <!-- Voice Recording Bar (Active State) -->
+      <div id="voiceRecordBar" class="hidden p-2.5 sm:p-3 bg-rose-50 rounded-2xl border border-rose-200 flex flex-wrap items-center justify-between gap-2 text-xs text-rose-700 animate-fadeIn">
+        <div class="flex items-center gap-2 font-semibold">
+          <span class="w-3 h-3 rounded-full bg-rose-500 recording-pulse"></span>
+          <span class="text-xs">Merekam Pesan Suara...</span>
+          <span id="recordTimerLabel" class="font-mono font-bold text-xs bg-white px-2 py-0.5 rounded-md border border-rose-200">00:00</span>
+        </div>
+        <div class="flex items-center gap-2 ml-auto">
+          <button id="cancelRecordBtn" type="button" class="px-3 py-1.5 rounded-xl border border-rose-200 bg-white hover:bg-rose-100 text-xs font-bold transition-all">
+            Batal
+          </button>
+          <button id="sendRecordBtn" type="button" class="px-3.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition-all flex items-center gap-1 shadow-sm">
+            <i data-lucide="send" class="w-3.5 h-3.5"></i>
+            <span>Kirim VN</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Form Input Pesan Teks & Tombol VN (Natural, Langsung Kirim Sesuai Peran Aktif) -->
+      <form id="chatForm" class="flex items-center gap-2">
+        <button 
+          type="button" 
+          id="micBtn" 
+          title="Rekam Pesan Suara (Voice Note)" 
+          class="p-2.5 sm:p-3 rounded-2xl bg-heather-50 hover:bg-heather-100 text-heather-700 border border-heather-200 transition-all flex items-center justify-center flex-shrink-0"
+        >
+          <i data-lucide="mic" class="w-5 h-5"></i>
+        </button>
+
+        <input 
+          type="text" 
+          id="messageInput" 
+          placeholder="Ketik pesan Anda di sini..." 
+          autocomplete="off"
+          class="flex-grow px-4 py-2.5 sm:py-3 rounded-2xl border border-oase-border bg-oase-surface/50 text-sm focus:outline-none focus:border-heather-500 focus:bg-white transition-all"
+        >
+
+        <button 
+          type="submit" 
+          id="sendMessageBtn"
+          class="px-5 py-2.5 sm:py-3 rounded-2xl bg-heather-500 hover:bg-heather-600 text-white font-bold text-xs sm:text-sm shadow-md shadow-heather-500/25 transition-all flex items-center gap-1.5 flex-shrink-0"
+        >
+          <i data-lucide="send" class="w-4 h-4"></i>
+          <span class="hidden sm:inline">Kirim</span>
+        </button>
+      </form>
+
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="counselors.js"></script>
+  <script src="supabaseClient.js"></script>
+  <script>
+    lucide.createIcons();
+
+    // Parse URL params
+    const urlParams = new URLSearchParams(window.location.search);
+    const targetSessionId = urlParams.get('sessionId');
+
+    // DOM Elements
+    const backDashboardBtn = document.getElementById('backDashboardBtn');
+    const opponentAvatar = document.getElementById('opponentAvatar');
+    const opponentName = document.getElementById('opponentName');
+    const sessionTopicMeta = document.getElementById('sessionTopicMeta');
+    const sessionTimerLabel = document.getElementById('sessionTimerLabel');
+    const resetSessionChatBtn = document.getElementById('resetSessionChatBtn');
+    const endSessionBtn = document.getElementById('endSessionBtn');
+
+    const chatMessagesContainer = document.getElementById('chatMessagesContainer');
+    const chatForm = document.getElementById('chatForm');
+    const messageInput = document.getElementById('messageInput');
+    const sendMessageBtn = document.getElementById('sendMessageBtn');
+
+    const micBtn = document.getElementById('micBtn');
+    const voiceRecordBar = document.getElementById('voiceRecordBar');
+    const recordTimerLabel = document.getElementById('recordTimerLabel');
+    const cancelRecordBtn = document.getElementById('cancelRecordBtn');
+    const sendRecordBtn = document.getElementById('sendRecordBtn');
+
+    // State Variables
+    let currentRole = 'user'; // 'user' (siswa) or 'counselor' (konselor)
+    let currentUserSession = null;
+    let currentCounselorSession = null;
+    let activeSession = null;
+    let timerInterval = null;
+    let lastRenderedMessageIds = new Set();
+
+    // Voice Note variables
+    let mediaRecorder = null;
+    let audioChunks = [];
+    let recordStart = null;
+    let recordInterval = null;
+
+    // 1. INITIALIZE IDENTITY & DETECT ROLE (TAB ISOLATION)
+    async function initChat() {
+      // Prioritas 1: Parameter URL (?role=user atau ?role=counselor)
+      const explicitRole = urlParams.get('role');
+      if (explicitRole === 'user' || explicitRole === 'counselor') {
+        currentRole = explicitRole;
+        sessionStorage.setItem('oase_active_chat_role', explicitRole);
+      } else if (sessionStorage.getItem('oase_active_chat_role')) {
+        // Prioritas 2: Peran tab yang sudah tersimpan di sessionStorage tab saat ini
+        currentRole = sessionStorage.getItem('oase_active_chat_role');
+      } else if (document.referrer && document.referrer.includes('laman-konselor')) {
+        currentRole = 'counselor';
+        sessionStorage.setItem('oase_active_chat_role', 'counselor');
+      } else if (document.referrer && document.referrer.includes('dashboard-user')) {
+        currentRole = 'user';
+        sessionStorage.setItem('oase_active_chat_role', 'user');
+      } else {
+        // Default aman: 'user' (siswa). Jangan baca oase_counselor_session dari localStorage yang dapat mengacaukan tab siswa
+        currentRole = 'user';
+        sessionStorage.setItem('oase_active_chat_role', 'user');
+      }
+
+      // Sesi konselor & user
+      currentCounselorSession = window.CounselingService.getCurrentCounselorSession();
+      const session = await window.AuthService.getSession();
+      if (session && session.user) {
+        currentUserSession = session.user;
+      } else {
+        const localEmail = localStorage.getItem('oase_active_user_email') || 'siswa@oase.id';
+        currentUserSession = { email: localEmail, id: 'user-' + localEmail.replace(/[^a-zA-Z0-9]/g, '') };
+      }
+
+      updateRoleUI();
+
+      // Atur tombol kembali ke dashboard yang sesuai peran
+      backDashboardBtn.addEventListener('click', () => {
+        if (currentRole === 'counselor') {
+          window.location.href = 'laman-konselor.html';
+        } else {
+          window.location.href = 'dashboard-user.html';
+        }
+      });
+
+      // Tombol Reset Sesi Chat untuk Pengujian
+      resetSessionChatBtn.addEventListener('click', () => {
+        if (confirm('Bersihkan seluruh pesan pada sesi obrolan ini untuk memulai pengujian dari awal?')) {
+          const allMsgs = JSON.parse(localStorage.getItem('oase_session_messages') || '[]');
+          const filtered = allMsgs.filter(m => m.session_id !== activeSession.id);
+          localStorage.setItem('oase_session_messages', JSON.stringify(filtered));
+          lastRenderedMessageIds.clear();
+          syncMessages(true);
+        }
+      });
+
+      // Cari sesi konseling
+      const sessions = JSON.parse(localStorage.getItem('oase_counseling_sessions') || '[]');
+      if (targetSessionId) {
+        activeSession = sessions.find(s => s.id === targetSessionId);
+      }
+      if (!activeSession) {
+        // Ambil sesi aktif pertama yang ada
+        activeSession = sessions.find(s => s.status === 'aktif');
+      }
+
+      if (!activeSession) {
+        alert('Sesi konseling tidak ditemukan atau telah berakhir.');
+        if (currentRole === 'counselor') {
+          window.location.href = 'laman-konselor.html';
+        } else {
+          window.location.href = 'dashboard-user.html';
+        }
+        return;
+      }
+
+      setupOpponentProfile();
+      startSessionTimer();
+      await syncMessages(true);
+
+      // Mulai sinkronisasi berkala setiap 1000ms (1 detik)
+      setInterval(() => syncMessages(false), 1000);
+
+      // Listener storage event antar-tab browser (seketika saat ada pesan baru di tab lawan)
+      window.addEventListener('storage', (e) => {
+        if (e.key === 'oase_session_messages' || e.key === 'oase_counseling_sessions') {
+          syncMessages(false);
+        }
+      });
+      window.addEventListener('oase_new_notification', () => {
+        syncMessages(false);
+      });
+    }
+
+    function updateRoleUI() {
+      if (currentRole === 'counselor') {
+        messageInput.placeholder = 'Tulis tanggapan empati untuk siswa...';
+      } else {
+        messageInput.placeholder = 'Ketik ceritamu untuk konselor...';
+      }
+      lucide.createIcons();
+    }
+
+    // 2. SETUP OPPONENT PROFILE IN HEADER
+    function setupOpponentProfile() {
+      if (!activeSession) return;
+
+      if (currentRole === 'counselor') {
+        // Di layar konselor: Lawan bicaranya adalah Siswa
+        opponentName.textContent = `${activeSession.user_name} (${activeSession.user_email})`;
+        sessionTopicMeta.textContent = `Topik: ${activeSession.topic}`;
+        opponentAvatar.src = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&h=200&q=80';
+      } else {
+        // Di layar siswa: Lawan bicaranya adalah Konselor
+        const counselorObj = (window.COUNSELORS_DATA || []).find(c => c.id === activeSession.counselor_id) || {
+          name: activeSession.counselor_name || 'Kak Sarah Maulida, S.Psi.',
+          role: 'Konselor Terverifikasi OASE',
+          avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=200&h=200&q=80'
+        };
+        opponentName.textContent = counselorObj.name;
+        sessionTopicMeta.textContent = `${counselorObj.role} • Topik: ${activeSession.topic}`;
+        opponentAvatar.src = counselorObj.avatar;
+      }
+    }
+
+    // 3. COUNTDOWN TIMER 30 MENIT
+    function startSessionTimer() {
+      if (timerInterval) clearInterval(timerInterval);
+      const startTime = new Date(activeSession.started_at || activeSession.created_at).getTime();
+      const durationMs = (activeSession.duration_minutes || 30) * 60 * 1000;
+      const endTime = startTime + durationMs;
+
+      const update = () => {
+        const diff = endTime - Date.now();
+        if (diff <= 0) {
+          clearInterval(timerInterval);
+          sessionTimerLabel.textContent = '00:00 (Selesai)';
+          alert('Sesi konseling 30 menit telah berakhir. Terima kasih.');
+          window.ChatSessionService.endSession(activeSession.id);
+          messageInput.disabled = true;
+          messageInput.placeholder = 'Sesi konseling telah selesai.';
+          micBtn.disabled = true;
+          sendMessageBtn.disabled = true;
+          return;
+        }
+        const m = Math.floor(diff / 60000);
+        const s = Math.floor((diff % 60000) / 1000);
+        sessionTimerLabel.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+      };
+
+      update();
+      timerInterval = setInterval(update, 1000);
+
+      endSessionBtn.addEventListener('click', async () => {
+        if (confirm('Apakah Anda yakin ingin menyelesaikan sesi konseling 30 menit ini?')) {
+          await window.ChatSessionService.endSession(activeSession.id);
+          alert('Sesi telah diselesaikan.');
+          if (currentRole === 'counselor') {
+            window.location.href = 'laman-konselor.html';
+          } else {
+            window.location.href = 'dashboard-user.html';
+          }
+        }
+      });
+    }
+
+    // 4. REAL-TIME MESSAGE SYNC & RENDER (ALIRAN ALAMI: SAYA DI KANAN, LAWAN DI KIRI)
+    async function syncMessages(forceScroll = false) {
+      if (!activeSession) return;
+      const messages = await window.ChatSessionService.getMessages(activeSession.id);
+
+      // Cek apakah ada pesan baru
+      let hasNewMessage = false;
+      messages.forEach(m => {
+        if (!lastRenderedMessageIds.has(m.id)) {
+          hasNewMessage = true;
+          lastRenderedMessageIds.add(m.id);
+        }
+      });
+
+      if (!hasNewMessage && !forceScroll) return;
+
+      renderAllMessages(messages);
+      chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
+    }
+
+    function renderAllMessages(messages) {
+      chatMessagesContainer.innerHTML = `
+        <div class="text-center py-2">
+          <span class="px-3.5 py-1 rounded-full bg-white border border-heather-200 text-heather-800 text-[10px] sm:text-[11px] font-semibold shadow-2xs inline-block">
+            🔒 Sesi konseling 30 menit dimulai secara aman dan rahasia. Sampaikan cerita dengan tenang.
+          </span>
+        </div>
+      `;
+
+      // Setup foto profil
+      const cObj = (window.COUNSELORS_DATA || []).find(c => c.id === activeSession.counselor_id) || {
+        name: activeSession.counselor_name || 'Konselor OASE',
+        avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=200&h=200&q=80'
+      };
+      const userPhoto = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&h=200&q=80';
+
+      let myPhoto = currentRole === 'counselor' ? cObj.avatar : userPhoto;
+      let opponentPhoto = currentRole === 'counselor' ? userPhoto : cObj.avatar;
+
+      messages.forEach(m => {
+        // isMe bernilai true jika sender_type persis sama dengan peran tab saat ini
+        const isMe = m.sender_type === currentRole;
+        const msgDiv = document.createElement('div');
+        msgDiv.className = `flex items-end gap-2 max-w-[85%] sm:max-w-[75%] ${isMe ? 'ml-auto flex-row-reverse' : ''}`;
+
+        // Konten teks atau audio Voice Note
+        let bubbleContent = '';
+        if (m.message_type === 'voice' && m.audio_data) {
+          bubbleContent = `
+            <div class="flex items-center gap-2 py-1">
+              <audio src="${m.audio_data}" controls class="h-9 w-48 sm:w-60 max-w-full">
+                Browser Anda tidak mendukung pemutar audio.
+              </audio>
+            </div>
+          `;
+        } else {
+          bubbleContent = `<p class="whitespace-pre-line leading-relaxed text-xs sm:text-sm">${m.message_text}</p>`;
+        }
+
+        const timeStr = new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+        if (isMe) {
+          // PESAN SAYA SENDIRI: Rapi di KANAN dengan foto profil rapi di samping balon
+          msgDiv.innerHTML = `
+            <img src="${myPhoto}" alt="Avatar Saya" class="w-7 h-7 sm:w-8 sm:h-8 rounded-xl object-cover border border-heather-200 shadow-2xs flex-shrink-0 mb-1">
+            <div class="p-3 sm:p-3.5 rounded-2xl rounded-br-xs bg-heather-500 text-white shadow-xs">
+              <span class="block text-[9px] sm:text-[10px] font-bold text-heather-100 mb-1 text-right">
+                ${currentRole === 'counselor' ? 'Anda (Konselor)' : 'Anda (Siswa)'}
+              </span>
+              ${bubbleContent}
+              <span class="block text-[9px] sm:text-[10px] mt-1 text-right text-heather-200 font-medium">
+                ${timeStr}
+              </span>
+            </div>
+          `;
+        } else {
+          // PESAN LAWAN BICARA: Rapi di KIRI dengan foto profil asli lawan bicara
+          const senderRoleLabel = m.sender_type === 'counselor' ? 'Konselor' : 'Siswa';
+          msgDiv.innerHTML = `
+            <img src="${opponentPhoto}" alt="Avatar Lawan Bicara" class="w-7 h-7 sm:w-8 sm:h-8 rounded-xl object-cover border border-heather-200 flex-shrink-0 shadow-2xs mb-1">
+            <div class="p-3 sm:p-3.5 rounded-2xl rounded-bl-xs bg-white border border-heather-200 text-oase-plum shadow-xs">
+              <span class="block text-[10px] font-bold text-heather-600 mb-1">
+                ${m.sender_name} (${senderRoleLabel})
+              </span>
+              ${bubbleContent}
+              <span class="block text-[9px] sm:text-[10px] mt-1 text-right text-oase-muted font-medium">
+                ${timeStr}
+              </span>
+            </div>
+          `;
+        }
+
+        chatMessagesContainer.appendChild(msgDiv);
+      });
+    }
+
+    // 5. SEND TEXT MESSAGE (OTOMATIS SESUAI PERAN TAB INI)
+    chatForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const text = messageInput.value.trim();
+      if (!text || !activeSession) return;
+      messageInput.value = '';
+
+      let senderId, senderName;
+      if (currentRole === 'counselor') {
+        senderId = (currentCounselorSession && currentCounselorSession.id) || activeSession.counselor_id || 'counselor-1';
+        senderName = (currentCounselorSession && currentCounselorSession.name) || activeSession.counselor_name || 'Kak Sarah Maulida, S.Psi.';
+      } else {
+        senderId = (currentUserSession && currentUserSession.id) || activeSession.user_id || 'user-1';
+        senderName = (currentUserSession && currentUserSession.email ? currentUserSession.email.split('@')[0] : activeSession.user_name) || 'Siswa OASE';
+      }
+
+      await window.ChatSessionService.sendMessage({
+        sessionId: activeSession.id,
+        senderId,
+        senderName,
+        senderType: currentRole,
+        messageType: 'text',
+        messageText: text
+      });
+
+      await syncMessages(true);
+    });
+
+    // 6. VOICE NOTE RECORDER (OTOMATIS SESUAI PERAN TAB INI)
+    micBtn.addEventListener('click', async () => {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        alert('Peramban Anda tidak mendukung perekaman mikrofon.');
+        return;
+      }
+
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder = new MediaRecorder(stream);
+        audioChunks = [];
+
+        mediaRecorder.ondataavailable = (ev) => {
+          if (ev.data.size > 0) audioChunks.push(ev.data);
+        };
+
+        mediaRecorder.start();
+        recordStart = Date.now();
+        voiceRecordBar.classList.remove('hidden');
+
+        if (recordInterval) clearInterval(recordInterval);
+        recordInterval = setInterval(() => {
+          const diff = Math.floor((Date.now() - recordStart) / 1000);
+          const m = String(Math.floor(diff / 60)).padStart(2, '0');
+          const s = String(diff % 60).padStart(2, '0');
+          recordTimerLabel.textContent = `${m}:${s}`;
+        }, 1000);
+
+      } catch (err) {
+        alert('Gagal mengakses mikrofon: ' + err.message);
+      }
+    });
+
+    cancelRecordBtn.addEventListener('click', () => {
+      if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+        mediaRecorder.stop();
+        mediaRecorder.stream.getTracks().forEach(t => t.stop());
+      }
+      clearInterval(recordInterval);
+      voiceRecordBar.classList.add('hidden');
+    });
+
+    sendRecordBtn.addEventListener('click', () => {
+      if (!mediaRecorder || mediaRecorder.state === 'inactive') return;
+
+      mediaRecorder.onstop = async () => {
+        clearInterval(recordInterval);
+        voiceRecordBar.classList.add('hidden');
+        const blob = new Blob(audioChunks, { type: 'audio/webm' });
+        const reader = new FileReader();
+        reader.readAsDataURL(blob);
+        reader.onloadend = async () => {
+          let senderId, senderName;
+          if (currentRole === 'counselor') {
+            senderId = (currentCounselorSession && currentCounselorSession.id) || activeSession.counselor_id || 'counselor-1';
+            senderName = (currentCounselorSession && currentCounselorSession.name) || activeSession.counselor_name || 'Kak Sarah Maulida, S.Psi.';
+          } else {
+            senderId = (currentUserSession && currentUserSession.id) || activeSession.user_id || 'user-1';
+            senderName = (currentUserSession && currentUserSession.email ? currentUserSession.email.split('@')[0] : activeSession.user_name) || 'Siswa OASE';
+          }
+
+          await window.ChatSessionService.sendMessage({
+            sessionId: activeSession.id,
+            senderId,
+            senderName,
+            senderType: currentRole,
+            messageType: 'voice',
+            audioData: reader.result
+          });
+
+          await syncMessages(true);
+        };
+        mediaRecorder.stream.getTracks().forEach(t => t.stop());
+      };
+
+      mediaRecorder.stop();
+    });
+
+    // Run on startup
+    initChat();
+  </script>
+</body>
+</html>

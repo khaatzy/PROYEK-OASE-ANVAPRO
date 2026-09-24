@@ -88,6 +88,24 @@
 
       <!-- Counselor Profile Bar & Actions -->
       <div id="counselorProfileNav" class="flex items-center gap-3">
+        <!-- Notifikasi Konselor -->
+        <div class="relative">
+          <button id="counselorNotifBellBtn" class="p-2.5 rounded-2xl border border-oase-border hover:bg-heather-50 text-oase-muted hover:text-heather-600 transition-all relative" title="Pemberitahuan Masuk">
+            <i data-lucide="bell" class="w-4 h-4"></i>
+            <span id="counselorNotifBadge" class="hidden absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-rose-500 rounded-full border-2 border-white"></span>
+          </button>
+          
+          <div id="counselorNotifDropdown" class="hidden absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-3xl border border-heather-100 shadow-2xl p-4 z-50 animate-fadeIn">
+            <div class="flex items-center justify-between pb-3 border-b border-oase-border">
+              <h4 class="text-xs font-bold uppercase tracking-wider text-oase-plum">Pemberitahuan Konselor</h4>
+              <button id="clearCounselorNotifBtn" class="text-[11px] text-heather-600 hover:underline">Tandai Dibaca</button>
+            </div>
+            <div id="counselorNotifList" class="mt-3 space-y-2 max-h-64 overflow-y-auto pr-1">
+              <p class="text-xs text-center text-oase-muted py-4">Belum ada pemberitahuan baru.</p>
+            </div>
+          </div>
+        </div>
+
         <div class="hidden sm:flex items-center gap-3 bg-heather-50/80 border border-heather-200/80 px-3.5 py-1.5 rounded-2xl">
           <img id="navCounselorAvatar" src="" alt="Avatar" class="w-9 h-9 rounded-xl object-cover border border-heather-300 shadow-xs">
           <div class="text-left">
@@ -124,7 +142,7 @@
             Selamat Datang, Konselor.
           </h1>
           <p class="text-sm text-oase-muted max-w-2xl leading-relaxed">
-            Terima kasih telah hadir dengan ketulusan hati untuk mendengarkan beban saudara-saudara kita. Di bawah ini adalah antrean cerita yang membutuhkan kehangatan dan perspektif bijakmu.
+            Terima kasih telah hadir dengan ketulusan hati untuk mendengarkan beban saudara-saudara kita. Di bawah ini adalah antrean cerita dan sesi chat konseling yang siap Anda dampingi.
           </p>
         </div>
 
@@ -146,13 +164,53 @@
       </div>
     </div>
 
-    <!-- Filter & Kontrol Antrean -->
-    <div class="bg-white rounded-3xl p-5 sm:p-6 border border-oase-border shadow-sm space-y-4">
-      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h2 class="text-base sm:text-lg font-bold text-oase-plum flex items-center gap-2">
-            <i data-lucide="layers" class="w-5 h-5 text-heather-500"></i>
-            <span>Antrean Cerita & Curhat Masuk</span>
+    <!-- Tab Navigasi Mode Konselor: Antrean Cerita vs Sesi Chat Langsung -->
+    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 border-b border-oase-border pb-2">
+      <button id="tabModeQueue" class="px-5 py-2.5 rounded-2xl bg-heather-500 text-white font-bold text-xs shadow-sm flex items-center justify-center sm:justify-start gap-2 transition-all">
+        <i data-lucide="inbox" class="w-4 h-4"></i>
+        <span>Antrean Cerita Masuk</span>
+      </button>
+      <button id="tabModeLiveChat" class="px-5 py-2.5 rounded-2xl bg-white border border-oase-border hover:bg-heather-50 text-oase-muted font-bold text-xs flex items-center justify-center sm:justify-start gap-2 transition-all relative">
+        <i data-lucide="messages-square" class="w-4 h-4"></i>
+        <span>Sesi Chat Langsung Siswa (Live 30 Menit)</span>
+        <span id="liveChatCountBadge" class="hidden px-2 py-0.5 rounded-full bg-rose-500 text-white text-[10px] font-black">0</span>
+      </button>
+    </div>
+
+    <!-- Section Live Chat Konseling (Default Hidden) -->
+    <div id="liveChatSection" class="hidden space-y-6">
+      <div class="bg-white rounded-3xl p-6 border border-oase-border shadow-sm space-y-4">
+        <div class="flex items-center justify-between pb-3 border-b border-oase-border">
+          <div>
+            <h2 class="text-base sm:text-lg font-bold text-oase-plum flex items-center gap-2">
+              <i data-lucide="radio" class="w-5 h-5 text-emerald-500 animate-pulse"></i>
+              <span>Daftar Sesi Konseling Booking Siswa</span>
+            </h2>
+            <p class="text-xs text-oase-muted">Sesi booking 30 menit yang ditugaskan ke Anda. Buka ruang chat untuk saling berbalas pesan teks atau Voice Note.</p>
+          </div>
+          <button id="refreshLiveSessionsBtn" class="p-2.5 rounded-xl border border-oase-border hover:bg-heather-50 text-heather-700" title="Segarkan Sesi">
+            <i data-lucide="rotate-cw" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+        <div id="liveSessionsListContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Container Antrean Cerita Biasa -->
+    <div id="queueSection" class="space-y-6">
+      <!-- Filter & Kontrol Antrean -->
+      <div class="bg-white rounded-3xl p-5 sm:p-6 border border-oase-border shadow-sm space-y-4">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h2 class="text-base sm:text-lg font-bold text-oase-plum flex items-center gap-2">
+              <i data-lucide="layers" class="w-5 h-5 text-heather-500"></i>
+              <span>Antrean Cerita & Curhat Masuk</span>
+            </h2>
+            <p class="text-xs text-oase-muted">Disusun berurutan berdasarkan waktu masuk. Kamu bebas memilih kasus mana yang ingin direspons lebih dulu.</p>
+          </div>
           </h2>
           <p class="text-xs text-oase-muted">Disusun berurutan berdasarkan waktu masuk. Kamu bebas memilih kasus mana yang ingin direspons lebih dulu.</p>
         </div>
@@ -218,7 +276,7 @@
         <p class="text-sm font-medium">Memuat antrean cerita masuk...</p>
       </div>
     </div>
-
+  </div> <!-- Close queueSection -->
   </main>
 
   <!-- Footer -->
@@ -840,8 +898,167 @@
       }
     });
 
+    // 8. NOTIFIKASI & MODE TAB LIVE CHAT UNTUK KONSELOR
+    const tabModeQueue = document.getElementById('tabModeQueue');
+    const tabModeLiveChat = document.getElementById('tabModeLiveChat');
+    const queueSection = document.getElementById('queueSection');
+    const liveChatSection = document.getElementById('liveChatSection');
+    const liveChatCountBadge = document.getElementById('liveChatCountBadge');
+    const liveSessionsListContainer = document.getElementById('liveSessionsListContainer');
+    const refreshLiveSessionsBtn = document.getElementById('refreshLiveSessionsBtn');
+
+    const counselorNotifBellBtn = document.getElementById('counselorNotifBellBtn');
+    const counselorNotifDropdown = document.getElementById('counselorNotifDropdown');
+    const counselorNotifBadge = document.getElementById('counselorNotifBadge');
+    const counselorNotifList = document.getElementById('counselorNotifList');
+    const clearCounselorNotifBtn = document.getElementById('clearCounselorNotifBtn');
+
+    // Tab Switching
+    if (tabModeQueue && tabModeLiveChat) {
+      tabModeQueue.addEventListener('click', () => {
+        tabModeQueue.className = 'px-5 py-2.5 rounded-2xl bg-heather-500 text-white font-bold text-xs shadow-sm flex items-center gap-2 transition-all';
+        tabModeLiveChat.className = 'px-5 py-2.5 rounded-2xl bg-white border border-oase-border hover:bg-heather-50 text-oase-muted font-bold text-xs flex items-center gap-2 transition-all relative';
+        queueSection.classList.remove('hidden');
+        liveChatSection.classList.add('hidden');
+      });
+
+      tabModeLiveChat.addEventListener('click', () => {
+        tabModeLiveChat.className = 'px-5 py-2.5 rounded-2xl bg-heather-500 text-white font-bold text-xs shadow-sm flex items-center gap-2 transition-all relative';
+        tabModeQueue.className = 'px-5 py-2.5 rounded-2xl bg-white border border-oase-border hover:bg-heather-50 text-oase-muted font-bold text-xs flex items-center gap-2 transition-all';
+        queueSection.classList.add('hidden');
+        liveChatSection.classList.remove('hidden');
+        loadLiveSessions();
+      });
+    }
+
+    // Notifications
+    if (counselorNotifBellBtn) {
+      counselorNotifBellBtn.addEventListener('click', () => {
+        counselorNotifDropdown.classList.toggle('hidden');
+      });
+    }
+
+    function loadCounselorNotifs() {
+      if (!window.ChatSessionService) return;
+      const notifs = window.ChatSessionService.getNotifications();
+      if (!counselorNotifList) return;
+
+      if (!notifs || notifs.length === 0) {
+        counselorNotifList.innerHTML = `<p class="text-xs text-center text-oase-muted py-4">Belum ada pemberitahuan baru.</p>`;
+        if (counselorNotifBadge) counselorNotifBadge.classList.add('hidden');
+        return;
+      }
+      if (counselorNotifBadge) counselorNotifBadge.classList.remove('hidden');
+      counselorNotifList.innerHTML = '';
+      notifs.forEach(n => {
+        const item = document.createElement('div');
+        item.className = "p-2.5 rounded-xl bg-heather-50/60 hover:bg-heather-100/60 border border-heather-100 text-xs space-y-1 transition-all cursor-pointer";
+        item.innerHTML = `
+          <div class="font-bold text-oase-plum flex items-center justify-between">
+            <span>${n.title || 'Pemberitahuan'}</span>
+            <span class="text-[10px] text-oase-muted">${new Date(n.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+          </div>
+          <p class="text-oase-muted leading-relaxed">${n.message}</p>
+          ${n.sessionId ? `<span class="inline-flex items-center gap-1 text-[10px] font-bold text-heather-600 mt-0.5"><i data-lucide="arrow-right" class="w-3 h-3"></i> Buka Obrolan</span>` : ''}
+        `;
+        if (n.sessionId) {
+          item.addEventListener('click', () => {
+            sessionStorage.setItem('oase_active_chat_role', 'counselor');
+            window.location.href = 'ruang-chat.html?sessionId=' + n.sessionId + '&role=counselor';
+          });
+        }
+        counselorNotifList.appendChild(item);
+      });
+      lucide.createIcons();
+    }
+
+    if (clearCounselorNotifBtn) {
+      clearCounselorNotifBtn.addEventListener('click', () => {
+        localStorage.setItem('oase_notifications', '[]');
+        loadCounselorNotifs();
+      });
+    }
+
+    window.addEventListener('oase_new_notification', () => {
+      loadCounselorNotifs();
+      loadLiveSessions();
+    });
+
+    // Load Live Sessions for this counselor & all active students
+    async function loadLiveSessions() {
+      if (!currentSession || !liveSessionsListContainer) return;
+      const allSessions = JSON.parse(localStorage.getItem('oase_counseling_sessions') || '[]');
+      
+      const mySessions = allSessions.filter(s => s.counselor_id === currentSession.id && s.status === 'aktif');
+      const otherSessions = allSessions.filter(s => s.counselor_id !== currentSession.id && s.status === 'aktif');
+      const totalActive = mySessions.length + otherSessions.length;
+
+      if (liveChatCountBadge) {
+        if (totalActive > 0) {
+          liveChatCountBadge.textContent = totalActive;
+          liveChatCountBadge.classList.remove('hidden');
+        } else {
+          liveChatCountBadge.classList.add('hidden');
+        }
+      }
+
+      if (totalActive === 0) {
+        liveSessionsListContainer.innerHTML = `
+          <div class="col-span-full py-12 text-center space-y-2 bg-oase-surface/50 rounded-2xl border border-dashed border-oase-border">
+            <div class="w-10 h-10 rounded-xl bg-heather-100 text-heather-600 flex items-center justify-center mx-auto">
+              <i data-lucide="coffee" class="w-5 h-5"></i>
+            </div>
+            <p class="text-sm font-bold text-oase-plum">Belum Ada Sesi Konseling yang Sedang Berjalan</p>
+            <p class="text-xs text-oase-muted">Siswa yang melakukan booking sesi chat 30 menit akan otomatis muncul di sini dan memberikan notifikasi.</p>
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
+      liveSessionsListContainer.innerHTML = '';
+      mySessions.forEach(s => {
+        liveSessionsListContainer.appendChild(createCounselorSessionCard(s, true));
+      });
+      otherSessions.forEach(s => {
+        liveSessionsListContainer.appendChild(createCounselorSessionCard(s, false));
+      });
+      lucide.createIcons();
+    }
+
+    function createCounselorSessionCard(s, isDirectlyAssigned) {
+      const card = document.createElement('div');
+      card.className = "bg-white p-5 rounded-2xl border border-heather-200 hover:shadow-md transition-all space-y-3 flex flex-col justify-between";
+      card.innerHTML = `
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="px-2.5 py-0.5 rounded-full ${isDirectlyAssigned ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-800'} text-[10px] font-bold">
+              ${isDirectlyAssigned ? '🔴 Sesi Aktif untuk Anda' : `⚡ Sesi Terbuka (${s.counselor_name})`}
+            </span>
+            <span class="text-[11px] text-oase-muted font-medium">${getRelativeTime(s.started_at)}</span>
+          </div>
+          <h3 class="text-sm font-bold text-oase-plum">${s.user_name} (${s.user_email})</h3>
+          <p class="text-xs text-heather-700 font-semibold bg-heather-50 p-2 rounded-xl border border-heather-100">Topik: ${s.topic}</p>
+        </div>
+        <div class="pt-2 border-t border-oase-border flex items-center justify-between">
+          <span class="text-xs text-oase-muted">Durasi: 30 Menit</span>
+          <button class="open-counselor-chat-btn px-4 py-2 rounded-xl bg-heather-500 hover:bg-heather-600 text-white font-bold text-xs shadow-xs flex items-center gap-1.5 transition-all" data-session-id="${s.id}">
+            <i data-lucide="messages-square" class="w-3.5 h-3.5"></i>
+            <span>Buka Ruang Chat</span>
+          </button>
+        </div>
+      `;
+      card.querySelector('.open-counselor-chat-btn').addEventListener('click', () => {
+        sessionStorage.setItem('oase_active_chat_role', 'counselor');
+        window.location.href = 'ruang-chat.html?sessionId=' + s.id + '&role=counselor';
+      });
+      return card;
+    }
+
     // Run on start
     checkAuth();
+    loadCounselorNotifs();
+    loadLiveSessions();
   </script>
 </body>
 </html>
