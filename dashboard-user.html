@@ -420,10 +420,10 @@
       <!-- Area Bubble Chat AI -->
       <div id="aiChatMessages" class="flex-grow p-4 sm:p-6 overflow-y-auto space-y-4 bg-oase-surface/50 text-xs leading-relaxed">
         <div class="flex items-start gap-2.5 max-w-[85%]">
-          <div class="w-7 h-7 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center flex-shrink-0 font-bold text-xs mt-0.5">
-            AI
+          <div class="w-8 h-8 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center flex-shrink-0 font-bold text-xs mt-0.5 shadow-2xs">
+            <i data-lucide="bot" class="w-4 h-4 text-indigo-600"></i>
           </div>
-          <div class="p-3.5 rounded-2xl bg-white border border-indigo-100 text-oase-plum shadow-xs">
+          <div class="p-3.5 rounded-2xl bg-white border border-indigo-100 text-oase-plum shadow-xs rounded-tl-none">
             Halo! Aku Sahabat OASE. Aku selalu di sini untuk mendengarkan apapun yang ingin kamu ceritakan tanpa menghakimi. Bagaimana kabarmu hari ini?
           </div>
         </div>
@@ -873,9 +873,13 @@
 
     saveApiKeyForm.addEventListener('submit', (e) => {
       e.preventDefault();
-      const key = geminiApiKeyInput.value;
+      const key = geminiApiKeyInput.value.trim();
       window.GeminiService.setApiKey(key);
-      alert('Gemini API Key berhasil disimpan di browser Anda.');
+      if (!key) {
+        alert('Gemini API Key telah dikosongkan.');
+      } else {
+        alert('Gemini API Key berhasil disimpan! Sahabat OASE siap diajak mengobrol.');
+      }
       settingsModal.classList.add('hidden');
     });
 
@@ -986,15 +990,16 @@
       const msg = document.createElement('div');
       msg.className = `flex items-start gap-2.5 max-w-[85%] ${isUser ? 'ml-auto flex-row-reverse' : ''}`;
       msg.innerHTML = `
-        <div class="w-7 h-7 rounded-xl ${isUser ? 'bg-heather-500 text-white' : 'bg-indigo-100 text-indigo-700'} flex items-center justify-center flex-shrink-0 font-bold text-xs mt-0.5">
-          ${isUser ? 'Saya' : 'AI'}
+        <div class="w-8 h-8 rounded-xl ${isUser ? 'bg-heather-500 text-white' : 'bg-indigo-100 text-indigo-700'} flex items-center justify-center flex-shrink-0 font-bold text-xs mt-0.5 shadow-2xs">
+          ${isUser ? '<i data-lucide="user" class="w-4 h-4"></i>' : '<i data-lucide="bot" class="w-4 h-4 text-indigo-600"></i>'}
         </div>
-        <div class="p-3.5 rounded-2xl ${isUser ? 'bg-heather-500 text-white' : 'bg-white border border-indigo-100 text-oase-plum'} shadow-xs whitespace-pre-line">
+        <div class="p-3.5 rounded-2xl ${isUser ? 'bg-heather-500 text-white rounded-tr-none' : 'bg-white border border-indigo-100 text-oase-plum rounded-tl-none'} shadow-xs text-xs sm:text-sm leading-relaxed whitespace-pre-line">
           ${text}
         </div>
       `;
       aiChatMessages.appendChild(msg);
       aiChatMessages.scrollTop = aiChatMessages.scrollHeight;
+      lucide.createIcons();
     }
 
     function appendAITyping(id) {
@@ -1002,10 +1007,10 @@
       div.id = id;
       div.className = "flex items-start gap-2.5 max-w-[85%]";
       div.innerHTML = `
-        <div class="w-7 h-7 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center flex-shrink-0 font-bold text-xs mt-0.5">
-          AI
+        <div class="w-8 h-8 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center flex-shrink-0 font-bold text-xs mt-0.5 shadow-2xs">
+          <i data-lucide="bot" class="w-4 h-4 text-indigo-600"></i>
         </div>
-        <div class="p-3.5 rounded-2xl bg-white border border-indigo-100 text-oase-muted shadow-xs flex items-center gap-1.5">
+        <div class="p-3.5 rounded-2xl bg-white border border-indigo-100 text-oase-muted shadow-xs flex items-center gap-1.5 rounded-tl-none">
           <span class="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse"></span>
           <span class="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse delay-75"></span>
           <span class="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse delay-150"></span>
@@ -1014,6 +1019,7 @@
       `;
       aiChatMessages.appendChild(div);
       aiChatMessages.scrollTop = aiChatMessages.scrollHeight;
+      lucide.createIcons();
     }
 
     function removeAITyping(id) {

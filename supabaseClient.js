@@ -835,6 +835,55 @@ const GeminiService = {
 
   setApiKey(key) {
     localStorage.setItem('oase_gemini_api_key', key.trim());
+    localStorage.removeItem('oase_gemini_active_model');
+  },
+
+  async getWorkingModel(apiKey) {
+    const key = apiKey || this.getApiKey();
+    if (!key) throw new Error('API Key belum diisi.');
+
+    const cached = localStorage.getItem('oase_gemini_active_model');
+    if (cached) return cached;
+
+    // Prioritas model yang diuji
+    const candidatePriorities = [
+      'gemini-2.5-flash',
+      'gemini-2.0-flash',
+      'gemini-2.5-flash-lite',
+      'gemini-1.5-flash-latest',
+      'gemini-1.5-flash',
+      'gemini-pro'
+    ];
+
+    try {
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${key}`);
+      if (res.ok) {
+        const data = await res.json();
+        const available = (data.models || [])
+          .filter(m => m.supportedGenerationMethods && m.supportedGenerationMethods.includes('generateContent'))
+          .map(m => m.name.replace(/^models\//, ''));
+
+        for (const candidate of candidatePriorities) {
+          if (available.includes(candidate)) {
+            localStorage.setItem('oase_gemini_active_model', candidate);
+            return candidate;
+          }
+        }
+
+        if (available.length > 0) {
+          const picked = available.find(m => m.includes('flash')) || available[0];
+          localStorage.setItem('oase_gemini_active_model', picked);
+          return picked;
+        }
+      } else {
+        const errJson = await res.json().catch(() => ({}));
+        throw new Error(errJson.error?.message || `Gagal memeriksa model (${res.status})`);
+      }
+    } catch (e) {
+      console.warn('Gagal cek model via ListModels, menggunakan fallback default:', e);
+    }
+
+    return 'gemini-2.5-flash';
   },
 
   async chatWithGemini(userMessage, chatHistory = []) {
@@ -876,28 +925,91 @@ Gunakan bahasa Indonesia yang akrab, sopan, santun, dan menyentuh hati. Jangan m
       });
     }
 
-    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-    const response = await fetch(endpoint, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: contents,
-        generationConfig: {
-          temperature: 0.7,
-          maxOutputTokens: 800
-        }
-      })
-    });
+    // Urutan prioritas model Gemini modern Google
+    const candidateModels = [
+      localStorage.getItem('oase_gemini_active_model'),
+      'gemini-2.5-flash',
+      'gemini-2.0-flash',
+      'gemini-2.5-flash-lite',
+      'gemini-1.5-flash-latest',
+      'gemini-1.5-flash',
+      'gemini-pro'
+    ].filter(Boolean);
+    const modelsToTry = [...new Set(candidateModels)];
 
-    if (!response.ok) {
-      const errData = await response.json().catch(() => ({}));
-      throw new Error(errData.error?.message || `Gagal menghubungi Gemini API (Status: ${response.status})`);
+    let lastError = null;
+
+    for (const model of modelsToTry) {
+      try {
+        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: contents,
+            generationConfig: {
+              temperature: 0.7,
+              maxOutputTokens: 800
+            }
+          })
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          const replyText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (replyText) {
+            localStorage.setItem('oase_gemini_active_model', model);
+            return replyText;
+          }
+        } else {
+          const errData = await response.json().catch(() => ({}));
+          const errMsg = errData.error?.message || `Status ${response.status}`;
+          lastError = new Error(errMsg);
+
+          // Jika model tidak ditemukan / tidak didukung di tier API key, lanjut coba model berikutnya
+          if (response.status === 404 || errMsg.toLowerCase().includes('not found') || errMsg.toLowerCase().includes('not supported')) {
+            console.warn(`Model ${model} tidak aktif pada kunci ini, mencoba model alternatif...`);
+            continue;
+          }
+          // Jika masalah autentikasi atau kuota, lempar error langsung
+          throw new Error(errMsg);
+        }
+      } catch (err) {
+        if (err.message && (err.message.toLowerCase().includes('not found') || err.message.toLowerCase().includes('not supported'))) {
+          continue;
+        }
+        throw err;
+      }
     }
 
-    const data = await response.json();
-    const replyText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (!replyText) throw new Error('Tidak ada respon yang diterima dari Gemini AI.');
-    return replyText;
+    // Jika model di atas belum ada yang cocok, coba query ListModels langsung
+    try {
+      const activeFromList = await this.getWorkingModel(apiKey);
+      if (activeFromList && !modelsToTry.includes(activeFromList)) {
+        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${activeFromList}:generateContent?key=${apiKey}`;
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: contents,
+            generationConfig: {
+              temperature: 0.7,
+              maxOutputTokens: 800
+            }
+          })
+        });
+        if (response.ok) {
+          const data = await response.json();
+          const replyText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (replyText) {
+            localStorage.setItem('oase_gemini_active_model', activeFromList);
+            return replyText;
+          }
+        }
+      }
+    } catch (e) {}
+
+    throw lastError || new Error('Tidak ada model Gemini yang didukung oleh API Key ini. Pastikan API Key valid dan aktif di Google AI Studio.');
   }
 };
 
