@@ -1133,7 +1133,7 @@
           </div>
         `;
         card.querySelector('.open-counselor-chat-btn').addEventListener('click', () => {
-          openCounselorLiveChat(s);
+          window.location.href = 'ruang-chat.html?sessionId=' + s.id;
         });
         liveSessionsListContainer.appendChild(card);
       });
