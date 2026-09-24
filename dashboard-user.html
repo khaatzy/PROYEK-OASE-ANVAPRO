@@ -823,7 +823,7 @@
     if (bookNewSessionBtn) bookNewSessionBtn.addEventListener('click', openBookingModal);
     lanjutkanChatBtn.addEventListener('click', () => {
       if (activeSession) {
-        window.location.href = 'ruang-chat.html?sessionId=' + activeSession.id;
+        window.location.href = 'ruang-chat.html?sessionId=' + activeSession.id + '&role=user';
       } else {
         openBookingModal();
       }
@@ -871,7 +871,7 @@
 
         alert(`Sesi konseling 30 menit bersama ${counselorName} telah aktif! Mengalihkan ke Ruang Chat Konseling...`);
         bookingModal.classList.add('hidden');
-        window.location.href = 'ruang-chat.html?sessionId=' + session.id;
+        window.location.href = 'ruang-chat.html?sessionId=' + session.id + '&role=user';
       } catch (err) {
         alert('Gagal memulai booking: ' + err.message);
       } finally {
@@ -956,7 +956,7 @@
               <h4 class="text-xs font-bold text-heather-900">Halaman Khusus Obrolan & Voice Note Siap Digunakan</h4>
               <p class="text-[11px] text-oase-muted">Sesi end-to-end berdurasi 30 menit. Klik tombol di sebelah untuk masuk ke ruang obrolan penuh.</p>
             </div>
-            <a href="ruang-chat.html?sessionId=${session.id}" class="w-full sm:w-auto px-6 py-3 rounded-2xl bg-heather-500 hover:bg-heather-600 text-white font-bold text-xs sm:text-sm shadow-md shadow-heather-500/25 transition-all flex items-center justify-center gap-2 flex-shrink-0">
+            <a href="ruang-chat.html?sessionId=${session.id}&role=user" class="w-full sm:w-auto px-6 py-3 rounded-2xl bg-heather-500 hover:bg-heather-600 text-white font-bold text-xs sm:text-sm shadow-md shadow-heather-500/25 transition-all flex items-center justify-center gap-2 flex-shrink-0">
               <i data-lucide="messages-square" class="w-4 h-4"></i>
               <span>Buka Ruang Chat Konseling</span>
             </a>

@@ -85,8 +85,14 @@
         </div>
       </div>
 
-      <!-- Sesi Timer 30 Menit & Tombol Selesaikan -->
-      <div class="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+      <!-- Sesi Timer 30 Menit, Role Switcher, & Tombol Selesaikan -->
+      <div class="flex items-center gap-1.5 sm:gap-2.5 flex-shrink-0">
+        <!-- Role Indicator & Quick Switcher for Testing -->
+        <button id="toggleRoleBtn" class="px-2.5 py-1.5 rounded-xl bg-heather-100 hover:bg-heather-200 text-heather-800 text-[10px] sm:text-xs font-bold transition-all flex items-center gap-1" title="Klik untuk beralih mode peran (Siswa / Konselor) untuk pengujian">
+          <i data-lucide="user-check" class="w-3.5 h-3.5 text-heather-600"></i>
+          <span id="roleIndicatorLabel">Mode: Siswa</span>
+        </button>
+
         <div class="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-2xl bg-heather-50 border border-heather-200 text-xs font-bold text-heather-800 shadow-2xs">
           <i data-lucide="timer" class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-heather-600"></i>
           <span id="sessionTimerLabel">30:00</span>
@@ -95,7 +101,7 @@
 
         <button id="endSessionBtn" class="px-2.5 sm:px-3.5 py-1.5 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold transition-all flex items-center gap-1">
           <i data-lucide="phone-off" class="w-3.5 h-3.5"></i>
-          <span class="hidden sm:inline">Selesaikan Sesi</span>
+          <span class="hidden sm:inline">Selesaikan</span>
         </button>
       </div>
 
@@ -179,6 +185,8 @@
 
     // DOM Elements
     const backDashboardBtn = document.getElementById('backDashboardBtn');
+    const toggleRoleBtn = document.getElementById('toggleRoleBtn');
+    const roleIndicatorLabel = document.getElementById('roleIndicatorLabel');
     const opponentAvatar = document.getElementById('opponentAvatar');
     const opponentName = document.getElementById('opponentName');
     const sessionTopicMeta = document.getElementById('sessionTopicMeta');
@@ -211,20 +219,35 @@
 
     // 1. INITIALIZE IDENTITY & DETECT ROLE
     async function initChat() {
-      // Cek apakah konselor yang login
-      currentCounselorSession = window.CounselingService.getCurrentCounselorSession();
-      if (currentCounselorSession && currentCounselorSession.role === 'counselor') {
+      // Prioritas 1: Parameter URL (?role=user atau ?role=counselor)
+      const explicitRole = urlParams.get('role');
+      if (explicitRole === 'user' || explicitRole === 'counselor') {
+        currentRole = explicitRole;
+      } else if (document.referrer && document.referrer.includes('laman-konselor')) {
         currentRole = 'counselor';
-      } else {
+      } else if (document.referrer && document.referrer.includes('dashboard-user')) {
         currentRole = 'user';
-        const session = await window.AuthService.getSession();
-        if (session && session.user) {
-          currentUserSession = session.user;
+      } else {
+        // Fallback cek sesi konselor
+        currentCounselorSession = window.CounselingService.getCurrentCounselorSession();
+        if (currentCounselorSession && currentCounselorSession.role === 'counselor') {
+          currentRole = 'counselor';
         } else {
-          const localEmail = localStorage.getItem('oase_active_user_email') || 'siswa@oase.id';
-          currentUserSession = { email: localEmail, id: 'user-' + localEmail.replace(/[^a-zA-Z0-9]/g, '') };
+          currentRole = 'user';
         }
       }
+
+      // Sesi konselor & user
+      currentCounselorSession = window.CounselingService.getCurrentCounselorSession();
+      const session = await window.AuthService.getSession();
+      if (session && session.user) {
+        currentUserSession = session.user;
+      } else {
+        const localEmail = localStorage.getItem('oase_active_user_email') || 'siswa@oase.id';
+        currentUserSession = { email: localEmail, id: 'user-' + localEmail.replace(/[^a-zA-Z0-9]/g, '') };
+      }
+
+      updateRoleUI();
 
       // Atur tombol kembali ke dashboard yang sesuai
       backDashboardBtn.addEventListener('click', () => {
@@ -235,18 +258,26 @@
         }
       });
 
+      // Tombol Switcher Role untuk Pengujian Cepat
+      toggleRoleBtn.addEventListener('click', () => {
+        currentRole = currentRole === 'counselor' ? 'user' : 'counselor';
+        const newUrl = new URL(window.location);
+        newUrl.searchParams.set('role', currentRole);
+        window.history.replaceState({}, '', newUrl);
+        updateRoleUI();
+        setupOpponentProfile();
+        lastRenderedMessageIds.clear();
+        syncMessages(true);
+      });
+
       // Cari sesi konseling
       const sessions = JSON.parse(localStorage.getItem('oase_counseling_sessions') || '[]');
       if (targetSessionId) {
         activeSession = sessions.find(s => s.id === targetSessionId);
       }
       if (!activeSession) {
-        // Ambil sesi aktif pertama yang relevan
-        if (currentRole === 'counselor') {
-          activeSession = sessions.find(s => s.counselor_id === currentCounselorSession.id && s.status === 'aktif');
-        } else {
-          activeSession = sessions.find(s => s.user_email === currentUserSession.email && s.status === 'aktif');
-        }
+        // Ambil sesi aktif pertama yang ada
+        activeSession = sessions.find(s => s.status === 'aktif');
       }
 
       if (!activeSession) {
@@ -268,7 +299,7 @@
 
       // Listener storage event antar-tab
       window.addEventListener('storage', (e) => {
-        if (e.key === 'oase_session_messages') {
+        if (e.key === 'oase_session_messages' || e.key === 'oase_counseling_sessions') {
           syncMessages(false);
         }
       });
@@ -276,6 +307,20 @@
         syncMessages(false);
       });
     }
+
+    function updateRoleUI() {
+      if (currentRole === 'counselor') {
+        roleIndicatorLabel.textContent = 'Mode: Konselor';
+        toggleRoleBtn.className = 'px-2.5 py-1.5 rounded-xl bg-purple-100 hover:bg-purple-200 text-purple-900 text-[10px] sm:text-xs font-bold transition-all flex items-center gap-1 shadow-2xs';
+        messageInput.placeholder = 'Tulis tanggapan empati untuk siswa...';
+      } else {
+        roleIndicatorLabel.textContent = 'Mode: Siswa';
+        toggleRoleBtn.className = 'px-2.5 py-1.5 rounded-xl bg-heather-100 hover:bg-heather-200 text-heather-800 text-[10px] sm:text-xs font-bold transition-all flex items-center gap-1 shadow-2xs';
+        messageInput.placeholder = 'Ketik ceritamu untuk konselor...';
+      }
+      lucide.createIcons();
+    }
+
 
     // 2. SETUP OPPONENT PROFILE IN HEADER
     function setupOpponentProfile() {
@@ -394,9 +439,11 @@
         const timeStr = new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
         if (isMe) {
-          // Pesan saya sendiri: Rapi di kanan, tanpa teks avatar "Saya" yang merusak layout
+          // Pesan saya sendiri: Rapi di kanan dengan label identitas jelas
+          const myLabel = currentRole === 'counselor' ? 'Anda (Konselor)' : 'Anda (Siswa)';
           msgDiv.innerHTML = `
             <div class="p-3 sm:p-3.5 rounded-2xl rounded-br-xs bg-heather-500 text-white shadow-xs text-xs sm:text-sm">
+              <span class="block text-[9px] sm:text-[10px] font-bold text-heather-100 mb-1 text-right">${myLabel}</span>
               ${bubbleContent}
               <span class="block text-[9px] sm:text-[10px] mt-1 text-right text-heather-200 font-medium">
                 ${timeStr}
@@ -404,11 +451,12 @@
             </div>
           `;
         } else {
-          // Pesan lawan bicara: Rapi di kiri dengan foto profil asli
+          // Pesan lawan bicara: Rapi di kiri dengan foto profil asli & label jelas
+          const senderRoleLabel = m.sender_type === 'counselor' ? 'Konselor' : 'Siswa';
           msgDiv.innerHTML = `
             <img src="${opponentPhoto}" alt="Avatar" class="w-7 h-7 sm:w-8 sm:h-8 rounded-xl object-cover border border-heather-200 flex-shrink-0 shadow-2xs">
             <div class="p-3 sm:p-3.5 rounded-2xl rounded-bl-xs bg-white border border-heather-200 text-oase-plum shadow-xs text-xs sm:text-sm">
-              <span class="block text-[10px] font-bold text-heather-600 mb-0.5">${m.sender_name}</span>
+              <span class="block text-[10px] font-bold text-heather-600 mb-0.5">${m.sender_name} (${senderRoleLabel})</span>
               ${bubbleContent}
               <span class="block text-[9px] sm:text-[10px] mt-1 text-right text-oase-muted font-medium">
                 ${timeStr}
@@ -430,11 +478,11 @@
 
       let senderId, senderName;
       if (currentRole === 'counselor') {
-        senderId = currentCounselorSession.id;
-        senderName = currentCounselorSession.name;
+        senderId = (currentCounselorSession && currentCounselorSession.id) || activeSession.counselor_id || 'counselor-1';
+        senderName = (currentCounselorSession && currentCounselorSession.name) || activeSession.counselor_name || 'Kak Sarah Maulida, S.Psi.';
       } else {
-        senderId = currentUserSession.id;
-        senderName = currentUserSession.email.split('@')[0];
+        senderId = (currentUserSession && currentUserSession.id) || activeSession.user_id || 'user-1';
+        senderName = (currentUserSession && currentUserSession.email ? currentUserSession.email.split('@')[0] : activeSession.user_name) || 'Siswa OASE';
       }
 
       await window.ChatSessionService.sendMessage({
@@ -503,11 +551,11 @@
         reader.onloadend = async () => {
           let senderId, senderName;
           if (currentRole === 'counselor') {
-            senderId = currentCounselorSession.id;
-            senderName = currentCounselorSession.name;
+            senderId = (currentCounselorSession && currentCounselorSession.id) || activeSession.counselor_id || 'counselor-1';
+            senderName = (currentCounselorSession && currentCounselorSession.name) || activeSession.counselor_name || 'Kak Sarah Maulida, S.Psi.';
           } else {
-            senderId = currentUserSession.id;
-            senderName = currentUserSession.email.split('@')[0];
+            senderId = (currentUserSession && currentUserSession.id) || activeSession.user_id || 'user-1';
+            senderName = (currentUserSession && currentUserSession.email ? currentUserSession.email.split('@')[0] : activeSession.user_name) || 'Siswa OASE';
           }
 
           await window.ChatSessionService.sendMessage({

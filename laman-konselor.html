@@ -1133,7 +1133,7 @@
           </div>
         `;
         card.querySelector('.open-counselor-chat-btn').addEventListener('click', () => {
-          window.location.href = 'ruang-chat.html?sessionId=' + s.id;
+          window.location.href = 'ruang-chat.html?sessionId=' + s.id + '&role=counselor';
         });
         liveSessionsListContainer.appendChild(card);
       });
