@@ -1,4 +1,4 @@
-const NotificationService = {
+﻿const NotificationService = {
   swRegistration: null,
 
   async init() {
@@ -131,9 +131,3 @@ if (typeof window !== 'undefined') {
 
 
 window.NotificationService = NotificationService;
-
-if (typeof window !== 'undefined') {
-  window.addEventListener('load', () => {
-    NotificationService.init();
-  });
-}

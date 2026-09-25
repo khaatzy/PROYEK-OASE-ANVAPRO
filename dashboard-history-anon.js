@@ -120,9 +120,9 @@
         const opt = document.createElement('option');
         opt.value = c.id;
         if (c.id === 'auto') {
-          opt.textContent = 'ðŸŒŸ Pilihkan Otomatis (Konselor Pertama yang Siap)';
+          opt.textContent = '🌟 Pilihkan Otomatis (Konselor Pertama yang Siap)';
         } else {
-          opt.textContent = `${c.name} â€¢ ${c.role} (â­ ${ratingInfo.average})`;
+          opt.textContent = `${c.name} • ${c.role} (⭐ ${ratingInfo.average})`;
         }
         anonCounselorSelect.appendChild(opt);
       });
@@ -160,7 +160,7 @@
         if (s.rating) {
           ratingHtml = `
             <div class="flex items-center gap-2 text-xs">
-              <span class="text-amber-500 font-bold tracking-wider">${'â˜…'.repeat(s.rating)}${'â˜†'.repeat(5 - s.rating)}</span>
+              <span class="text-amber-500 font-bold tracking-wider">${'★'.repeat(s.rating)}${'☆'.repeat(5 - s.rating)}</span>
               <span class="text-oase-muted text-[11px]">Penilaian Anda (${s.rating}/5)</span>
             </div>
           `;
@@ -192,12 +192,12 @@
               <div>
                 <h4 class="text-xs sm:text-sm font-bold text-oase-plum">${counselorObj.name}</h4>
                 <p class="text-[11px] text-heather-700 font-medium">Topik: ${s.topic}</p>
-                <span class="text-[10px] text-oase-muted">${dateStr} â€¢ Durasi: 30 Menit</span>
+                <span class="text-[10px] text-oase-muted">${dateStr} • Durasi: 30 Menit</span>
               </div>
             </div>
             <div class="flex items-center gap-2 self-start sm:self-auto">
               <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 text-[10px] font-bold">
-                âœ“ Selesai
+                ✓ Selesai
               </span>
               <a href="ruang-chat.html?sessionId=${s.id}&role=user&readonly=true" onclick="sessionStorage.setItem('oase_active_chat_role', 'user')" class="px-3.5 py-1.5 rounded-xl border border-heather-200 bg-heather-50 hover:bg-heather-100 text-heather-800 text-xs font-bold transition-all flex items-center gap-1">
                 <i data-lucide="message-square" class="w-3.5 h-3.5"></i>

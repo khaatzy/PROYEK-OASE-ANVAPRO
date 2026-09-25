@@ -1,4 +1,4 @@
-﻿    lucide.createIcons();
+    lucide.createIcons();
 
     // Parse URL params
     const urlParams = new URLSearchParams(window.location.search);
@@ -110,9 +110,9 @@
       resetSessionChatBtn.title = "Muat ulang riwayat pesan";
       resetSessionChatBtn.addEventListener('click', async () => {
         const icon = resetSessionChatBtn.querySelector('i');
-        if(icon) icon.classList.add('animate-spin');
+        if (icon) icon.classList.add('animate-spin');
         await syncMessages(true);
-        setTimeout(() => { if(icon) icon.classList.remove('animate-spin') }, 500);
+        setTimeout(() => { if (icon) icon.classList.remove('animate-spin'); }, 500);
       });
 
       // Cari sesi konseling (simpan & pulihkan ID sesi agar tidak hilang saat refresh)
@@ -190,7 +190,6 @@
 
       let notifCooldown = false;
       btn.addEventListener('click', async () => {
-        // Jeda / cooldown 1.5 detik agar tidak menumpuk saat diklik berkali-kali
         if (notifCooldown) return;
         notifCooldown = true;
         btn.classList.add('opacity-60', 'cursor-not-allowed');
@@ -206,14 +205,12 @@
 
           if (perm === 'granted') {
             if (!isMuted) {
-              // Jika sedang aktif, klik akan menonaktifkan fitur notifikasi (tanpa kirim notif)
               localStorage.setItem('oase_notif_muted', 'true');
               updateBtn();
               if (window.NotificationService.showInAppToast) {
                 window.NotificationService.showInAppToast('Fitur notifikasi dinonaktifkan.');
               }
             } else {
-              // Jika sedang nonaktif, klik akan mengaktifkan kembali
               localStorage.setItem('oase_notif_muted', 'false');
               updateBtn();
               if (window.NotificationService.showInAppToast) {
@@ -221,7 +218,6 @@
               }
             }
           } else {
-            // Minta izin ke browser jika belum pernah
             const req = await window.NotificationService.requestPermission();
             if (req === 'granted') {
               localStorage.setItem('oase_notif_muted', 'false');
@@ -237,6 +233,7 @@
         } catch (e) {}
       });
     }
+
     function updateRoleUI() {
       if (currentRole === 'counselor') {
         messageInput.placeholder = 'Tulis tanggapan empati untuk siswa...';
@@ -252,7 +249,7 @@
 
       if (currentRole === 'counselor') {
         opponentName.textContent = activeSession.user_name || 'Siswa OASE (Anonim)';
-        sessionTopicMeta.textContent = `Topik: ${activeSession.topic} â€¢ ðŸ”’ Identitas Siswa Anonim`;
+        sessionTopicMeta.textContent = `Topik: ${activeSession.topic} • 🔒 Identitas Siswa Anonim`;
         opponentAvatar.src = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&h=200&q=80';
       } else {
         const counselorObj = (window.COUNSELORS_DATA || []).find(c => c.id === activeSession.counselor_id) || {
@@ -261,7 +258,7 @@
           avatar: 'https://images.unsplash.com/photo-1544027993-37dbfe43562a?auto=format&fit=crop&w=200&h=200&q=80'
         };
         opponentName.textContent = counselorObj.name;
-        sessionTopicMeta.textContent = `${counselorObj.role} â€¢ Topik: ${activeSession.topic}`;
+        sessionTopicMeta.textContent = `${counselorObj.role} • Topik: ${activeSession.topic}`;
         opponentAvatar.src = counselorObj.avatar;
       }
     }
@@ -274,7 +271,7 @@
       // Ubah status dan timer di header
       sessionTimerLabel.textContent = '00:00 (Selesai)';
       if (sessionStatusPill) {
-        sessionStatusPill.textContent = 'â— Selesai';
+        sessionStatusPill.textContent = '● Selesai';
         sessionStatusPill.className = 'px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 text-[9px] sm:text-[10px] font-bold flex-shrink-0';
       }
 
@@ -301,7 +298,7 @@
       if (currentRole === 'user') {
         lockedRatingActionBtn.classList.remove('hidden');
         if (sessionData && sessionData.rating) {
-          lockedRatingActionLabel.textContent = `Rating: ${'â˜…'.repeat(sessionData.rating)} (${sessionData.rating}/5)`;
+          lockedRatingActionLabel.textContent = `Rating: ${'★'.repeat(sessionData.rating)} (${sessionData.rating}/5)`;
           lockedRatingActionBtn.onclick = () => userRatingModal.classList.remove('hidden');
         } else {
           lockedRatingActionLabel.textContent = 'Beri Rating Konselor';
@@ -372,7 +369,7 @@
       // Quick chips template
       document.querySelectorAll('.quick-motivation-chip').forEach(chip => {
         chip.addEventListener('click', () => {
-          counselorMotivationInput.value = chip.textContent.trim().replace(/^ðŸŒŸ\s*|^ðŸ’ª\s*|^ðŸŒ±\s*/, '');
+          counselorMotivationInput.value = chip.textContent.trim().replace(/^🌟\s*|^💪\s*|^🌱\s*/, '');
         });
       });
 
@@ -448,7 +445,7 @@
         userRatingModal.classList.add('hidden');
         
         alert(`Terima kasih banyak! Penilaian ${selectedRating} bintang telah berhasil dikirimkan.`);
-        lockedRatingActionLabel.textContent = `Rating: ${'â˜…'.repeat(selectedRating)} (${selectedRating}/5)`;
+        lockedRatingActionLabel.textContent = `Rating: ${'★'.repeat(selectedRating)} (${selectedRating}/5)`;
         submitRatingBtn.disabled = false;
         submitRatingBtn.innerHTML = `<i data-lucide="check" class="w-3.5 h-3.5"></i><span>Kirim Penilaian</span>`;
         lucide.createIcons();
@@ -460,20 +457,13 @@
       if (!activeSession) return;
 
       // Cek status sesi terkini dari penyimpanan lokal (apakah sesi diakhiri oleh lawan bicara)
-      // Cari sesi konseling (simpan & pulihkan ID sesi agar tidak hilang saat refresh)
       const sessions = JSON.parse(localStorage.getItem('oase_counseling_sessions') || '[]');
-      const savedSessionId = sessionStorage.getItem('oase_active_chat_session_id');
-      if (targetSessionId) {
-        activeSession = sessions.find(s => s.id === targetSessionId);
-      } else if (savedSessionId) {
-        activeSession = sessions.find(s => s.id === savedSessionId);
-      }
-      if (!activeSession) {
-        activeSession = sessions.find(s => s.status === 'aktif');
-      }
-      if (activeSession) {
-        sessionStorage.setItem('oase_active_chat_session_id', activeSession.id);
-      }
+      const fresh = sessions.find(s => s.id === activeSession.id);
+      if (fresh) {
+        activeSession = fresh;
+        if (activeSession.status === 'selesai' && !isSessionLocked) {
+          lockChatUI(activeSession);
+        }
       }
 
       const messages = await window.ChatSessionService.getMessages(activeSession.id);
@@ -504,7 +494,7 @@
           // Jika pesan baru berasal dari lawan bicara dan bukan saat pertama kali membuka halaman
           if (!forceScroll && m.sender_type !== currentRole && window.NotificationService && localStorage.getItem('oase_notif_muted') !== 'true') {
             window.NotificationService.sendNotification(`Pesan baru dari ${m.sender_name}`, {
-              body: m.message_type === 'voice' ? 'ðŸŽ™ï¸ Mengirim pesan suara (Voice Note)' : (m.message_text || 'Pesan baru diterima'),
+              body: m.message_type === 'voice' ? '🎙️ Mengirim pesan suara (Voice Note)' : (m.message_text || 'Pesan baru diterima'),
               tag: 'oase-msg-' + m.id
             });
           }
@@ -521,7 +511,7 @@
       chatMessagesContainer.innerHTML = `
         <div class="text-center py-2">
           <span class="px-3.5 py-1 rounded-full bg-white border border-heather-200 text-heather-800 text-[10px] sm:text-[11px] font-semibold shadow-2xs inline-block">
-            ðŸ”’ Sesi konseling 30 menit terenkripsi secara aman dan rahasia (OASE Vault). Sampaikan cerita dengan tenang.
+            🔒 Sesi konseling 30 menit terenkripsi secara aman dan rahasia (OASE Vault). Sampaikan cerita dengan tenang.
           </span>
         </div>
       `;
@@ -549,7 +539,7 @@
             <p class="text-xs sm:text-sm text-oase-plum font-semibold italic whitespace-pre-line leading-relaxed max-w-md mx-auto">
               "${m.message_text}"
             </p>
-            <span class="text-[10px] text-oase-muted block font-medium">â€” ${m.sender_name}</span>
+            <span class="text-[10px] text-oase-muted block font-medium">— ${m.sender_name}</span>
           `;
           chatMessagesContainer.appendChild(card);
           return;
@@ -558,7 +548,6 @@
         // isMe bernilai true jika sender_type persis sama dengan peran tab saat ini
         const isMe = m.sender_type === currentRole;
         const isCrisis = Boolean(m.is_crisis);
-        // Indikasi krisis HANYA ditampilkan ke konselor, tidak pernah ke user
         const showCrisisUI = isCrisis && currentRole === 'counselor';
         const msgDiv = document.createElement('div');
         msgDiv.className = `flex items-end gap-2 max-w-[85%] sm:max-w-[75%] ${isMe ? 'ml-auto flex-row-reverse' : ''}`;
@@ -648,7 +637,7 @@
     // 6. VOICE NOTE RECORDER (OTOMATIS SESUAI PERAN TAB INI)
     let isRecordingVoice = false;
     micBtn.addEventListener('click', async () => {
-      if(isRecordingVoice) return;
+      if (isRecordingVoice) return;
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         alert('Peramban Anda tidak mendukung perekaman mikrofon.');
         return;
@@ -697,6 +686,7 @@
       updateRoleUI();
       voiceRecordBar.classList.add('hidden');
     }
+
     cancelRecordBtn.addEventListener('click', () => {
       if (mediaRecorder && mediaRecorder.state !== 'inactive') {
         mediaRecorder.stop();
@@ -820,11 +810,3 @@
 
     // Run on startup
     initChat();
-
-
-
-
-
-
-
-

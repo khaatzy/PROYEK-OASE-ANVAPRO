@@ -77,7 +77,7 @@
             <div class="flex items-center gap-1.5 sm:gap-2">
               <h2 id="opponentName" class="text-xs sm:text-sm font-extrabold text-oase-plum truncate">Nama Lawan Bicara</h2>
               <span id="sessionStatusPill" class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-900 border border-emerald-300 text-[9px] sm:text-[10px] font-bold flex-shrink-0">
-                â— Live 30m
+                ● Live 30m
               </span>
             </div>
             <p id="sessionTopicMeta" class="text-[11px] sm:text-xs text-heather-800 font-semibold truncate">Topik Konseling</p>
@@ -113,7 +113,7 @@
         </div>
 
         <!-- Tombol Reset Sesi (Membersihkan pesan lama uji coba) -->
-        <button id="resetSessionChatBtn" class="p-2 sm:p-2.5 rounded-xl border-2 border-heather-300 bg-white hover:bg-heather-50 text-oase-plum hover:text-heather-800 transition-all flex items-center gap-1 shadow-2xs" title="Muat ulang riwayat pesan">
+        <button id="resetSessionChatBtn" class="p-2 sm:p-2.5 rounded-xl border-2 border-heather-300 bg-white hover:bg-heather-50 text-oase-plum hover:text-heather-800 transition-all flex items-center gap-1 shadow-2xs" title="Bersihkan riwayat pesan pada sesi ini (Mulai uji coba baru)">
           <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
         </button>
 
@@ -132,7 +132,7 @@
     <div class="p-3.5 sm:p-4 rounded-2xl bg-rose-600 text-white shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs animate-pulse">
       <div class="flex items-center gap-2.5 font-semibold">
         <i data-lucide="alert-triangle" class="w-5 h-5 flex-shrink-0 text-white"></i>
-        <span>ðŸš¨ PERINGATAN KRISIS: Pesan ini mengandung indikasi bahaya/melukai diri sendiri. Mohon prioritaskan pendampingan atau arahkan segera ke Fasilitas Bantuan Terdekat atau Hubungi 119!</span>
+        <span>🚨 PERINGATAN KRISIS: Pesan ini mengandung indikasi bahaya/melukai diri sendiri. Mohon prioritaskan pendampingan atau arahkan segera ke Fasilitas Bantuan Terdekat atau Hubungi 119!</span>
       </div>
       <div class="flex items-center gap-2 flex-shrink-0">
         <button id="chatPlayCrisisAlarmBtn" type="button" class="px-3 py-1.5 rounded-xl bg-white text-rose-700 hover:bg-rose-50 text-xs font-bold transition-all flex items-center gap-1 shadow-xs">
@@ -148,7 +148,7 @@
     <!-- Notice Sesi -->
     <div class="text-center py-2">
       <span class="px-3.5 py-1 rounded-full bg-white border border-heather-200 text-heather-800 text-[10px] sm:text-[11px] font-semibold shadow-2xs inline-block">
-        ðŸ”’ Sesi konseling 30 menit terenkripsi secara aman dan rahasia. Sampaikan cerita dengan tenang.
+        🔒 Sesi konseling 30 menit terenkripsi secara aman dan rahasia. Sampaikan cerita dengan tenang.
       </span>
     </div>
 
@@ -252,13 +252,13 @@
         <label class="block text-[11px] font-bold text-heather-800 uppercase tracking-wider">Pilih Template Cepat:</label>
         <div class="flex flex-wrap gap-1.5">
           <button type="button" class="quick-motivation-chip px-2.5 py-1 rounded-xl bg-heather-50 hover:bg-heather-100 border border-heather-200 text-[11px] text-heather-800 transition-all text-left">
-            ðŸŒŸ Kamu sangat berani bercerita hari ini!
+            🌟 Kamu sangat berani bercerita hari ini!
           </button>
           <button type="button" class="quick-motivation-chip px-2.5 py-1 rounded-xl bg-heather-50 hover:bg-heather-100 border border-heather-200 text-[11px] text-heather-800 transition-all text-left">
-            ðŸ’ª Tetap semangat, setiap langkah kecilmu sangat berarti.
+            💪 Tetap semangat, setiap langkah kecilmu sangat berarti.
           </button>
           <button type="button" class="quick-motivation-chip px-2.5 py-1 rounded-xl bg-heather-50 hover:bg-heather-100 border border-heather-200 text-[11px] text-heather-800 transition-all text-left">
-            ðŸŒ± Ingat, kamu tidak sendirian. Pintu OASE selalu terbuka.
+            🌱 Ingat, kamu tidak sendirian. Pintu OASE selalu terbuka.
           </button>
         </div>
       </div>
@@ -303,11 +303,11 @@
       <!-- Star Rating Interactive Selector -->
       <div class="py-2">
         <div id="starContainer" class="flex items-center justify-center gap-2 text-3xl cursor-pointer">
-          <span class="star-btn text-amber-400 transition-transform hover:scale-125" data-val="1">â˜…</span>
-          <span class="star-btn text-amber-400 transition-transform hover:scale-125" data-val="2">â˜…</span>
-          <span class="star-btn text-amber-400 transition-transform hover:scale-125" data-val="3">â˜…</span>
-          <span class="star-btn text-amber-400 transition-transform hover:scale-125" data-val="4">â˜…</span>
-          <span class="star-btn text-amber-400 transition-transform hover:scale-125" data-val="5">â˜…</span>
+          <span class="star-btn text-amber-400 transition-transform hover:scale-125" data-val="1">★</span>
+          <span class="star-btn text-amber-400 transition-transform hover:scale-125" data-val="2">★</span>
+          <span class="star-btn text-amber-400 transition-transform hover:scale-125" data-val="3">★</span>
+          <span class="star-btn text-amber-400 transition-transform hover:scale-125" data-val="4">★</span>
+          <span class="star-btn text-amber-400 transition-transform hover:scale-125" data-val="5">★</span>
         </div>
         <p id="starLabel" class="text-xs font-bold text-amber-700 mt-1.5">Sangat Puas & Membantu (5 Bintang)</p>
       </div>
@@ -371,7 +371,7 @@
           <!-- Hotline Nasional Sejiwa -->
           <div class="p-4 rounded-2xl border border-rose-200 bg-white hover:border-rose-400 transition-all shadow-2xs flex items-center justify-between gap-3">
             <div class="space-y-0.5">
-              <span class="px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 text-[10px] font-bold">Nasional â€¢ 24 Jam Bebas Pulsa</span>
+              <span class="px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 text-[10px] font-bold">Nasional • 24 Jam Bebas Pulsa</span>
               <h4 class="text-sm font-bold text-oase-plum">Layanan SEJIWA Kemenkes RI</h4>
               <p class="text-xs text-oase-muted">Hotline Kesehatan Jiwa Nasional: Telepon 119 (Tekan 8)</p>
             </div>
@@ -399,7 +399,7 @@
             <div class="space-y-0.5">
               <span class="px-2 py-0.5 rounded-full bg-heather-100 text-heather-800 text-[10px] font-bold">Moderator Utama OASE</span>
               <h4 class="text-sm font-bold text-oase-plum">Bantuan & Eskalasi Moderator</h4>
-              <p class="text-xs text-oase-muted">moderator@oase.id â€¢ WhatsApp: +62 813-1122-3344</p>
+              <p class="text-xs text-oase-muted">moderator@oase.id • WhatsApp: +62 813-1122-3344</p>
             </div>
             <a href="https://wa.me/6281311223344?text=Halo%20Moderator%20OASE,%20saya%20ingin%20melaporkan%20kejadian%20darurat." target="_blank" rel="noopener noreferrer" class="px-3.5 py-2 rounded-xl bg-heather-600 hover:bg-heather-700 text-white font-bold text-xs flex items-center gap-1 shadow-xs flex-shrink-0">
               <i data-lucide="shield" class="w-3.5 h-3.5"></i>
@@ -425,10 +425,10 @@
           <div class="space-y-1">
             <label class="block text-xs font-bold text-oase-plum">Kategori Kendala:</label>
             <select id="bugCategorySelect" class="w-full px-3.5 py-2.5 rounded-xl border border-oase-border text-xs bg-white focus:outline-none focus:border-indigo-500">
-              <option value="Tampilan Berantakan / Layout HP & Desktop">ðŸ“± Tampilan Berantakan (Mobile/Desktop)</option>
-              <option value="Pesan Macet / Gagal Terkirim">ðŸ’¬ Pesan Macet / Gagal Terkirim</option>
-              <option value="Mikrofon / Voice Note Tidak Berfungsi">ðŸŽ™ï¸ Mikrofon / Voice Note Tidak Berfungsi</option>
-              <option value="Lainnya">âœ¨ Kendala Lainnya</option>
+              <option value="Tampilan Berantakan / Layout HP & Desktop">📱 Tampilan Berantakan (Mobile/Desktop)</option>
+              <option value="Pesan Macet / Gagal Terkirim">💬 Pesan Macet / Gagal Terkirim</option>
+              <option value="Mikrofon / Voice Note Tidak Berfungsi">🎙️ Mikrofon / Voice Note Tidak Berfungsi</option>
+              <option value="Lainnya">✨ Kendala Lainnya</option>
             </select>
           </div>
 
@@ -459,6 +459,7 @@
   </div>
 
   <!-- Scripts -->
+  <script src="counselors.js"></script>
   <script src="counselors.js"></script>
   <script src="chat-session-service.js"></script>
   <script src="notification-service.js"></script>

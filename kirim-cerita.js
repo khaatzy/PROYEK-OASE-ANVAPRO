@@ -383,3 +383,4 @@
 
     // Initial render
     renderCounselors();
+  </script>

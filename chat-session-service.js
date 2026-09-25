@@ -1,4 +1,4 @@
-﻿const ChatSessionService = {
+const ChatSessionService = {
   // Helper: Mengecek apakah slot tanggal & jam tertentu sudah dibooking untuk konselor tertentu
   isSlotBooked(counselorId, bookingDate, bookingTime) {
     if (!counselorId || counselorId === 'auto' || !bookingDate || !bookingTime) return false;
@@ -213,7 +213,7 @@
       type: 'motivation',
       sessionId,
       title: `Pesan Semangat dari ${counselorName}`,
-      message: `ðŸ’Œ "${messageText.substring(0, 60)}${messageText.length > 60 ? '...' : ''}"`
+      message: `💌 "${messageText.substring(0, 60)}${messageText.length > 60 ? '...' : ''}"`
     });
 
     return msg;
@@ -423,4 +423,3 @@
 // Layanan Interaktif Gemini AI (Sahabat OASE)
 
 window.ChatSessionService = ChatSessionService;
-

@@ -93,9 +93,9 @@
         const rInfo = window.getCounselorRatingInfo(currentSession.id);
         const statCounselorRating = document.getElementById('statCounselorRating');
         if (statCounselorRating) {
-          statCounselorRating.textContent = `â­ ${rInfo.average}`;
+          statCounselorRating.textContent = `⭐ ${rInfo.average}`;
         }
-        navCounselorRole.textContent = `â­ ${rInfo.average} â€¢ ${currentSession.email}`;
+        navCounselorRole.textContent = `⭐ ${rInfo.average} • ${currentSession.email}`;
       } else {
         navCounselorRole.textContent = currentSession.email;
       }
@@ -228,14 +228,14 @@
             <div class="flex items-center justify-between gap-2 flex-wrap">
               <div class="flex items-center gap-1.5 flex-wrap">
                 <span class="font-mono text-xs font-bold text-heather-700 bg-heather-50 px-2.5 py-1 rounded-lg border border-heather-200">${story.ticket_code}</span>
-                ${isCrisis ? '<span class="px-2.5 py-0.5 rounded-full bg-rose-600 text-white text-[10px] font-extrabold flex items-center gap-1 shadow-xs animate-pulse"><i data-lucide="alert-triangle" class="w-3 h-3"></i> ðŸš¨ KRISIS: Respon Cepat</span>' : ''}
+                ${isCrisis ? '<span class="px-2.5 py-0.5 rounded-full bg-rose-600 text-white text-[10px] font-extrabold flex items-center gap-1 shadow-xs animate-pulse"><i data-lucide="alert-triangle" class="w-3 h-3"></i> 🚨 KRISIS: Respon Cepat</span>' : ''}
                 ${isAnon ? '<span class="px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 text-[10px] font-bold flex items-center gap-1"><i data-lucide="shield-check" class="w-3 h-3 text-rose-600"></i> Curhat Anonim</span>' : ''}
               </div>
               ${isAnswered 
-                ? '<span class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[11px] font-bold">âœ“ Sudah Dibalas</span>'
+                ? '<span class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[11px] font-bold">✓ Sudah Dibalas</span>'
                 : (isCrisis 
-                    ? '<span class="px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-700 text-[11px] font-extrabold border border-rose-300">ðŸ”¥ Butuh Penanganan Segera</span>'
-                    : '<span class="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[11px] font-bold">â³ Menunggu Respons</span>'
+                    ? '<span class="px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-700 text-[11px] font-extrabold border border-rose-300">🔥 Butuh Penanganan Segera</span>'
+                    : '<span class="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[11px] font-bold">⏳ Menunggu Respons</span>'
                   )
               }
             </div>
@@ -244,7 +244,7 @@
               <span class="font-semibold text-oase-plum flex items-center gap-1.5">
                 <i data-lucide="user" class="w-3.5 h-3.5 text-heather-500"></i>
                 <span>${story.author_name}</span>
-                <span class="text-[10px] text-oase-muted font-normal">(${story.education_level}${story.grade_class ? ' â€¢ ' + story.grade_class : ''})</span>
+                <span class="text-[10px] text-oase-muted font-normal">(${story.education_level}${story.grade_class ? ' • ' + story.grade_class : ''})</span>
               </span>
               <span class="flex items-center gap-1 text-[11px]">
                 <i data-lucide="clock" class="w-3 h-3"></i>
@@ -321,7 +321,7 @@
       modalCategoryBadge.textContent = story.category;
       modalTimeBadge.textContent = getRelativeTime(story.created_at);
       modalAuthorName.textContent = story.author_name;
-      modalAuthorMeta.textContent = `${story.education_level} ${story.grade_class ? ' â€¢ ' + story.grade_class : ''} â€¢ Jenis Kelamin: ${story.gender}`;
+      modalAuthorMeta.textContent = `${story.education_level} ${story.grade_class ? ' • ' + story.grade_class : ''} • Jenis Kelamin: ${story.gender}`;
       modalStoryContent.textContent = story.story_content;
 
       // Pre-fill existing reply if any
@@ -636,13 +636,13 @@
         <div class="space-y-2">
           <div class="flex items-center justify-between">
             <span class="px-2.5 py-0.5 rounded-full ${isDirectlyAssigned ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-800'} text-[10px] font-bold">
-              ${isDirectlyAssigned ? 'ðŸ”´ Sesi Aktif untuk Anda' : `âš¡ Sesi Terbuka (${s.counselor_name})`}
+              ${isDirectlyAssigned ? '🔴 Sesi Aktif untuk Anda' : `⚡ Sesi Terbuka (${s.counselor_name})`}
             </span>
             <span class="text-[11px] text-oase-muted font-medium">${getRelativeTime(s.started_at)}</span>
           </div>
           <div class="flex items-center gap-2">
             <h3 class="text-sm font-extrabold text-oase-plum">${s.user_name || 'Siswa Anonim'}</h3>
-            <span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-300 text-[10px] font-bold">ðŸ”’ Anonim</span>
+            <span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-300 text-[10px] font-bold">🔒 Anonim</span>
           </div>
           <p class="text-xs text-heather-700 font-semibold bg-heather-50 p-2 rounded-xl border border-heather-100">Topik: ${s.topic}</p>
         </div>
@@ -705,7 +705,7 @@
         if (s.rating) {
           ratingHtml = `
             <div class="flex items-center gap-1.5 text-xs">
-              <span class="text-amber-500 font-bold">${'â˜…'.repeat(s.rating)}${'â˜†'.repeat(5 - s.rating)}</span>
+              <span class="text-amber-500 font-bold">${'★'.repeat(s.rating)}${'☆'.repeat(5 - s.rating)}</span>
               <span class="text-oase-muted text-[11px]">(${s.rating}/5)</span>
             </div>
           `;
@@ -729,14 +729,14 @@
           <div class="space-y-2.5">
             <div class="flex items-center justify-between">
               <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 text-[10px] font-bold">
-                âœ“ Selesai
+                ✓ Selesai
               </span>
               <span class="text-[11px] text-oase-muted font-medium">${dateStr}</span>
             </div>
             <div>
               <div class="flex items-center gap-2">
                 <h3 class="text-sm font-extrabold text-oase-plum">${s.user_name || 'Siswa Anonim'}</h3>
-                <span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-300 text-[10px] font-bold">ðŸ”’ Anonim</span>
+                <span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-300 text-[10px] font-bold">🔒 Anonim</span>
               </div>
               <p class="text-xs text-heather-700 font-semibold mt-0.5">Topik: ${s.topic}</p>
             </div>
@@ -841,3 +841,4 @@
     loadCounselorNotifs();
     loadLiveSessions();
     loadHistorySessions();
+  </script>

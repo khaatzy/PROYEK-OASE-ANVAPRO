@@ -86,7 +86,7 @@
       const displayName = userProfile.display_name || userProfile.full_name || 'Sahabat OASE';
       userInitialLabel.textContent = displayName.charAt(0).toUpperCase();
       userNameLabel.textContent = displayName;
-      userEmailLabel.textContent = 'ðŸ”’ Mode Anonim Aktif';
+      userEmailLabel.textContent = '🔒 Mode Anonim Aktif';
 
       // Role badge
       if (userProfile.role === 'moderator') {
@@ -207,7 +207,7 @@
           const perm = await window.NotificationService.requestPermission();
           updateBtnStatus();
           if (perm === 'granted') {
-            await window.NotificationService.sendNotification('Notifikasi OASE Aktif ðŸŽ‰', {
+            await window.NotificationService.sendNotification('Notifikasi OASE Aktif 🎉', {
               body: 'Anda akan menerima pemberitahuan langsung di layar desktop atau handphone saat ada balasan konselor atau pesan baru.',
               tag: 'oase-welcome-notif'
             });
@@ -472,7 +472,7 @@
         const ratingInfo = window.getCounselorRatingInfo ? window.getCounselorRatingInfo(c.id) : { average: 5.0, totalReviews: 10 };
         const opt = document.createElement('option');
         opt.value = c.id;
-        opt.textContent = `${c.name} â€¢ ${c.role} (â­ ${ratingInfo.average} â€¢ ${ratingInfo.totalReviews} ulasan)`;
+        opt.textContent = `${c.name} • ${c.role} (⭐ ${ratingInfo.average} • ${ratingInfo.totalReviews} ulasan)`;
         bookingCounselorSelect.appendChild(opt);
       });
 
@@ -491,7 +491,7 @@
       const ratingBadge = document.getElementById('selectedCounselorRatingBadge');
       if (c && ratingBadge) {
         const ratingInfo = window.getCounselorRatingInfo ? window.getCounselorRatingInfo(c.id) : { average: 5.0 };
-        ratingBadge.textContent = `â­ ${ratingInfo.average} â€¢ ${c.role}`;
+        ratingBadge.textContent = `⭐ ${ratingInfo.average} • ${c.role}`;
       }
     }
 
@@ -592,7 +592,7 @@
         slotBtn.innerHTML = `
           <span>${slot} WIB</span>
           <span class="text-[9px] font-semibold ${isBooked ? 'text-rose-600 font-extrabold' : (isSelected ? 'text-heather-100' : 'text-emerald-700')}">
-            ${isBooked ? 'âœ• Terisi' : 'âœ“ Tersedia'}
+            ${isBooked ? '✕ Terisi' : '✓ Tersedia'}
           </span>
         `;
 
@@ -624,7 +624,7 @@
             subBtn.className = "px-3 py-1.5 rounded-xl bg-white hover:bg-amber-100 border border-amber-300 text-amber-900 text-xs font-bold transition-all flex items-center gap-1.5 shadow-2xs";
             subBtn.innerHTML = `
               <i data-lucide="user-check" class="w-3.5 h-3.5 text-emerald-600"></i>
-              <span>Pilih ${sub.name.split(',')[0]} (â­ ${rInfo.average})</span>
+              <span>Pilih ${sub.name.split(',')[0]} (⭐ ${rInfo.average})</span>
             `;
             subBtn.addEventListener('click', () => {
               bookingCounselorSelect.value = sub.id;
@@ -825,7 +825,7 @@
               <div>
                 <div class="flex items-center gap-2">
                   <h3 class="text-base font-bold text-oase-plum">${counselorObj.name}</h3>
-                  <span class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold">ðŸ”´ Sesi Aktif</span>
+                  <span class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold">🔴 Sesi Aktif</span>
                 </div>
                 <p class="text-xs text-heather-700 font-semibold">${counselorObj.role}</p>
                 <p class="text-xs text-oase-muted mt-0.5">Topik: ${session.topic}</p>

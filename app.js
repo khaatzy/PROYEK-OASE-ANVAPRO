@@ -1,4 +1,4 @@
-﻿// JavaScript & Supabase Integration for OASE Cerita
+// JavaScript & Supabase Integration for OASE Cerita
 
 document.addEventListener('DOMContentLoaded', async () => {
   // ==========================================
@@ -119,7 +119,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (openWriteStoryBtn) openWriteStoryBtn.addEventListener('click', handleStartStoryClick);
   if (navWriteStoryBtn) navWriteStoryBtn.addEventListener('click', openStoryModal);
 
-  // Intercept 'Chat dengan Konselor' links
   // Intercept 'Chat dengan Konselor' links
   document.querySelectorAll('.chat-counselor-btn, a[href*="action=chat-counselor"], a[href="kirim-cerita.html"]').forEach(link => {
     link.addEventListener('click', (e) => {
@@ -326,12 +325,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   // 5. FETCH & RENDER STORIES (COMMUNITY FEED)
   // ==========================================
   const emotionColorMap = {
-    'Tenang': { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200', icon: 'ðŸŒ¿' },
-    'Cemas':  { bg: 'bg-amber-50',   text: 'text-amber-700',   border: 'border-amber-200',   icon: 'ðŸŒ§ï¸' },
-    'Lelah':  { bg: 'bg-heather-100', text: 'text-heather-800', border: 'border-heather-200', icon: 'ðŸ”‹' },
-    'Sedih':  { bg: 'bg-blue-50',    text: 'text-blue-700',    border: 'border-blue-200',    icon: 'ðŸ¥€' },
-    'Bingung':{ bg: 'bg-purple-50',  text: 'text-purple-700',  border: 'border-purple-200',  icon: 'ðŸŒ€' },
-    'Syukur': { bg: 'bg-rose-50',    text: 'text-rose-700',    border: 'border-rose-200',    icon: 'âœ¨' }
+    'Tenang': { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200', icon: '🌿' },
+    'Cemas':  { bg: 'bg-amber-50',   text: 'text-amber-700',   border: 'border-amber-200',   icon: '🌧️' },
+    'Lelah':  { bg: 'bg-heather-100', text: 'text-heather-800', border: 'border-heather-200', icon: '🔋' },
+    'Sedih':  { bg: 'bg-blue-50',    text: 'text-blue-700',    border: 'border-blue-200',    icon: '🥀' },
+    'Bingung':{ bg: 'bg-purple-50',  text: 'text-purple-700',  border: 'border-purple-200',  icon: '🌀' },
+    'Syukur': { bg: 'bg-rose-50',    text: 'text-rose-700',    border: 'border-rose-200',    icon: '✨' }
   };
 
   const formatRelativeTime = (timestamp) => {
@@ -485,4 +484,3 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 });
-
