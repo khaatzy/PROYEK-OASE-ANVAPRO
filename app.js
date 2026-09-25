@@ -1,4 +1,4 @@
-// JavaScript & Supabase Integration for OASE Cerita
+﻿// JavaScript & Supabase Integration for OASE Cerita
 
 document.addEventListener('DOMContentLoaded', async () => {
   // ==========================================
@@ -120,12 +120,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (navWriteStoryBtn) navWriteStoryBtn.addEventListener('click', openStoryModal);
 
   // Intercept 'Chat dengan Konselor' links
-  document.querySelectorAll('a[href="kirim-cerita.html"]').forEach(link => {
+  // Intercept 'Chat dengan Konselor' links
+  document.querySelectorAll('.chat-counselor-btn, a[href*="action=chat-counselor"], a[href="kirim-cerita.html"]').forEach(link => {
     link.addEventListener('click', (e) => {
       if (!currentUserSession) {
         e.preventDefault();
+        sessionStorage.setItem('oase_auth_redirect', 'dashboard-user.html?action=chat-counselor');
         openAuthModal('login');
-        showAuthFeedback('Silakan masuk atau daftar terlebih dahulu untuk konsultasi privat.', 'info');
+        showAuthFeedback('Silakan masuk atau daftar akun terlebih dahulu untuk chat langsung dengan konselor.', 'info');
       }
     });
   });
@@ -214,7 +216,9 @@ document.addEventListener('DOMContentLoaded', async () => {
           setTimeout(() => {
             closeAuthModal();
             authForm.reset();
-            window.location.href = 'dashboard-user.html';
+            const targetUrl = sessionStorage.getItem('oase_auth_redirect') || 'dashboard-user.html';
+            sessionStorage.removeItem('oase_auth_redirect');
+            window.location.href = targetUrl;
           }, 800);
         } else {
           await window.AuthService.signUp(email, password);
@@ -322,12 +326,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   // 5. FETCH & RENDER STORIES (COMMUNITY FEED)
   // ==========================================
   const emotionColorMap = {
-    'Tenang': { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200', icon: '🌿' },
-    'Cemas':  { bg: 'bg-amber-50',   text: 'text-amber-700',   border: 'border-amber-200',   icon: '🌧️' },
-    'Lelah':  { bg: 'bg-heather-100', text: 'text-heather-800', border: 'border-heather-200', icon: '🔋' },
-    'Sedih':  { bg: 'bg-blue-50',    text: 'text-blue-700',    border: 'border-blue-200',    icon: '🥀' },
-    'Bingung':{ bg: 'bg-purple-50',  text: 'text-purple-700',  border: 'border-purple-200',  icon: '🌀' },
-    'Syukur': { bg: 'bg-rose-50',    text: 'text-rose-700',    border: 'border-rose-200',    icon: '✨' }
+    'Tenang': { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200', icon: 'ðŸŒ¿' },
+    'Cemas':  { bg: 'bg-amber-50',   text: 'text-amber-700',   border: 'border-amber-200',   icon: 'ðŸŒ§ï¸' },
+    'Lelah':  { bg: 'bg-heather-100', text: 'text-heather-800', border: 'border-heather-200', icon: 'ðŸ”‹' },
+    'Sedih':  { bg: 'bg-blue-50',    text: 'text-blue-700',    border: 'border-blue-200',    icon: 'ðŸ¥€' },
+    'Bingung':{ bg: 'bg-purple-50',  text: 'text-purple-700',  border: 'border-purple-200',  icon: 'ðŸŒ€' },
+    'Syukur': { bg: 'bg-rose-50',    text: 'text-rose-700',    border: 'border-rose-200',    icon: 'âœ¨' }
   };
 
   const formatRelativeTime = (timestamp) => {

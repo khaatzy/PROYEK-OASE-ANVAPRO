@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="id" class="scroll-smooth">
 <head>
   <meta charset="UTF-8">
@@ -15,38 +15,7 @@
   <!-- Supabase CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <!-- Tailwind Config -->
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
-          },
-          colors: {
-            heather: {
-              50: '#FBF5F9',
-              100: '#F5EBF3',
-              200: '#EBD8E7',
-              300: '#DCB8D4',
-              400: '#C78CBB',
-              500: '#A14189', /* HEATHER MAUVE PRIMARY */
-              600: '#8E3476',
-              700: '#752A62',
-              800: '#5F244F',
-              900: '#3D1533',
-            },
-            oase: {
-              cream: '#FDFBF7',
-              surface: '#FDF7FB',
-              border: '#CCA8C5',
-              plum: '#240B1D',
-              muted: '#553D4F'
-            }
-          }
-        }
-      }
-    }
-  </script>
+  <script src="tailwind-config.js"></script>
   <link rel="stylesheet" href="style.css">
   <style>
     @keyframes pulse-ring {
@@ -274,8 +243,8 @@
             </p>
           </div>
           <div class="flex flex-wrap gap-1.5 text-[10px] font-bold text-heather-800">
-            <span class="px-2.5 py-1 rounded-lg bg-heather-50 border border-heather-300">✓ Sesi 30 Menit</span>
-            <span class="px-2.5 py-1 rounded-lg bg-heather-50 border border-heather-300">✓ Voice Note</span>
+            <span class="px-2.5 py-1 rounded-lg bg-heather-50 border border-heather-300">âœ“ Sesi 30 Menit</span>
+            <span class="px-2.5 py-1 rounded-lg bg-heather-50 border border-heather-300">âœ“ Voice Note</span>
           </div>
         </div>
 
@@ -303,8 +272,8 @@
             </p>
           </div>
           <div class="flex flex-wrap gap-1.5 text-[10px] font-bold text-rose-800">
-            <span class="px-2.5 py-1 rounded-lg bg-rose-50 border border-rose-300">✓ 100% Tanpa Nama Asli</span>
-            <span class="px-2.5 py-1 rounded-lg bg-rose-50 border border-rose-300">✓ Kode Tiket</span>
+            <span class="px-2.5 py-1 rounded-lg bg-rose-50 border border-rose-300">âœ“ 100% Tanpa Nama Asli</span>
+            <span class="px-2.5 py-1 rounded-lg bg-rose-50 border border-rose-300">âœ“ Kode Tiket</span>
           </div>
         </div>
 
@@ -332,8 +301,8 @@
             </p>
           </div>
           <div class="flex flex-wrap gap-1.5 text-[10px] font-semibold text-indigo-700">
-            <span class="px-2 py-0.5 rounded-lg bg-indigo-50 border border-indigo-200">✓ Respon Cepat</span>
-            <span class="px-2 py-0.5 rounded-lg bg-indigo-50 border border-indigo-200">✓ 24 Jam Siap</span>
+            <span class="px-2 py-0.5 rounded-lg bg-indigo-50 border border-indigo-200">âœ“ Respon Cepat</span>
+            <span class="px-2 py-0.5 rounded-lg bg-indigo-50 border border-indigo-200">âœ“ 24 Jam Siap</span>
           </div>
         </div>
 
@@ -403,7 +372,7 @@
   <!-- Footer -->
   <footer class="mt-12 bg-white/70 border-t border-oase-border py-6 text-center text-xs text-oase-muted">
     <div class="max-w-7xl mx-auto px-4">
-      <p>&copy; 2026 OASE Cerita. Obrolan Aman Seputar Emosi • Dashboard Siswa.</p>
+      <p>&copy; 2026 OASE Cerita. Obrolan Aman Seputar Emosi â€¢ Dashboard Siswa.</p>
     </div>
   </footer>
 
@@ -571,7 +540,7 @@
         <div class="space-y-1.5">
           <label class="block text-xs font-bold text-oase-plum flex items-center justify-between">
             <span>Pilih Konselor Pendamping:</span>
-            <span id="selectedCounselorRatingBadge" class="text-[11px] text-amber-700 font-normal">⭐ 5.0</span>
+            <span id="selectedCounselorRatingBadge" class="text-[11px] text-amber-700 font-normal">â­ 5.0</span>
           </label>
           <select id="bookingCounselorSelect" required class="w-full px-3.5 py-2.5 rounded-xl border border-oase-border text-xs focus:outline-none focus:border-heather-500 bg-white">
             <!-- Populated via JS -->
@@ -627,12 +596,12 @@
         <div class="space-y-1.5">
           <label class="block text-xs font-bold text-oase-plum">Fokus Dukungan & Cerita:</label>
           <select id="bookingTopicSelect" required class="w-full px-3.5 py-2.5 rounded-xl border border-oase-border text-xs focus:outline-none focus:border-heather-500 bg-white">
-            <option value="Masalah Pembelajaran & Akademik">🎓 Pembelajaran & Akademik</option>
-            <option value="Masalah Mental & Emosi">🧠 Kesehatan Mental & Emosi</option>
-            <option value="Masalah Keluarga & Rumah Tangga">🏡 Masalah Keluarga & Rumah Tangga</option>
-            <option value="Hubungan & Pertemanan">🤝 Hubungan, Pertemanan & Asmara</option>
-            <option value="Karier & Rencana Masa Depan">🧭 Karier & Rencana Masa Depan</option>
-            <option value="Lainnya">✨ Kebutuhan Cerita Lainnya</option>
+            <option value="Masalah Pembelajaran & Akademik">ðŸŽ“ Pembelajaran & Akademik</option>
+            <option value="Masalah Mental & Emosi">ðŸ§  Kesehatan Mental & Emosi</option>
+            <option value="Masalah Keluarga & Rumah Tangga">ðŸ¡ Masalah Keluarga & Rumah Tangga</option>
+            <option value="Hubungan & Pertemanan">ðŸ¤ Hubungan, Pertemanan & Asmara</option>
+            <option value="Karier & Rencana Masa Depan">ðŸ§­ Karier & Rencana Masa Depan</option>
+            <option value="Lainnya">âœ¨ Kebutuhan Cerita Lainnya</option>
           </select>
         </div>
 
@@ -640,7 +609,7 @@
         <div class="p-3.5 rounded-2xl bg-heather-50/70 border border-heather-200 text-xs space-y-1.5">
           <div class="flex items-center justify-between text-heather-900 font-semibold">
             <span>Ringkasan Booking:</span>
-            <span class="text-[11px] px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 font-bold">🔒 Terenkripsi Aman</span>
+            <span class="text-[11px] px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 font-bold">ðŸ”’ Terenkripsi Aman</span>
           </div>
           <div class="text-[11px] text-oase-muted leading-relaxed space-y-0.5">
             <p>Konselor: <strong id="summaryCounselorName" class="text-oase-plum">-</strong></p>
@@ -699,7 +668,7 @@
           <!-- Hotline Nasional Sejiwa -->
           <div class="p-4 rounded-2xl border border-rose-200 bg-white hover:border-rose-400 transition-all shadow-2xs flex items-center justify-between gap-3">
             <div class="space-y-0.5">
-              <span class="px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 text-[10px] font-bold">Nasional • 24 Jam Bebas Pulsa</span>
+              <span class="px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 text-[10px] font-bold">Nasional â€¢ 24 Jam Bebas Pulsa</span>
               <h4 class="text-sm font-bold text-oase-plum">Layanan SEJIWA Kemenkes RI</h4>
               <p class="text-xs text-oase-muted">Hotline Kesehatan Jiwa Nasional: Telepon 119 (Tekan 8)</p>
             </div>
@@ -727,7 +696,7 @@
             <div class="space-y-0.5">
               <span class="px-2 py-0.5 rounded-full bg-heather-100 text-heather-800 text-[10px] font-bold">Moderator Utama OASE</span>
               <h4 class="text-sm font-bold text-oase-plum">Bantuan & Eskalasi Moderator</h4>
-              <p class="text-xs text-oase-muted">moderator@oase.id • WhatsApp: +62 822-2817-6090</p>
+              <p class="text-xs text-oase-muted">moderator@oase.id â€¢ WhatsApp: +62 822-2817-6090</p>
             </div>
             <a href="https://wa.me/6282228176090?text=Halo%20Moderator%20OASE,%20saya%20ingin%20melaporkan%20kejadian%20darurat." target="_blank" rel="noopener noreferrer" class="px-3.5 py-2 rounded-xl bg-heather-600 hover:bg-heather-700 text-white font-bold text-xs flex items-center gap-1 shadow-xs flex-shrink-0">
               <i data-lucide="shield" class="w-3.5 h-3.5"></i>
@@ -753,10 +722,10 @@
           <div class="space-y-1">
             <label class="block text-xs font-bold text-oase-plum">Kategori Kendala:</label>
             <select id="bugCategorySelect" class="w-full px-3.5 py-2.5 rounded-xl border border-oase-border text-xs bg-white focus:outline-none focus:border-indigo-500">
-              <option value="Tampilan Berantakan / Layout HP & Desktop">📱 Tampilan Berantakan (Mobile/Desktop)</option>
-              <option value="Tombol / Fitur Tidak Berfungsi">⚙️ Tombol / Fitur Tidak Berfungsi</option>
-              <option value="Kendala Kirim Cerita / Chat">💬 Kendala Kirim Cerita / Chat</option>
-              <option value="Lainnya">✨ Kendala Lainnya</option>
+              <option value="Tampilan Berantakan / Layout HP & Desktop">ðŸ“± Tampilan Berantakan (Mobile/Desktop)</option>
+              <option value="Tombol / Fitur Tidak Berfungsi">âš™ï¸ Tombol / Fitur Tidak Berfungsi</option>
+              <option value="Kendala Kirim Cerita / Chat">ðŸ’¬ Kendala Kirim Cerita / Chat</option>
+              <option value="Lainnya">âœ¨ Kendala Lainnya</option>
             </select>
           </div>
 
@@ -835,12 +804,12 @@
         <div class="space-y-1">
           <label class="block text-xs font-bold text-oase-plum">Kategori Masalah:</label>
           <select id="anonCategorySelect" required class="w-full px-3.5 py-2.5 rounded-xl border border-oase-border text-xs focus:outline-none focus:border-rose-500 bg-white">
-            <option value="Masalah Mental & Emosi">🧠 Kesehatan Mental & Emosi</option>
-            <option value="Masalah Pembelajaran & Akademik">🎓 Pembelajaran & Akademik</option>
-            <option value="Masalah Keluarga & Rumah Tangga">🏡 Masalah Keluarga</option>
-            <option value="Hubungan & Pertemanan">🤝 Pertemanan & Hubungan</option>
-            <option value="Karier & Rencana Masa Depan">🧭 Karier & Masa Depan</option>
-            <option value="Lainnya">✨ Lainnya</option>
+            <option value="Masalah Mental & Emosi">ðŸ§  Kesehatan Mental & Emosi</option>
+            <option value="Masalah Pembelajaran & Akademik">ðŸŽ“ Pembelajaran & Akademik</option>
+            <option value="Masalah Keluarga & Rumah Tangga">ðŸ¡ Masalah Keluarga</option>
+            <option value="Hubungan & Pertemanan">ðŸ¤ Pertemanan & Hubungan</option>
+            <option value="Karier & Rencana Masa Depan">ðŸ§­ Karier & Masa Depan</option>
+            <option value="Lainnya">âœ¨ Lainnya</option>
           </select>
         </div>
 
@@ -913,11 +882,11 @@
       <!-- Star Rating Interactive Selector -->
       <div class="py-2">
         <div id="dashStarContainer" class="flex items-center justify-center gap-2 text-3xl cursor-pointer">
-          <span class="dash-star-btn text-amber-400 transition-transform hover:scale-125" data-val="1">★</span>
-          <span class="dash-star-btn text-amber-400 transition-transform hover:scale-125" data-val="2">★</span>
-          <span class="dash-star-btn text-amber-400 transition-transform hover:scale-125" data-val="3">★</span>
-          <span class="dash-star-btn text-amber-400 transition-transform hover:scale-125" data-val="4">★</span>
-          <span class="dash-star-btn text-amber-400 transition-transform hover:scale-125" data-val="5">★</span>
+          <span class="dash-star-btn text-amber-400 transition-transform hover:scale-125" data-val="1">â˜…</span>
+          <span class="dash-star-btn text-amber-400 transition-transform hover:scale-125" data-val="2">â˜…</span>
+          <span class="dash-star-btn text-amber-400 transition-transform hover:scale-125" data-val="3">â˜…</span>
+          <span class="dash-star-btn text-amber-400 transition-transform hover:scale-125" data-val="4">â˜…</span>
+          <span class="dash-star-btn text-amber-400 transition-transform hover:scale-125" data-val="5">â˜…</span>
         </div>
         <p id="dashStarLabel" class="text-xs font-bold text-amber-700 mt-1.5">Sangat Puas & Membantu (5 Bintang)</p>
       </div>
@@ -1012,10 +981,10 @@
 
   <!-- Scripts -->
   <script src="counselors.js"></script>
-  <script src="chat-session-service.js"></script>`n  <script src="notification-service.js"></script>`n  <script src="supabaseClient.js"></script>
-  <script>
-<script src="dashboard-user.js"></script>
+  <script src="chat-session-service.js"></script>
+  <script src="notification-service.js"></script>
+  <script src="supabaseClient.js"></script>
+  <script src="dashboard-history-anon.js"></script>
+  <script src="dashboard-user.js"></script>
 </body>
 </html>
-
-

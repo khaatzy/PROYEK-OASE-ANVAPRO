@@ -1,4 +1,4 @@
-const ChatSessionService = {
+﻿const ChatSessionService = {
   // Helper: Mengecek apakah slot tanggal & jam tertentu sudah dibooking untuk konselor tertentu
   isSlotBooked(counselorId, bookingDate, bookingTime) {
     if (!counselorId || counselorId === 'auto' || !bookingDate || !bookingTime) return false;
@@ -213,7 +213,7 @@ const ChatSessionService = {
       type: 'motivation',
       sessionId,
       title: `Pesan Semangat dari ${counselorName}`,
-      message: `💌 "${messageText.substring(0, 60)}${messageText.length > 60 ? '...' : ''}"`
+      message: `ðŸ’Œ "${messageText.substring(0, 60)}${messageText.length > 60 ? '...' : ''}"`
     });
 
     return msg;
@@ -327,17 +327,11 @@ const ChatSessionService = {
       created_at: new Date().toISOString()
     };
 
-    if (crisisCheck.isCrisis && senderType === 'user') {
-      if (window.AudioAlertService) {
-        window.AudioAlertService.playCrisisAlarm();
-      }
-      this.triggerNotification({
-        type: 'crisis_message',
-        sessionId,
-        senderType,
-        title: '🚨 PERINGATAN KRISIS DALAM RUANG CHAT!',
-        message: `Siswa terdeteksi menyampaikan pesan indikasi krisis: "${messageText.substring(0, 45)}...". Harap segera prioritaskan pendampingan!`
-      });
+    // Selalu simpan ke localStorage sebagai cache reliabel agar tidak hilang saat refresh
+    const allMsgs = JSON.parse(localStorage.getItem('oase_session_messages') || '[]');
+    if (!allMsgs.some(m => m.id === msg.id)) {
+      allMsgs.push(msg);
+      localStorage.setItem('oase_session_messages', JSON.stringify(allMsgs));
     }
 
     if (supabaseClient) {
@@ -357,10 +351,6 @@ const ChatSessionService = {
       } catch (e) {}
     }
 
-    const allMsgs = JSON.parse(localStorage.getItem('oase_session_messages') || '[]');
-    allMsgs.push(msg);
-    localStorage.setItem('oase_session_messages', JSON.stringify(allMsgs));
-
     this.triggerNotification({
       type: 'message',
       sessionId,
@@ -372,12 +362,15 @@ const ChatSessionService = {
     return { ...msg, message_text: messageText };
   },
 
-  // Ambil Semua Pesan dalam Sesi (Didekripsi secara otomatis)
+  // Ambil Semua Pesan dalam Sesi (Didekripsi secara otomatis & Digabung Tanpa Hilang Saat Refresh)
   async getMessages(sessionId) {
     const decryptMsg = (m) => ({
       ...m,
       message_text: (m.message_text && window.EncryptionService) ? window.EncryptionService.decrypt(m.message_text) : (m.message_text || '')
     });
+
+    const localMsgs = JSON.parse(localStorage.getItem('oase_session_messages') || '[]').filter(m => m.session_id === sessionId);
+    let remoteMsgs = [];
 
     if (supabaseClient) {
       try {
@@ -386,12 +379,24 @@ const ChatSessionService = {
           .select('*')
           .eq('session_id', sessionId)
           .order('created_at', { ascending: true });
-        if (!error && data && data.length > 0) return data.map(decryptMsg);
+        if (!error && data && data.length > 0) {
+          remoteMsgs = data;
+        }
       } catch (e) {}
     }
 
-    const allMsgs = JSON.parse(localStorage.getItem('oase_session_messages') || '[]');
-    return allMsgs.filter(m => m.session_id === sessionId).map(decryptMsg);
+    // Gabungkan pesan lokal dan remote tanpa duplikasi agar chat tidak pernah hilang
+    const map = new Map();
+    localMsgs.forEach(m => map.set(m.id, m));
+    remoteMsgs.forEach(m => map.set(m.id, m));
+
+    const combined = Array.from(map.values()).sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+    if (combined.length > localMsgs.length) {
+      const allOtherMsgs = JSON.parse(localStorage.getItem('oase_session_messages') || '[]').filter(m => m.session_id !== sessionId);
+      localStorage.setItem('oase_session_messages', JSON.stringify([...allOtherMsgs, ...combined]));
+    }
+
+    return combined.map(decryptMsg);
   },
 
   // Sistem Notifikasi Dua Arah & Push Notifikasi Desktop / Handphone
@@ -418,3 +423,4 @@ const ChatSessionService = {
 // Layanan Interaktif Gemini AI (Sahabat OASE)
 
 window.ChatSessionService = ChatSessionService;
+

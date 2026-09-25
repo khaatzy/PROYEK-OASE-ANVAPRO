@@ -1,4 +1,4 @@
-// Konfigurasi & Inisialisasi Supabase Client untuk OASE Cerita
+﻿// Konfigurasi & Inisialisasi Supabase Client untuk OASE Cerita
 
 const SUPABASE_URL = 'https://lfsgrihhlyffxrlwjyev.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxmc2dyaWhobHlmZnhybHdqeWV2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAxMjk4NTEsImV4cCI6MjEwNTcwNTg1MX0.0rsevZLOXjV-JTP3ui6WtJUdIM-hN-fZbuGuaZ7Py14';
@@ -441,11 +441,6 @@ const CounselingService = {
       priority: crisisCheck.isCrisis ? 'krisis' : 'normal'
     };
 
-    if (crisisCheck.isCrisis && window.AudioAlertService) {
-      setTimeout(() => {
-        window.AudioAlertService.playCrisisAlarm();
-      }, 300);
-    }
 
     if (!supabaseClient) {
       console.warn('Supabase Client tidak aktif. Menggunakan penyimpanan lokal.');
@@ -686,7 +681,7 @@ const CounselingService = {
     if (!counselor) {
       const availableList = counselors
         .filter(c => c.id !== 'auto' && c.email)
-        .map(c => `• ${c.name} (${c.email})`)
+        .map(c => `â€¢ ${c.name} (${c.email})`)
         .join('\n');
       throw new Error(`Akun konselor "${email}" tidak ditemukan.\n\nAkun yang terdaftar di counselors.js:\n${availableList}\n\nPastikan email atau nama yang Anda masukkan sesuai.`);
     }
