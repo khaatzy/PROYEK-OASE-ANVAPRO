@@ -1,4 +1,4 @@
-﻿// Modul Fitur Curhat Anonim, Riwayat Konseling & Rating Siswa (OASE)
+// Modul Fitur Curhat Anonim, Riwayat Konseling & Rating Siswa (OASE)
 (() => {
     let currentUser = null;
     function getCurrentUser() {
@@ -92,9 +92,26 @@
               storyContent: storyContent
             });
 
-            alert(`Curhat anonim Anda berhasil dikirim dengan Kode Tiket: ${res.ticketCode || 'OASE-CERITA'}.\nKonselor akan membaca ceritamu secara rahasia di portal konseling.`);
+            // Simpan tiket ke list riwayat lokal agar mudah diakses
+            try {
+              let saved = JSON.parse(localStorage.getItem('oase_my_anon_tickets') || '[]');
+              if (!saved.includes(res.ticketCode)) {
+                saved.unshift(res.ticketCode);
+                localStorage.setItem('oase_my_anon_tickets', JSON.stringify(saved.slice(0, 15)));
+              }
+            } catch (e) {}
+
             anonStoryInput.value = '';
             anonymousCurhatModal.classList.add('hidden');
+
+            const anonSuccessModal = document.getElementById('anonSuccessModal');
+            const anonTicketCodeDisplay = document.getElementById('anonTicketCodeDisplay');
+            if (anonSuccessModal && anonTicketCodeDisplay) {
+              anonTicketCodeDisplay.textContent = res.ticketCode || 'OASE-CERITA';
+              anonSuccessModal.classList.remove('hidden');
+            } else {
+              alert(`Curhat anonim Anda berhasil dikirim dengan Kode Tiket: ${res.ticketCode || 'OASE-CERITA'}.\nKonselor akan membaca ceritamu secara rahasia di portal konseling.`);
+            }
           } catch (err) {
             alert('Gagal mengirim curhat: ' + err.message);
           } finally {
@@ -292,8 +309,204 @@
       dashRatingModal.classList.remove('hidden');
     }
 
+    // 10. FITUR CEK BALASAN DARI KONSELOR (KODE TIKET UNIK)
+    function setupCheckTicketModal() {
+      const navCheckTicketBtn = document.getElementById('navCheckTicketBtn');
+      const drawerCheckTicketBtn = document.getElementById('drawerCheckTicketBtn');
+      const cardCheckTicketBtn = document.getElementById('cardCheckTicketBtn');
+      const checkTicketModal = document.getElementById('checkTicketModal');
+      const closeCheckTicketModalBtn = document.getElementById('closeCheckTicketModalBtn');
+      const searchTicketInput = document.getElementById('searchTicketInput');
+      const searchTicketBtn = document.getElementById('searchTicketBtn');
+      const ticketResultBox = document.getElementById('ticketResultBox');
+      const recentTicketsContainer = document.getElementById('recentTicketsContainer');
+      const recentTicketsList = document.getElementById('recentTicketsList');
+
+      const anonSuccessModal = document.getElementById('anonSuccessModal');
+      const copyAnonTicketBtn = document.getElementById('copyAnonTicketBtn');
+      const anonCopyFeedbackText = document.getElementById('anonCopyFeedbackText');
+      const anonCheckStatusNowBtn = document.getElementById('anonCheckStatusNowBtn');
+      const closeAnonSuccessModalBtn = document.getElementById('closeAnonSuccessModalBtn');
+      const anonTicketCodeDisplay = document.getElementById('anonTicketCodeDisplay');
+
+      function openCheckModal(codeToSearch = '') {
+        if (!checkTicketModal) return;
+        checkTicketModal.classList.remove('hidden');
+        if (ticketResultBox) ticketResultBox.classList.add('hidden');
+        if (searchTicketInput) searchTicketInput.value = codeToSearch;
+
+        try {
+          const savedTickets = JSON.parse(localStorage.getItem('oase_my_anon_tickets') || '[]');
+          if (recentTicketsContainer && recentTicketsList) {
+            if (savedTickets.length > 0) {
+              recentTicketsContainer.classList.remove('hidden');
+              recentTicketsList.innerHTML = '';
+              savedTickets.slice(0, 5).forEach(ticketCode => {
+                const chip = document.createElement('button');
+                chip.type = 'button';
+                chip.className = 'px-2.5 py-1 rounded-xl bg-heather-50 hover:bg-heather-100 text-heather-800 text-[11px] font-mono font-bold border border-heather-200 transition-all';
+                chip.textContent = ticketCode;
+                chip.addEventListener('click', () => {
+                  searchTicketInput.value = ticketCode;
+                  searchTicket();
+                });
+                recentTicketsList.appendChild(chip);
+              });
+            } else {
+              recentTicketsContainer.classList.add('hidden');
+            }
+          }
+        } catch (e) {}
+
+        if (codeToSearch) {
+          searchTicket();
+        }
+      }
+
+      async function searchTicket() {
+        if (!searchTicketInput || !ticketResultBox || !searchTicketBtn) return;
+        const queryCode = searchTicketInput.value.trim().toUpperCase();
+        if (!queryCode) {
+          alert('Masukkan kode tiket terlebih dahulu.');
+          return;
+        }
+
+        searchTicketBtn.disabled = true;
+        searchTicketBtn.innerHTML = 'Mencari...';
+
+        try {
+          const data = await window.CounselingService.getStoryByTicket(queryCode);
+          ticketResultBox.classList.remove('hidden');
+
+          if (!data) {
+            ticketResultBox.innerHTML = `
+              <div class="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs text-center space-y-1">
+                <p class="font-bold">Kode Tiket Tidak Ditemukan</p>
+                <p>Pastikan kode tiket yang kamu masukkan sudah benar (contoh: OASE-8392-AB).</p>
+              </div>
+            `;
+          } else {
+            const isReplied = data.counselor_reply && data.counselor_reply.trim() !== '';
+            const statusBadge = isReplied 
+              ? '<span class="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold flex items-center gap-1"><i data-lucide="check-circle" class="w-3.5 h-3.5 text-emerald-600"></i> Sudah Dibalas Konselor</span>' 
+              : '<span class="px-2.5 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-bold flex items-center gap-1"><i data-lucide="clock" class="w-3.5 h-3.5 text-amber-600"></i> Sedang Ditinjau Konselor</span>';
+
+            ticketResultBox.innerHTML = `
+              <div class="bg-oase-surface p-4 sm:p-5 rounded-2xl border border-oase-border space-y-3.5">
+                <div class="flex items-center justify-between flex-wrap gap-2">
+                  <span class="font-mono text-xs font-bold text-heather-700 bg-white px-2.5 py-1 rounded-lg border border-heather-200">${data.ticket_code}</span>
+                  ${statusBadge}
+                </div>
+                <div class="text-xs space-y-1 text-oase-muted">
+                  <p><strong>Nama Samaran:</strong> <span class="text-oase-plum">${data.author_name}</span> (${data.education_level || 'Siswa'}${data.grade_class ? ' • ' + data.grade_class : ''})</p>
+                  <p><strong>Kategori Masalah:</strong> <span class="text-oase-plum">${data.category}</span></p>
+                  <p><strong>Konselor:</strong> <span class="text-oase-plum font-semibold">${data.counselor_name}</span></p>
+                </div>
+
+                <div class="pt-2 border-t border-oase-border">
+                  <p class="text-xs font-bold text-oase-plum mb-1 flex items-center gap-1">
+                    <i data-lucide="message-square" class="w-3.5 h-3.5 text-heather-500"></i>
+                    <span>Isi Cerita Kamu:</span>
+                  </p>
+                  <div class="p-3.5 bg-white rounded-xl border border-oase-border text-xs text-oase-muted italic max-h-36 overflow-y-auto leading-relaxed">
+                    "${data.story_content}"
+                  </div>
+                </div>
+
+                ${isReplied ? `
+                  <div class="pt-2 border-t border-emerald-100 space-y-1.5">
+                    <div class="flex items-center gap-1.5 text-xs font-bold text-emerald-800">
+                      <i data-lucide="heart-handshake" class="w-4 h-4 text-emerald-600"></i>
+                      <span>Balasan Resmi dari ${data.counselor_name}:</span>
+                    </div>
+                    <div class="p-4 bg-emerald-50 rounded-2xl border border-emerald-200 text-xs text-emerald-950 font-medium leading-relaxed">
+                      ${data.counselor_reply}
+                    </div>
+                  </div>
+                ` : `
+                  <div class="p-3.5 bg-amber-50/80 rounded-2xl border border-amber-200 text-xs text-amber-900 flex items-start gap-2.5">
+                    <i data-lucide="clock" class="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5"></i>
+                    <p class="leading-relaxed">Konselor sedang membaca dan menyiapkan panduan untuk ceritamu. Harap simpan kode tiket ini dan cek kembali nanti secara berkala ya!</p>
+                  </div>
+                `}
+              </div>
+            `;
+            lucide.createIcons();
+          }
+        } catch (err) {
+          console.error('Error saat mencari tiket:', err);
+          ticketResultBox.classList.remove('hidden');
+          ticketResultBox.innerHTML = `<p class="text-xs text-red-500 text-center">Gagal memuat data tiket. Coba lagi nanti.</p>`;
+        } finally {
+          searchTicketBtn.disabled = false;
+          searchTicketBtn.innerHTML = `<i data-lucide="search" class="w-4 h-4"></i><span>Cari</span>`;
+          lucide.createIcons();
+        }
+      }
+
+      if (navCheckTicketBtn) navCheckTicketBtn.addEventListener('click', () => openCheckModal());
+      if (drawerCheckTicketBtn) drawerCheckTicketBtn.addEventListener('click', () => {
+        const drawer = document.getElementById('hamburgerDrawer');
+        const overlay = document.getElementById('hamburgerDrawerOverlay');
+        if (drawer) drawer.classList.add('translate-x-full');
+        if (overlay) overlay.classList.add('hidden');
+        openCheckModal();
+      });
+      if (cardCheckTicketBtn) cardCheckTicketBtn.addEventListener('click', () => openCheckModal());
+      if (closeCheckTicketModalBtn) closeCheckTicketModalBtn.addEventListener('click', () => {
+        if (checkTicketModal) checkTicketModal.classList.add('hidden');
+      });
+
+      if (searchTicketBtn) searchTicketBtn.addEventListener('click', searchTicket);
+      if (searchTicketInput) {
+        searchTicketInput.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            searchTicket();
+          }
+        });
+      }
+
+      // Handler Modal Sukses Anonim
+      if (copyAnonTicketBtn && anonTicketCodeDisplay) {
+        copyAnonTicketBtn.addEventListener('click', () => {
+          const code = anonTicketCodeDisplay.textContent;
+          navigator.clipboard.writeText(code).then(() => {
+            if (anonCopyFeedbackText) {
+              anonCopyFeedbackText.classList.remove('hidden');
+              setTimeout(() => anonCopyFeedbackText.classList.add('hidden'), 3000);
+            }
+          });
+        });
+      }
+
+      if (anonCheckStatusNowBtn) {
+        anonCheckStatusNowBtn.addEventListener('click', () => {
+          const code = anonTicketCodeDisplay ? anonTicketCodeDisplay.textContent : '';
+          if (anonSuccessModal) anonSuccessModal.classList.add('hidden');
+          openCheckModal(code);
+        });
+      }
+
+      if (closeAnonSuccessModalBtn) {
+        closeAnonSuccessModalBtn.addEventListener('click', () => {
+          if (anonSuccessModal) anonSuccessModal.classList.add('hidden');
+        });
+      }
+
+      // Auto-open jika ada parameter action=cek-tiket atau hash #cek-tiket
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('action') === 'cek-tiket' || window.location.hash === '#cek-tiket') {
+        const ticketParam = urlParams.get('ticket') || '';
+        setTimeout(() => openCheckModal(ticketParam), 300);
+      }
+    }
 
     window.setupAnonCurhat = (user) => { if (user) currentUser = user; setupAnonCurhat(); };
     window.loadCompletedSessions = async (user) => { if (user) currentUser = user; await loadCompletedSessions(); };
     window.setupDashRating = setupDashRating;
+    window.setupCheckTicketModal = setupCheckTicketModal;
+
+    // Run check ticket setup on start
+    setupCheckTicketModal();
 })();

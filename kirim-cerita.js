@@ -180,6 +180,15 @@
         ticketCodeDisplay.textContent = result.ticketCode;
         successModal.classList.remove('hidden');
 
+        // Simpan ke riwayat tiket lokal agar mudah dicek kembali
+        try {
+          let savedTickets = JSON.parse(localStorage.getItem('oase_my_anon_tickets') || '[]');
+          if (!savedTickets.includes(result.ticketCode)) {
+            savedTickets.unshift(result.ticketCode);
+            localStorage.setItem('oase_my_anon_tickets', JSON.stringify(savedTickets.slice(0, 15)));
+          }
+        } catch (e) {}
+
         // Reset form
         submissionForm.reset();
         selectedGenderInput.value = '';
@@ -383,3 +392,16 @@
 
     // Initial render
     renderCounselors();
+
+    // Auto-open modal jika URL memuat parameter atau hash cek tiket
+    if (window.location.hash === '#cek-tiket' || window.location.search.includes('cek=1')) {
+      const urlParams = new URLSearchParams(window.location.search);
+      const codeFromUrl = urlParams.get('ticket') || '';
+      if (checkTicketModal) {
+        checkTicketModal.classList.remove('hidden');
+        if (codeFromUrl) {
+          searchTicketInput.value = codeFromUrl;
+          searchTicketBtn.click();
+        }
+      }
+    }
