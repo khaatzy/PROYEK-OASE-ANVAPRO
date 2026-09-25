@@ -1,4 +1,4 @@
-﻿    lucide.createIcons();
+    lucide.createIcons();
 
     // State Variables
     let currentSession = null;
@@ -841,4 +841,3 @@
     loadCounselorNotifs();
     loadLiveSessions();
     loadHistorySessions();
-  </script>

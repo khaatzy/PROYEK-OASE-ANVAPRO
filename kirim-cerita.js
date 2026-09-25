@@ -1,4 +1,4 @@
-﻿    // Initialize Lucide Icons
+    // Initialize Lucide Icons
     lucide.createIcons();
 
     // DOM Elements
@@ -383,4 +383,3 @@
 
     // Initial render
     renderCounselors();
-  </script>
