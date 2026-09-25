@@ -119,6 +119,17 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (openWriteStoryBtn) openWriteStoryBtn.addEventListener('click', handleStartStoryClick);
   if (navWriteStoryBtn) navWriteStoryBtn.addEventListener('click', openStoryModal);
 
+  // Intercept 'Chat dengan Konselor' links
+  document.querySelectorAll('a[href="kirim-cerita.html"]').forEach(link => {
+    link.addEventListener('click', (e) => {
+      if (!currentUserSession) {
+        e.preventDefault();
+        openAuthModal('login');
+        showAuthFeedback('Silakan masuk atau daftar terlebih dahulu untuk konsultasi privat.', 'info');
+      }
+    });
+  });
+
   // ==========================================
   // 3. AUTH LOGIC & TABS
   // ==========================================
@@ -470,3 +481,4 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 });
+
