@@ -101,23 +101,23 @@
         </div>
 
         <!-- Authenticated View -->
-        <div id="userControls" class="hidden flex items-center gap-1.5 sm:gap-2">
+        <div id="userControls" class="hidden flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
           <!-- Tombol Dashboard Siswa (Ikon di mobile, teks di layar besar) -->
-          <a href="dashboard-user.html" id="navDashboardBtn" class="p-2 sm:px-3.5 sm:py-2 rounded-2xl bg-heather-100 text-heather-800 hover:bg-heather-200 font-bold text-xs sm:text-sm shadow-2xs transition-all flex items-center gap-1.5" title="Buka Dashboard Siswa">
-            <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+          <a href="dashboard-user.html" id="navDashboardBtn" class="p-2 sm:px-3.5 sm:py-2 rounded-2xl bg-heather-100 text-heather-800 hover:bg-heather-200 font-bold text-xs sm:text-sm shadow-2xs transition-all flex items-center gap-1.5 whitespace-nowrap flex-shrink-0" title="Buka Dashboard Siswa">
+            <i data-lucide="layout-dashboard" class="w-4 h-4 flex-shrink-0"></i>
             <span class="hidden xl:inline">Dashboard Saya</span>
           </a>
 
           <!-- Tombol Tulis Cerita (Hanya muncul di sm: ke atas agar layar HP tetap lega) -->
-          <button id="navWriteStoryBtn" class="hidden sm:flex px-3.5 py-2 rounded-2xl bg-heather-500 hover:bg-heather-600 text-white font-bold text-xs sm:text-sm shadow-md shadow-heather-500/20 transition-all items-center gap-1.5">
-            <i data-lucide="pen-tool" class="w-4 h-4"></i>
+          <button id="navWriteStoryBtn" class="hidden sm:flex px-3.5 py-2 rounded-2xl bg-heather-500 hover:bg-heather-600 text-white font-bold text-xs sm:text-sm shadow-md shadow-heather-500/20 transition-all items-center gap-1.5 whitespace-nowrap flex-shrink-0">
+            <i data-lucide="pen-tool" class="w-4 h-4 flex-shrink-0"></i>
             <span class="hidden md:inline">Tulis Cerita</span>
           </button>
 
           <!-- Pill Email Pengguna (Disembunyikan di layar HP, dapat diakses di menu hamburger) -->
-          <div class="hidden md:flex items-center gap-2 bg-heather-50 px-3 py-1.5 rounded-2xl border border-heather-200">
-            <span id="userEmailLabel" class="text-xs font-semibold text-heather-800 max-w-[110px] lg:max-w-[160px] truncate">Pengguna</span>
-            <button id="navLogoutBtn" title="Keluar" class="text-oase-muted hover:text-red-500 transition-colors p-0.5">
+          <div class="hidden lg:flex items-center gap-2 bg-heather-50 px-3 py-1.5 rounded-2xl border border-heather-200 whitespace-nowrap flex-shrink-0">
+            <span id="userEmailLabel" class="text-xs font-semibold text-heather-800 max-w-[120px] xl:max-w-[160px] truncate">Pengguna</span>
+            <button id="navLogoutBtn" title="Keluar" class="text-oase-muted hover:text-red-500 transition-colors p-0.5 flex-shrink-0">
               <i data-lucide="log-out" class="w-4 h-4"></i>
             </button>
           </div>
