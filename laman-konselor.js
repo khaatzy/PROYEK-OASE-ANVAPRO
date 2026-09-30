@@ -1,4 +1,4 @@
-﻿    lucide.createIcons();
+    lucide.createIcons();
 
     // State Variables
     let currentSession = null;
@@ -587,25 +587,30 @@
       loadHistorySessions();
     });
 
-    // Load Live Sessions for this counselor & all active students
+    // Load Live Sessions for this counselor & all active students (from Supabase)
     async function loadLiveSessions() {
       if (!currentSession || !liveSessionsListContainer) return;
-      const allSessions = JSON.parse(localStorage.getItem('oase_counseling_sessions') || '[]');
+
+      // Ambil dari Supabase
+      const allActiveSessions = await window.ChatSessionService.getAllActiveSessions();
+      const allScheduledSessions = await window.ChatSessionService.getAllScheduledSessions();
       
-      const mySessions = allSessions.filter(s => s.counselor_id === currentSession.id && s.status === 'aktif');
-      const otherSessions = allSessions.filter(s => s.counselor_id !== currentSession.id && s.status === 'aktif');
-      const totalActive = mySessions.length + otherSessions.length;
+      const myActiveSessions = allActiveSessions.filter(s => s.counselor_id === currentSession.id);
+      const otherActiveSessions = allActiveSessions.filter(s => s.counselor_id !== currentSession.id);
+      const myScheduledSessions = allScheduledSessions.filter(s => s.counselor_id === currentSession.id);
+
+      const totalItems = myActiveSessions.length + otherActiveSessions.length + myScheduledSessions.length;
 
       if (liveChatCountBadge) {
-        if (totalActive > 0) {
-          liveChatCountBadge.textContent = totalActive;
+        if (myActiveSessions.length > 0) {
+          liveChatCountBadge.textContent = myActiveSessions.length;
           liveChatCountBadge.classList.remove('hidden');
         } else {
           liveChatCountBadge.classList.add('hidden');
         }
       }
 
-      if (totalActive === 0) {
+      if (totalItems === 0) {
         liveSessionsListContainer.innerHTML = `
           <div class="col-span-full py-12 text-center space-y-2 bg-oase-surface/50 rounded-2xl border border-dashed border-oase-border">
             <div class="w-10 h-10 rounded-xl bg-heather-100 text-heather-600 flex items-center justify-center mx-auto">
@@ -620,25 +625,64 @@
       }
 
       liveSessionsListContainer.innerHTML = '';
-      mySessions.forEach(s => {
-        liveSessionsListContainer.appendChild(createCounselorSessionCard(s, true));
+
+      // Sesi terjadwal milik konselor ini
+      myScheduledSessions.forEach(s => {
+        liveSessionsListContainer.appendChild(createCounselorSessionCard(s, true, 'terjadwal'));
       });
-      otherSessions.forEach(s => {
-        liveSessionsListContainer.appendChild(createCounselorSessionCard(s, false));
+      // Sesi aktif milik konselor ini
+      myActiveSessions.forEach(s => {
+        liveSessionsListContainer.appendChild(createCounselorSessionCard(s, true, 'aktif'));
+      });
+      // Sesi aktif konselor lain
+      otherActiveSessions.forEach(s => {
+        liveSessionsListContainer.appendChild(createCounselorSessionCard(s, false, 'aktif'));
       });
       lucide.createIcons();
     }
 
-    function createCounselorSessionCard(s, isDirectlyAssigned) {
+    // Setup Supabase Realtime untuk auto-refresh sesi
+    if (window.ChatSessionService && window.ChatSessionService.subscribeToAllSessions) {
+      window.ChatSessionService.subscribeToAllSessions(() => {
+        loadLiveSessions();
+      });
+    }
+
+    function createCounselorSessionCard(s, isDirectlyAssigned, sessionStatus) {
       const card = document.createElement('div');
-      card.className = "bg-white p-5 rounded-2xl border border-heather-200 hover:shadow-md transition-all space-y-3 flex flex-col justify-between";
+      const isScheduled = sessionStatus === 'terjadwal';
+      const borderColor = isScheduled ? 'border-amber-200' : 'border-heather-200';
+      card.className = `bg-white p-5 rounded-2xl border ${borderColor} hover:shadow-md transition-all space-y-3 flex flex-col justify-between`;
+
+      let badge, timeInfo, actionBtn;
+      if (isScheduled) {
+        badge = `<span class="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[10px] font-bold">📅 Terjadwal untuk Anda</span>`;
+        timeInfo = `<span class="text-[11px] text-amber-700 font-medium">${s.booking_date} pukul ${s.booking_time} WIB</span>`;
+        const isReady = window.ChatSessionService.isSessionReady(s);
+        if (isReady) {
+          actionBtn = `<button class="open-counselor-chat-btn px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs shadow-xs flex items-center gap-1.5 transition-all" data-session-id="${s.id}">
+            <i data-lucide="messages-square" class="w-3.5 h-3.5"></i><span>Mulai Chat Sekarang</span>
+          </button>`;
+        } else {
+          actionBtn = `<button disabled class="px-4 py-2 rounded-xl bg-gray-200 text-gray-500 font-bold text-xs cursor-not-allowed flex items-center gap-1.5">
+            <i data-lucide="lock" class="w-3.5 h-3.5"></i><span>Menunggu Jadwal</span>
+          </button>`;
+        }
+      } else {
+        badge = isDirectlyAssigned
+          ? `<span class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold">🔴 Sesi Aktif untuk Anda</span>`
+          : `<span class="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-bold">⚡ Sesi Terbuka (${s.counselor_name})</span>`;
+        timeInfo = `<span class="text-[11px] text-oase-muted font-medium">${getRelativeTime(s.started_at)}</span>`;
+        actionBtn = `<button class="open-counselor-chat-btn px-4 py-2 rounded-xl bg-heather-500 hover:bg-heather-600 text-white font-bold text-xs shadow-xs flex items-center gap-1.5 transition-all" data-session-id="${s.id}">
+          <i data-lucide="messages-square" class="w-3.5 h-3.5"></i><span>Buka Ruang Chat</span>
+        </button>`;
+      }
+
       card.innerHTML = `
         <div class="space-y-2">
           <div class="flex items-center justify-between">
-            <span class="px-2.5 py-0.5 rounded-full ${isDirectlyAssigned ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-800'} text-[10px] font-bold">
-              ${isDirectlyAssigned ? '🔴 Sesi Aktif untuk Anda' : `⚡ Sesi Terbuka (${s.counselor_name})`}
-            </span>
-            <span class="text-[11px] text-oase-muted font-medium">${getRelativeTime(s.started_at)}</span>
+            ${badge}
+            ${timeInfo}
           </div>
           <div class="flex items-center gap-2">
             <h3 class="text-sm font-extrabold text-oase-plum">${s.user_name || 'Siswa Anonim'}</h3>
@@ -648,16 +692,20 @@
         </div>
         <div class="pt-2 border-t border-oase-border flex items-center justify-between">
           <span class="text-xs text-oase-muted">Durasi: 30 Menit</span>
-          <button class="open-counselor-chat-btn px-4 py-2 rounded-xl bg-heather-500 hover:bg-heather-600 text-white font-bold text-xs shadow-xs flex items-center gap-1.5 transition-all" data-session-id="${s.id}">
-            <i data-lucide="messages-square" class="w-3.5 h-3.5"></i>
-            <span>Buka Ruang Chat</span>
-          </button>
+          ${actionBtn}
         </div>
       `;
-      card.querySelector('.open-counselor-chat-btn').addEventListener('click', () => {
-        sessionStorage.setItem('oase_active_chat_role', 'counselor');
-        window.location.href = 'ruang-chat.html?sessionId=' + s.id + '&role=counselor';
-      });
+      const chatBtn = card.querySelector('.open-counselor-chat-btn');
+      if (chatBtn) {
+        chatBtn.addEventListener('click', async () => {
+          // Jika terjadwal dan sudah waktunya, aktifkan dulu
+          if (isScheduled) {
+            await window.ChatSessionService.activateSession(s.id);
+          }
+          sessionStorage.setItem('oase_active_chat_role', 'counselor');
+          window.location.href = 'ruang-chat.html?sessionId=' + s.id + '&role=counselor';
+        });
+      }
       return card;
     }
 

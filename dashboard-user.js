@@ -1,4 +1,4 @@
-﻿    lucide.createIcons();
+    lucide.createIcons();
 
     // State Variables
     let currentUser = null;
@@ -666,18 +666,19 @@
       const bookingDate = selectedBookingDateStr;
       const bookingTime = selectedBookingTimeSlot;
 
-      // Cek apakah slot sudah terisi untuk konselor ini
-      if (window.ChatSessionService.isSlotBooked(counselorId, bookingDate, bookingTime)) {
-        renderTimeSlots();
-        alert(`Maaf, jadwal tanggal ${bookingDate} jam ${bookingTime} WIB untuk ${counselorName} sudah terisi. Silakan pilih konselor pengganti rekomendasi di bawah atau pilih jam lainnya.`);
-        return;
-      }
-
       const submitBtn = document.getElementById('confirmBookingSubmitBtn');
       submitBtn.disabled = true;
       submitBtn.textContent = 'Memproses Booking...';
 
       try {
+        // Cek apakah slot sudah terisi untuk konselor ini (async)
+        const slotTaken = await window.ChatSessionService.isSlotBooked(counselorId, bookingDate, bookingTime);
+        if (slotTaken) {
+          renderTimeSlots();
+          alert(`Maaf, jadwal tanggal ${bookingDate} jam ${bookingTime} WIB untuk ${counselorName} sudah terisi. Silakan pilih konselor pengganti rekomendasi di bawah atau pilih jam lainnya.`);
+          return;
+        }
+
         const session = await window.ChatSessionService.bookSession({
           userId: currentUser.id,
           userEmail: currentUser.email,
@@ -690,10 +691,22 @@
           duration: 30
         });
 
-        alert(`Jadwal konseling bersama ${counselorName} berhasil dibooking!\nTanggal: ${bookingDate}\nJam: ${bookingTime} WIB\n\nMengalihkan ke Ruang Chat Konseling...`);
         bookingModal.classList.add('hidden');
-        sessionStorage.setItem('oase_active_chat_role', 'user');
-        window.location.href = 'ruang-chat.html?sessionId=' + session.id + '&role=user';
+
+        // Cek apakah waktu booking sudah tiba (hari ini dan jam sudah lewat/tepat)
+        const isReady = window.ChatSessionService.isSessionReady(session);
+        if (isReady) {
+          // Waktu sudah tiba -> langsung aktifkan dan redirect
+          const activated = await window.ChatSessionService.activateSession(session.id);
+          alert(`Sesi konseling bersama ${counselorName} dimulai sekarang!\nTimer 30 menit akan segera berjalan.`);
+          sessionStorage.setItem('oase_active_chat_role', 'user');
+          window.location.href = 'ruang-chat.html?sessionId=' + session.id + '&role=user';
+        } else {
+          // Waktu belum tiba -> tampilkan konfirmasi jadwal
+          alert(`Jadwal konseling bersama ${counselorName} berhasil dibooking!\n\nTanggal: ${bookingDate}\nJam: ${bookingTime} WIB\n\nRuang chat akan otomatis terbuka saat waktu booking tiba. Silakan cek kembali di dashboard Anda.`);
+          // Refresh tampilan dashboard untuk menunjukkan sesi terjadwal
+          checkActiveCounselingSession();
+        }
       } catch (err) {
         alert('Gagal melakukan booking: ' + err.message);
       } finally {
@@ -781,12 +794,105 @@
     // 7. AKTIFKAN RUANG CHAT KONSELING & TIMER 30 MENIT
     async function checkActiveCounselingSession() {
       if (!currentUser) return;
+
+      // 1. Cek sesi aktif terlebih dahulu
       activeSession = await window.ChatSessionService.getActiveSession(currentUser.email);
-      if (!activeSession) {
-        renderEmptySessionUI();
+      if (activeSession) {
+        renderActiveSessionRoom(activeSession);
         return;
       }
-      renderActiveSessionRoom(activeSession);
+
+      // 2. Cek sesi terjadwal
+      const scheduled = await window.ChatSessionService.getScheduledSessions(currentUser.email);
+      if (scheduled && scheduled.length > 0) {
+        const nextSession = scheduled[0]; // Sesi terjadwal terdekat
+        const isReady = window.ChatSessionService.isSessionReady(nextSession);
+        if (isReady) {
+          // Waktu sudah tiba! Aktifkan sesi
+          const activated = await window.ChatSessionService.activateSession(nextSession.id);
+          activeSession = activated || nextSession;
+          activeSession.status = 'aktif';
+          renderActiveSessionRoom(activeSession);
+        } else {
+          // Waktu belum tiba, tampilkan countdown
+          renderScheduledSessionUI(nextSession);
+        }
+        return;
+      }
+
+      // 3. Tidak ada sesi
+      renderEmptySessionUI();
+    }
+
+    function renderScheduledSessionUI(session) {
+      if (sessionTimerInterval) clearInterval(sessionTimerInterval);
+      const counselorObj = (window.COUNSELORS_DATA || []).find(c => c.id === session.counselor_id) || {
+        name: session.counselor_name, role: 'Konselor Terverifikasi OASE',
+        avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=200&h=200&q=80'
+      };
+
+      const scheduledTime = new Date(`${session.booking_date}T${session.booking_time}:00`);
+      const dateStr = scheduledTime.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+      counselingSessionArea.innerHTML = `
+        <div class="rounded-3xl border border-amber-200 bg-gradient-to-br from-white via-amber-50/40 to-white p-6 sm:p-8 overflow-hidden shadow-sm space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="flex items-center gap-3.5">
+              <img src="${counselorObj.avatar}" alt="${counselorObj.name}" class="w-14 h-14 rounded-2xl object-cover border border-heather-200 shadow-sm flex-shrink-0">
+              <div>
+                <div class="flex items-center gap-2">
+                  <h3 class="text-base font-bold text-oase-plum">${counselorObj.name}</h3>
+                  <span class="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[10px] font-bold">📅 Terjadwal</span>
+                </div>
+                <p class="text-xs text-heather-700 font-semibold">${counselorObj.role}</p>
+                <p class="text-xs text-oase-muted mt-0.5">Topik: ${session.topic}</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-white border border-amber-200 shadow-xs text-xs font-bold text-amber-800">
+                <i data-lucide="clock" class="w-4 h-4 text-amber-500"></i>
+                <span id="scheduledCountdownLabel">Menghitung...</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="p-4 rounded-2xl bg-amber-50/70 border border-amber-200 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="space-y-0.5 text-center sm:text-left">
+              <h4 class="text-xs font-bold text-amber-900">Sesi Dijadwalkan: ${dateStr} pukul ${session.booking_time} WIB</h4>
+              <p class="text-[11px] text-oase-muted">Ruang chat akan terbuka otomatis saat waktu booking tiba. Halaman ini akan me-refresh secara otomatis.</p>
+            </div>
+            <button disabled class="w-full sm:w-auto px-6 py-3 rounded-2xl bg-gray-300 text-gray-500 font-bold text-xs sm:text-sm cursor-not-allowed flex items-center justify-center gap-2 flex-shrink-0">
+              <i data-lucide="lock" class="w-4 h-4"></i>
+              <span>Menunggu Jadwal...</span>
+            </button>
+          </div>
+        </div>
+      `;
+      lucide.createIcons();
+
+      // Countdown ke waktu booking
+      const updateCountdown = () => {
+        const diff = window.ChatSessionService.getTimeUntilReady(session);
+        const label = document.getElementById('scheduledCountdownLabel');
+        if (diff <= 0) {
+          clearInterval(sessionTimerInterval);
+          // Waktu tiba! Auto-aktivasi
+          checkActiveCounselingSession();
+          return;
+        }
+        const hours = Math.floor(diff / 3600000);
+        const mins = Math.floor((diff % 3600000) / 60000);
+        const secs = Math.floor((diff % 60000) / 1000);
+        if (label) {
+          if (hours > 0) {
+            label.textContent = `${hours}j ${mins}m ${secs}d lagi`;
+          } else {
+            label.textContent = `${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')} lagi`;
+          }
+        }
+      };
+      updateCountdown();
+      sessionTimerInterval = setInterval(updateCountdown, 1000);
     }
 
     function renderEmptySessionUI() {

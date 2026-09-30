@@ -115,19 +115,22 @@
         setTimeout(() => { if (icon) icon.classList.remove('animate-spin'); }, 500);
       });
 
-      // Cari sesi konseling (simpan & pulihkan ID sesi agar tidak hilang saat refresh)
-      const sessions = JSON.parse(localStorage.getItem('oase_counseling_sessions') || '[]');
-      const savedSessionId = sessionStorage.getItem('oase_active_chat_session_id');
+      // Cari sesi konseling dari Supabase (atau fallback ke localStorage)
       if (targetSessionId) {
-        activeSession = sessions.find(s => s.id === targetSessionId);
-      } else if (savedSessionId) {
-        activeSession = sessions.find(s => s.id === savedSessionId);
+        activeSession = await window.ChatSessionService.getSessionById(targetSessionId);
       }
       if (!activeSession) {
-        activeSession = sessions.find(s => s.status === 'aktif');
+        const savedSessionId = sessionStorage.getItem('oase_active_chat_session_id');
+        if (savedSessionId) {
+          activeSession = await window.ChatSessionService.getSessionById(savedSessionId);
+        }
       }
-      if (activeSession) {
-        sessionStorage.setItem('oase_active_chat_session_id', activeSession.id);
+      if (!activeSession) {
+        if (currentRole === 'user' && currentUserSession) {
+          activeSession = await window.ChatSessionService.getActiveSession(currentUserSession.email);
+        } else if (currentRole === 'counselor' && currentCounselorSession) {
+          activeSession = await window.ChatSessionService.getActiveSession(null, currentCounselorSession.id);
+        }
       }
 
       if (!activeSession) {
@@ -135,6 +138,21 @@
         goBack();
         return;
       }
+
+      // Cek apakah sesi masih terjadwal (belum waktunya)
+      if (activeSession.status === 'terjadwal') {
+        const isReady = window.ChatSessionService.isSessionReady(activeSession);
+        if (!isReady) {
+          alert('Sesi ini belum waktunya dibuka. Silakan tunggu hingga waktu booking tiba.');
+          goBack();
+          return;
+        }
+        // Waktu sudah tiba, aktifkan
+        const activated = await window.ChatSessionService.activateSession(activeSession.id);
+        if (activated) activeSession = activated;
+      }
+
+      sessionStorage.setItem('oase_active_chat_session_id', activeSession.id);
 
       setupOpponentProfile();
       setupRatingModal();
@@ -149,10 +167,21 @@
 
       await syncMessages(true);
 
-      // Mulai sinkronisasi berkala setiap 1000ms (1 detik)
-      setInterval(() => syncMessages(false), 1000);
+      // Setup Supabase Realtime subscriptions (menggantikan polling 1 detik)
+      window.ChatSessionService.subscribeToMessages(activeSession.id, async (newMsg) => {
+        await syncMessages(false);
+      });
+      window.ChatSessionService.subscribeToSession(activeSession.id, (updatedSession) => {
+        if (updatedSession && updatedSession.status === 'selesai' && !isSessionLocked) {
+          activeSession = updatedSession;
+          lockChatUI(activeSession);
+        }
+      });
 
-      // Listener storage event antar-tab browser (seketika saat ada pesan baru atau sesi diakhiri di tab lawan)
+      // Fallback polling setiap 3 detik (untuk kasus Realtime gagal)
+      setInterval(() => syncMessages(false), 3000);
+
+      // Listener storage event antar-tab browser
       window.addEventListener('storage', (e) => {
         if (e.key === 'oase_session_messages' || e.key === 'oase_counseling_sessions') {
           syncMessages(false);
@@ -456,9 +485,8 @@
     async function syncMessages(forceScroll = false) {
       if (!activeSession) return;
 
-      // Cek status sesi terkini dari penyimpanan lokal (apakah sesi diakhiri oleh lawan bicara)
-      const sessions = JSON.parse(localStorage.getItem('oase_counseling_sessions') || '[]');
-      const fresh = sessions.find(s => s.id === activeSession.id);
+      // Cek status sesi terkini dari Supabase (cross-device sync)
+      const fresh = await window.ChatSessionService.getSessionById(activeSession.id);
       if (fresh) {
         activeSession = fresh;
         if (activeSession.status === 'selesai' && !isSessionLocked) {
