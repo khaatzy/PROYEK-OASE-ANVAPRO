@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id" class="scroll-smooth">
 <head>
   <meta charset="UTF-8">
@@ -134,9 +134,13 @@
     <div class="bg-gradient-to-r from-white via-heather-50/60 to-white rounded-3xl p-6 sm:p-8 border border-heather-100 shadow-md relative overflow-hidden">
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
         <div class="space-y-2">
-          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-semibold">
-            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span>Status Konselor: Aktif Siap Mendengar</span>
+          <div class="inline-flex items-center gap-2">
+            <div id="counselorStatusDot" class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shadow-sm shadow-emerald-400"></div>
+            <select id="counselorStatusSelect" class="bg-transparent border-0 text-sm font-extrabold text-emerald-700 focus:ring-0 cursor-pointer p-0 pr-4">
+              <option value="tersedia" class="text-oase-plum font-medium">Siap Mendengarkan</option>
+              <option value="sibuk" class="text-oase-plum font-medium">Sedang Sibuk</option>
+              <option value="offline" class="text-oase-plum font-medium">Tidak Bisa Mendengarkan</option>
+            </select>
           </div>
           <h1 id="greetingHeading" class="text-2xl sm:text-3xl font-extrabold text-oase-plum tracking-tight">
             Selamat Datang, Konselor.

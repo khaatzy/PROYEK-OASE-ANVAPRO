@@ -643,6 +643,37 @@ const ChatSessionService = {
   },
 
   // ============================================================
+  // STATUS KONSELOR
+  // ============================================================
+  async getCounselorStatus(counselorId) {
+    if (!counselorId) return 'tersedia';
+    if (window.supabaseClient) {
+      try {
+        const { data, error } = await window.supabaseClient
+          .from('counselor_status')
+          .select('status')
+          .eq('counselor_id', counselorId)
+          .single();
+        if (!error && data) return data.status;
+      } catch (e) {}
+    }
+    return 'tersedia';
+  },
+
+  async updateCounselorStatus(counselorId, statusStr) {
+    if (!counselorId) return false;
+    if (window.supabaseClient) {
+      try {
+        const { error } = await window.supabaseClient
+          .from('counselor_status')
+          .upsert({ counselor_id: counselorId, status: statusStr, updated_at: new Date().toISOString() });
+        return !error;
+      } catch (e) {}
+    }
+    return false;
+  },
+
+  // ============================================================
   // HELPER: Sinkronisasi ke localStorage (cache)
   // ============================================================
   _syncSessionToLocal(session) {

@@ -65,7 +65,7 @@
     }
 
     // Greet counselor warmly based on local time
-    function setupGreeting() {
+    async function setupGreeting() {
       if (!currentSession) return;
 
       // Sinkronkan nama dan info konselor secara otomatis dengan data terbaru di counselors.js
@@ -98,6 +98,48 @@
         navCounselorRole.textContent = `⭐ ${rInfo.average} • ${currentSession.email}`;
       } else {
         navCounselorRole.textContent = currentSession.email;
+      }
+
+      // Initialize status dropdown
+      const statusSelect = document.getElementById('counselorStatusSelect');
+      const statusDot = document.getElementById('counselorStatusDot');
+      if (statusSelect && window.ChatSessionService) {
+        const currentStatus = await window.ChatSessionService.getCounselorStatus(currentSession.id);
+        statusSelect.value = currentStatus;
+        updateStatusDotUI(currentStatus, statusDot, statusSelect);
+
+        statusSelect.addEventListener('change', async (e) => {
+          const newStatus = e.target.value;
+          statusSelect.disabled = true;
+          const success = await window.ChatSessionService.updateCounselorStatus(currentSession.id, newStatus);
+          statusSelect.disabled = false;
+          if (success) {
+            updateStatusDotUI(newStatus, statusDot, statusSelect);
+          } else {
+            alert('Gagal memperbarui status. Periksa koneksi Anda.');
+            statusSelect.value = currentStatus; // revert
+          }
+        });
+      }
+    }
+
+    function updateStatusDotUI(status, dotElem, selectElem) {
+      if (!dotElem || !selectElem) return;
+      
+      // Reset colors
+      dotElem.className = 'w-2.5 h-2.5 rounded-full animate-pulse shadow-sm';
+      selectElem.className = 'bg-transparent border-0 text-sm font-extrabold focus:ring-0 cursor-pointer p-0 pr-4';
+
+      if (status === 'tersedia') {
+        dotElem.classList.add('bg-emerald-500', 'shadow-emerald-400');
+        selectElem.classList.add('text-emerald-700');
+      } else if (status === 'sibuk') {
+        dotElem.classList.add('bg-amber-500', 'shadow-amber-400');
+        selectElem.classList.add('text-amber-700');
+      } else if (status === 'offline') {
+        dotElem.classList.add('bg-rose-500', 'shadow-rose-400');
+        dotElem.classList.remove('animate-pulse');
+        selectElem.classList.add('text-rose-700');
       }
     }
 

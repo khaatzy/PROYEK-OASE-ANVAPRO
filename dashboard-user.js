@@ -464,19 +464,60 @@
     }
     closeBookingModalBtn.addEventListener('click', () => bookingModal.classList.add('hidden'));
 
-    function populateBookingCounselors() {
+    async function populateBookingCounselors() {
       const counselors = window.COUNSELORS_DATA || [];
+      bookingCounselorSelect.innerHTML = '<option value="">Memuat data konselor...</option>';
+      
+      const statuses = {};
+      if (window.supabaseClient) {
+        try {
+          const { data } = await window.supabaseClient.from('counselor_status').select('*');
+          if (data) {
+            data.forEach(d => { statuses[d.counselor_id] = d.status; });
+          }
+        } catch (e) {}
+      }
+
       bookingCounselorSelect.innerHTML = '';
       counselors.forEach(c => {
         if (c.id === 'auto') return;
+        
+        const status = statuses[c.id] || 'tersedia';
+        let statusText = '';
+        let disabled = false;
+        
+        if (status === 'offline') {
+          statusText = ' (❌ Tidak Bisa Mendengarkan)';
+          disabled = true;
+        } else if (status === 'sibuk') {
+          statusText = ' (⏳ Sedang Sibuk / Slow Respon)';
+        }
+
         const ratingInfo = window.getCounselorRatingInfo ? window.getCounselorRatingInfo(c.id) : { average: 5.0, totalReviews: 10 };
         const opt = document.createElement('option');
         opt.value = c.id;
-        opt.textContent = `${c.name} • ${c.role} (⭐ ${ratingInfo.average} • ${ratingInfo.totalReviews} ulasan)`;
+        opt.textContent = `${c.name}${statusText} • ${c.role} (⭐ ${ratingInfo.average})`;
+        opt.disabled = disabled;
+        
+        // Select the first available counselor automatically
+        if (disabled && bookingCounselorSelect.value === c.id) {
+          opt.selected = false;
+        }
+        
         bookingCounselorSelect.appendChild(opt);
       });
 
-      updateSelectedCounselorInfo();
+      // Ensure the selected value isn't disabled
+      if (bookingCounselorSelect.options[bookingCounselorSelect.selectedIndex]?.disabled) {
+        for (let i = 0; i < bookingCounselorSelect.options.length; i++) {
+          if (!bookingCounselorSelect.options[i].disabled) {
+            bookingCounselorSelect.selectedIndex = i;
+            break;
+          }
+        }
+      }
+
+      updateSelectedCounselorInfo(statuses);
     }
 
     bookingCounselorSelect.addEventListener('change', () => {
@@ -485,13 +526,18 @@
       updateBookingSummary();
     });
 
-    function updateSelectedCounselorInfo() {
+    async function updateSelectedCounselorInfo() {
       const cId = bookingCounselorSelect.value;
       const c = (window.COUNSELORS_DATA || []).find(x => x.id === cId);
       const ratingBadge = document.getElementById('selectedCounselorRatingBadge');
       if (c && ratingBadge) {
         const ratingInfo = window.getCounselorRatingInfo ? window.getCounselorRatingInfo(c.id) : { average: 5.0 };
-        ratingBadge.textContent = `⭐ ${ratingInfo.average} • ${c.role}`;
+        const status = await window.ChatSessionService.getCounselorStatus(cId);
+        let statusText = 'Siap Mendengarkan';
+        if (status === 'sibuk') statusText = 'Sedang Sibuk (Slow Respon)';
+        if (status === 'offline') statusText = 'Tidak Bisa Mendengarkan';
+
+        ratingBadge.innerHTML = `⭐ ${ratingInfo.average} • ${c.role} <span class="ml-2 px-2 py-0.5 rounded text-[10px] ${status === 'tersedia' ? 'bg-emerald-100 text-emerald-700' : (status === 'sibuk' ? 'bg-amber-100 text-amber-700' : 'bg-rose-100 text-rose-700')}">${statusText}</span>`;
       }
     }
 
@@ -703,6 +749,13 @@
       submitBtn.textContent = 'Memproses Booking...';
 
       try {
+        const cStatus = await window.ChatSessionService.getCounselorStatus(counselorId);
+        if (cStatus === 'offline') {
+          alert(`Maaf, ${counselorName} sedang tidak bisa mendengarkan saat ini. Silakan pilih konselor lain.`);
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Konfirmasi Booking Jadwal';
+          return;
+        }
         // Cek apakah waktu sudah lewat (isPassed)
         const now = new Date();
         const todayStr = now.toISOString().split('T')[0];
