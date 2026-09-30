@@ -61,6 +61,29 @@
       counselorLoginModal.classList.add('hidden');
       setupGreeting();
       loadQueue();
+      
+      // Berlangganan (Subscribe) ke perubahan tabel counseling_submissions secara real-time
+      if (window.supabaseClient) {
+        window.supabaseClient
+          .channel('public:counseling_submissions')
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'counseling_submissions' }, payload => {
+            console.log('Update dari counseling_submissions:', payload);
+            loadQueue(); // Muat ulang antrean jika ada curhatan baru atau dibalas
+            
+            // Tambahkan notifikasi jika ada insert (curhatan baru)
+            if (payload.eventType === 'INSERT') {
+               const cName = payload.new.author_name || 'Anonim';
+               if (window.NotificationService && localStorage.getItem('oase_notif_muted') !== 'true') {
+                 window.NotificationService.sendNotification('Curhatan Anonim Baru!', {
+                   body: `${cName} mengirimkan cerita baru.`,
+                   tag: 'oase-new-submission'
+                 });
+               }
+            }
+          })
+          .subscribe();
+      }
+
       return true;
     }
 
