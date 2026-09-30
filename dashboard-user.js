@@ -984,7 +984,7 @@
         <div class="rounded-3xl border border-amber-200 bg-gradient-to-br from-white via-amber-50/40 to-white p-6 sm:p-8 overflow-hidden shadow-sm space-y-6">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div class="flex items-center gap-3.5">
-              <img src="${counselorObj.avatar}" alt="${counselorObj.name}" class="w-14 h-14 rounded-2xl object-cover border border-heather-200 shadow-sm flex-shrink-0">
+              <img src="${counselorObj.avatar}" alt="${counselorObj.name}" class="w-14 h-14 rounded-2xl object-cover object-top border border-heather-200 shadow-sm flex-shrink-0">
               <div>
                 <div class="flex items-center gap-2">
                   <h3 class="text-base font-bold text-oase-plum">${counselorObj.name}</h3>
@@ -1073,7 +1073,7 @@
         <div class="rounded-3xl border border-heather-200 bg-gradient-to-br from-white via-heather-50/40 to-white p-6 sm:p-8 overflow-hidden shadow-sm space-y-6">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div class="flex items-center gap-3.5">
-              <img src="${counselorObj.avatar}" alt="${counselorObj.name}" class="w-14 h-14 rounded-2xl object-cover border border-heather-200 shadow-sm flex-shrink-0">
+              <img src="${counselorObj.avatar}" alt="${counselorObj.name}" class="w-14 h-14 rounded-2xl object-cover object-top border border-heather-200 shadow-sm flex-shrink-0">
               <div>
                 <div class="flex items-center gap-2">
                   <h3 class="text-base font-bold text-oase-plum">${counselorObj.name}</h3>
@@ -1170,3 +1170,4 @@
         }
       }, 500);
     }
+
