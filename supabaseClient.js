@@ -678,14 +678,14 @@ const CounselingService = {
       .limit(1);
 
     if (error || !counselorsData || counselorsData.length === 0) {
-      throw new Error(Akun konselor tidak ditemukan di database.);
+      throw new Error('Akun konselor tidak ditemukan di database.');
     }
 
     const counselor = counselorsData[0];
 
     const expectedPass = (counselor.password || '').trim();
     if (expectedPass && expectedPass !== inputPass) {
-      throw new Error(Password untuk konselor " + counselor.name + " tidak sesuai.);
+      throw new Error('Password untuk konselor ' + counselor.name + ' tidak sesuai.');
     }
 
     const sessionData = {
@@ -949,4 +949,5 @@ window.AuthService = AuthService;
 window.StoryService = StoryService;
 window.CounselingService = CounselingService;
 window.GeminiService = GeminiService;
+
 
