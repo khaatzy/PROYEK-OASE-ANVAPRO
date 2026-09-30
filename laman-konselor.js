@@ -532,17 +532,27 @@
     refreshQueueBtn.addEventListener('click', loadQueue);
 
     // 6. LOGIN HANDLER
-    counselorLoginForm.addEventListener('submit', (e) => {
+    counselorLoginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const email = counselorEmailInput.value.trim();
       const password = counselorPasswordInput.value;
       const rememberMe = rememberMeCheckbox.checked;
 
+      const submitBtn = document.getElementById('loginSubmitBtn');
+      const originalText = submitBtn.innerHTML;
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span>Memeriksa...</span>';
+      if (window.lucide) lucide.createIcons();
+
       try {
-        currentSession = window.CounselingService.loginCounselor({ email, password, rememberMe });
+        currentSession = await window.CounselingService.loginCounselor({ email, password, rememberMe });
         checkAuth();
       } catch (err) {
         alert(err.message || 'Login gagal. Periksa email dan password.');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+        if (window.lucide) lucide.createIcons();
       }
     });
 
