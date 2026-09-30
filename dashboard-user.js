@@ -555,7 +555,7 @@
     }
 
     // Render Time Slots & Cek Tabrakan Jadwal (Conflict Detection)
-    function renderTimeSlots() {
+    async function renderTimeSlots() {
       const container = document.getElementById('bookingTimeSlotsContainer');
       const timeInput = document.getElementById('selectedBookingTimeInput');
       const substituteBox = document.getElementById('substituteCounselorBox');
@@ -563,16 +563,22 @@
       const slotConflictMessage = document.getElementById('slotConflictMessage');
       if (!container) return;
 
-      container.innerHTML = '';
+      container.innerHTML = '<div class="col-span-3 text-center text-xs text-heather-500 py-4"><i data-lucide="loader-2" class="w-5 h-5 animate-spin mx-auto"></i> Memuat jadwal...</div>';
+      lucide.createIcons();
+
       const slots = ['09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00', '19:00', '20:00'];
       const counselorId = bookingCounselorSelect.value;
       const counselorObj = (window.COUNSELORS_DATA || []).find(x => x.id === counselorId);
       const counselorName = counselorObj ? counselorObj.name : 'Konselor Terpilih';
 
+      // Fetch booked slots asynchronously first
+      const bookedSlots = await window.ChatSessionService.getBookedSlots(counselorId, selectedBookingDateStr);
+      
+      container.innerHTML = '';
       let isSelectedSlotConflict = false;
 
       slots.forEach(slot => {
-        const isBooked = window.ChatSessionService.isSlotBooked(counselorId, selectedBookingDateStr, slot);
+        const isBooked = bookedSlots.includes(slot);
         const isSelected = (slot === selectedBookingTimeSlot);
 
         if (isSelected && isBooked) {
@@ -597,6 +603,7 @@
         `;
 
         slotBtn.addEventListener('click', () => {
+          if (isBooked) return;
           selectedBookingTimeSlot = slot;
           timeInput.value = slot;
           renderTimeSlots();
