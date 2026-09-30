@@ -566,10 +566,22 @@
       container.innerHTML = '<div class="col-span-3 text-center text-xs text-heather-500 py-4"><i data-lucide="loader-2" class="w-5 h-5 animate-spin mx-auto"></i> Memuat jadwal...</div>';
       lucide.createIcons();
 
-      const slots = ['09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00', '19:00', '20:00'];
+      const slots = [];
+      for (let h = 9; h <= 19; h++) {
+        slots.push(`${String(h).padStart(2, '0')}:00`);
+        if (h < 19) slots.push(`${String(h).padStart(2, '0')}:30`);
+      }
+
       const counselorId = bookingCounselorSelect.value;
       const counselorObj = (window.COUNSELORS_DATA || []).find(x => x.id === counselorId);
       const counselorName = counselorObj ? counselorObj.name : 'Konselor Terpilih';
+
+      // Waktu saat ini untuk mengecek slot yang sudah lewat hari ini
+      const now = new Date();
+      const todayStr = now.toISOString().split('T')[0];
+      const isToday = selectedBookingDateStr === todayStr;
+      const currentHours = now.getHours();
+      const currentMinutes = now.getMinutes();
 
       // Fetch booked slots asynchronously first
       const bookedSlots = await window.ChatSessionService.getBookedSlots(counselorId, selectedBookingDateStr);
@@ -578,7 +590,13 @@
       let isSelectedSlotConflict = false;
 
       slots.forEach(slot => {
-        const isBooked = bookedSlots.includes(slot);
+        const [slotHourStr, slotMinStr] = slot.split(':');
+        const slotHour = parseInt(slotHourStr, 10);
+        const slotMin = parseInt(slotMinStr, 10);
+        
+        // Slot tidak tersedia jika sudah dibooking ATAU jika hari ini dan jamnya sudah lewat
+        const isPassed = isToday && (slotHour < currentHours || (slotHour === currentHours && slotMin <= currentMinutes));
+        const isBooked = bookedSlots.includes(slot) || isPassed;
         const isSelected = (slot === selectedBookingTimeSlot);
 
         if (isSelected && isBooked) {
@@ -589,16 +607,23 @@
         slotBtn.type = 'button';
         slotBtn.className = `p-2.5 rounded-xl border text-xs font-bold transition-all flex flex-col items-center justify-center gap-0.5 relative ${
           isBooked
-            ? 'bg-rose-50 border-rose-300 text-rose-700 opacity-80 cursor-pointer hover:bg-rose-100'
+            ? 'bg-rose-50 border-rose-300 text-rose-700 opacity-80 cursor-not-allowed'
             : (isSelected
                 ? 'bg-heather-600 text-white border-heather-700 shadow-sm ring-2 ring-heather-300'
                 : 'bg-white hover:bg-heather-50 text-oase-plum border-oase-border hover:border-heather-400')
         }`;
 
+        let statusText = '✓ Tersedia';
+        if (isPassed && !bookedSlots.includes(slot)) {
+          statusText = '✕ Terlewat';
+        } else if (isBooked) {
+          statusText = '✕ Terisi';
+        }
+
         slotBtn.innerHTML = `
           <span>${slot} WIB</span>
           <span class="text-[9px] font-semibold ${isBooked ? 'text-rose-600 font-extrabold' : (isSelected ? 'text-heather-100' : 'text-emerald-700')}">
-            ${isBooked ? '✕ Terisi' : '✓ Tersedia'}
+            ${statusText}
           </span>
         `;
 
@@ -678,6 +703,20 @@
       submitBtn.textContent = 'Memproses Booking...';
 
       try {
+        // Cek apakah waktu sudah lewat (isPassed)
+        const now = new Date();
+        const todayStr = now.toISOString().split('T')[0];
+        if (bookingDate === todayStr) {
+          const [slotHourStr, slotMinStr] = bookingTime.split(':');
+          const slotHour = parseInt(slotHourStr, 10);
+          const slotMin = parseInt(slotMinStr, 10);
+          if (slotHour < now.getHours() || (slotHour === now.getHours() && slotMin <= now.getMinutes())) {
+            renderTimeSlots();
+            alert(`Maaf, jadwal jam ${bookingTime} WIB hari ini sudah terlewat. Silakan pilih jam lain yang masih tersedia.`);
+            return;
+          }
+        }
+
         // Cek apakah slot sudah terisi untuk konselor ini (async)
         const slotTaken = await window.ChatSessionService.isSlotBooked(counselorId, bookingDate, bookingTime);
         if (slotTaken) {
