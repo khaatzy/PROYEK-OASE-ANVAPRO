@@ -676,10 +676,33 @@ const ChatSessionService = {
     window.dispatchEvent(new CustomEvent('oase_new_notification', { detail: payload }));
 
     if (window.NotificationService) {
-      window.NotificationService.sendNotification(payload.title || 'Notifikasi OASE Cerita', {
+      let iconUrl = null;
+      let targetCounselorId = payload.counselorId;
+
+      // Jika tidak ada counselorId tapi ada sessionId, cari dari sesi
+      if (!targetCounselorId && payload.sessionId) {
+        const sessions = JSON.parse(localStorage.getItem('oase_counseling_sessions') || '[]');
+        const s = sessions.find(x => x.id === payload.sessionId);
+        if (s) targetCounselorId = s.counselor_id;
+      }
+
+      // Cocokkan dengan data konselor
+      if (targetCounselorId && window.COUNSELORS_DATA) {
+        const c = window.COUNSELORS_DATA.find(x => x.id === targetCounselorId);
+        if (c && c.avatar) iconUrl = c.avatar;
+      }
+
+      const notifOptions = {
         body: payload.message || 'Ada pesan atau pembaruan baru untuk Anda.',
         tag: 'oase-session-' + (payload.sessionId || 'chat')
-      });
+      };
+      
+      if (iconUrl) {
+        notifOptions.icon = iconUrl;
+        notifOptions.badge = iconUrl;
+      }
+
+      window.NotificationService.sendNotification(payload.title || 'Notifikasi OASE Cerita', notifOptions);
     }
   },
 
