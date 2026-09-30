@@ -119,6 +119,18 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (openWriteStoryBtn) openWriteStoryBtn.addEventListener('click', handleStartStoryClick);
   if (navWriteStoryBtn) navWriteStoryBtn.addEventListener('click', openStoryModal);
 
+  // Intercept 'Chat dengan Konselor' links
+  document.querySelectorAll('.chat-counselor-btn, a[href*="action=chat-counselor"], a[href="kirim-cerita.html"]').forEach(link => {
+    link.addEventListener('click', (e) => {
+      if (!currentUserSession) {
+        e.preventDefault();
+        sessionStorage.setItem('oase_auth_redirect', 'dashboard-user.html?action=chat-counselor');
+        openAuthModal('login');
+        showAuthFeedback('Silakan masuk atau daftar akun terlebih dahulu untuk chat langsung dengan konselor.', 'info');
+      }
+    });
+  });
+
   // ==========================================
   // 3. AUTH LOGIC & TABS
   // ==========================================
@@ -203,7 +215,9 @@ document.addEventListener('DOMContentLoaded', async () => {
           setTimeout(() => {
             closeAuthModal();
             authForm.reset();
-            window.location.href = 'dashboard-user.html';
+            const targetUrl = sessionStorage.getItem('oase_auth_redirect') || 'dashboard-user.html';
+            sessionStorage.removeItem('oase_auth_redirect');
+            window.location.href = targetUrl;
           }, 800);
         } else {
           await window.AuthService.signUp(email, password);
