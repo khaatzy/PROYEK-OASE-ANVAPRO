@@ -521,10 +521,25 @@
 
           // Jika pesan baru berasal dari lawan bicara dan bukan saat pertama kali membuka halaman
           if (!forceScroll && m.sender_type !== currentRole && window.NotificationService && localStorage.getItem('oase_notif_muted') !== 'true') {
-            window.NotificationService.sendNotification(`Pesan baru dari ${m.sender_name}`, {
+            
+            let iconUrl = null;
+            if (m.sender_type === 'counselor' && activeSession) {
+              const c = (window.COUNSELORS_DATA || []).find(x => x.id === activeSession.counselor_id);
+              if (c && c.avatar) iconUrl = c.avatar;
+            } else if (m.sender_type === 'user') {
+              // Jika user tidak ada avatar khusus, bisa biarkan null atau beri default user icon. Biarkan null akan pakai fallback default
+            }
+
+            const notifOpts = {
               body: m.message_type === 'voice' ? '🎙️ Mengirim pesan suara (Voice Note)' : (m.message_text || 'Pesan baru diterima'),
               tag: 'oase-msg-' + m.id
-            });
+            };
+            if (iconUrl) {
+              notifOpts.icon = iconUrl;
+              notifOpts.badge = iconUrl;
+            }
+
+            window.NotificationService.sendNotification(`Pesan baru dari ${m.sender_name}`, notifOpts);
           }
         }
       });
