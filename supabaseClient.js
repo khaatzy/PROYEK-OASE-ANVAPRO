@@ -7,7 +7,8 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 let supabaseClient = null;
 
 if (window.supabase && typeof window.supabase.createClient === 'function') {
-  supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  supabaseClient = window.supabaseClient; // backward compatibility for let declaration
 } else {
   console.error('Supabase library belum dimuat. Pastikan CDN Supabase telah disertakan di HTML.');
 }
@@ -531,6 +532,8 @@ const CounselingService = {
         }
         if (status && status !== 'all') {
           query = query.eq('status', status);
+        } else {
+          query = query.neq('status', 'arsip');
         }
 
         const { data, error } = await query;
@@ -558,6 +561,8 @@ const CounselingService = {
     }
     if (status && status !== 'all') {
       filtered = filtered.filter(item => item.status === status);
+    } else {
+      filtered = filtered.filter(item => item.status !== 'arsip');
     }
     return filtered.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
   },
@@ -635,17 +640,20 @@ const CounselingService = {
     return null;
   },
 
-  // Hapus curhatan yang sudah dibalas oleh konselor
+  // Arsipkan (Hapus dari pandangan konselor) curhatan yang sudah dibalas
   async deleteSubmission(ticketCode) {
     if (!ticketCode) throw new Error('Kode tiket tidak valid.');
     if (supabaseClient) {
       try {
-        await supabaseClient.from('counseling_submissions').delete().eq('ticket_code', ticketCode);
+        await supabaseClient.from('counseling_submissions').update({ status: 'arsip' }).eq('ticket_code', ticketCode);
       } catch (e) {}
     }
     const local = JSON.parse(localStorage.getItem('oase_counseling_submissions') || '[]');
-    const filtered = local.filter(s => s.ticket_code !== ticketCode);
-    localStorage.setItem('oase_counseling_submissions', JSON.stringify(filtered));
+    const idx = local.findIndex(s => s.ticket_code === ticketCode);
+    if (idx !== -1) {
+      local[idx].status = 'arsip';
+      localStorage.setItem('oase_counseling_submissions', JSON.stringify(local));
+    }
     return { success: true };
   },
 

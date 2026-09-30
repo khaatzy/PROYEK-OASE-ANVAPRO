@@ -464,19 +464,60 @@
     }
     closeBookingModalBtn.addEventListener('click', () => bookingModal.classList.add('hidden'));
 
-    function populateBookingCounselors() {
+    async function populateBookingCounselors() {
       const counselors = window.COUNSELORS_DATA || [];
+      bookingCounselorSelect.innerHTML = '<option value="">Memuat data konselor...</option>';
+      
+      const statuses = {};
+      if (window.supabaseClient) {
+        try {
+          const { data } = await window.supabaseClient.from('counselor_status').select('*');
+          if (data) {
+            data.forEach(d => { statuses[d.counselor_id] = d.status; });
+          }
+        } catch (e) {}
+      }
+
       bookingCounselorSelect.innerHTML = '';
       counselors.forEach(c => {
         if (c.id === 'auto') return;
+        
+        const status = statuses[c.id] || 'tersedia';
+        let statusText = '';
+        let disabled = false;
+        
+        if (status === 'offline') {
+          statusText = ' (❌ Tidak Bisa Mendengarkan)';
+          disabled = true;
+        } else if (status === 'sibuk') {
+          statusText = ' (⏳ Sedang Sibuk / Slow Respon)';
+        }
+
         const ratingInfo = window.getCounselorRatingInfo ? window.getCounselorRatingInfo(c.id) : { average: 5.0, totalReviews: 10 };
         const opt = document.createElement('option');
         opt.value = c.id;
-        opt.textContent = `${c.name} • ${c.role} (⭐ ${ratingInfo.average} • ${ratingInfo.totalReviews} ulasan)`;
+        opt.textContent = `${c.name}${statusText} • ${c.role} (⭐ ${ratingInfo.average})`;
+        opt.disabled = disabled;
+        
+        // Select the first available counselor automatically
+        if (disabled && bookingCounselorSelect.value === c.id) {
+          opt.selected = false;
+        }
+        
         bookingCounselorSelect.appendChild(opt);
       });
 
-      updateSelectedCounselorInfo();
+      // Ensure the selected value isn't disabled
+      if (bookingCounselorSelect.options[bookingCounselorSelect.selectedIndex]?.disabled) {
+        for (let i = 0; i < bookingCounselorSelect.options.length; i++) {
+          if (!bookingCounselorSelect.options[i].disabled) {
+            bookingCounselorSelect.selectedIndex = i;
+            break;
+          }
+        }
+      }
+
+      updateSelectedCounselorInfo(statuses);
     }
 
     bookingCounselorSelect.addEventListener('change', () => {
@@ -485,13 +526,18 @@
       updateBookingSummary();
     });
 
-    function updateSelectedCounselorInfo() {
+    async function updateSelectedCounselorInfo() {
       const cId = bookingCounselorSelect.value;
       const c = (window.COUNSELORS_DATA || []).find(x => x.id === cId);
       const ratingBadge = document.getElementById('selectedCounselorRatingBadge');
       if (c && ratingBadge) {
         const ratingInfo = window.getCounselorRatingInfo ? window.getCounselorRatingInfo(c.id) : { average: 5.0 };
-        ratingBadge.textContent = `⭐ ${ratingInfo.average} • ${c.role}`;
+        const status = await window.ChatSessionService.getCounselorStatus(cId);
+        let statusText = 'Siap Mendengarkan';
+        if (status === 'sibuk') statusText = 'Sedang Sibuk (Slow Respon)';
+        if (status === 'offline') statusText = 'Tidak Bisa Mendengarkan';
+
+        ratingBadge.innerHTML = `⭐ ${ratingInfo.average} • ${c.role} <span class="ml-2 px-2 py-0.5 rounded text-[10px] ${status === 'tersedia' ? 'bg-emerald-100 text-emerald-700' : (status === 'sibuk' ? 'bg-amber-100 text-amber-700' : 'bg-rose-100 text-rose-700')}">${statusText}</span>`;
       }
     }
 
@@ -555,7 +601,7 @@
     }
 
     // Render Time Slots & Cek Tabrakan Jadwal (Conflict Detection)
-    function renderTimeSlots() {
+    async function renderTimeSlots() {
       const container = document.getElementById('bookingTimeSlotsContainer');
       const timeInput = document.getElementById('selectedBookingTimeInput');
       const substituteBox = document.getElementById('substituteCounselorBox');
@@ -563,16 +609,40 @@
       const slotConflictMessage = document.getElementById('slotConflictMessage');
       if (!container) return;
 
-      container.innerHTML = '';
-      const slots = ['09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00', '19:00', '20:00'];
+      container.innerHTML = '<div class="col-span-3 text-center text-xs text-heather-500 py-4"><i data-lucide="loader-2" class="w-5 h-5 animate-spin mx-auto"></i> Memuat jadwal...</div>';
+      lucide.createIcons();
+
+      const slots = [];
+      for (let h = 9; h <= 19; h++) {
+        slots.push(`${String(h).padStart(2, '0')}:00`);
+        if (h < 19) slots.push(`${String(h).padStart(2, '0')}:30`);
+      }
+
       const counselorId = bookingCounselorSelect.value;
       const counselorObj = (window.COUNSELORS_DATA || []).find(x => x.id === counselorId);
       const counselorName = counselorObj ? counselorObj.name : 'Konselor Terpilih';
 
+      // Waktu saat ini untuk mengecek slot yang sudah lewat hari ini
+      const now = new Date();
+      const todayStr = now.toISOString().split('T')[0];
+      const isToday = selectedBookingDateStr === todayStr;
+      const currentHours = now.getHours();
+      const currentMinutes = now.getMinutes();
+
+      // Fetch booked slots asynchronously first
+      const bookedSlots = await window.ChatSessionService.getBookedSlots(counselorId, selectedBookingDateStr);
+      
+      container.innerHTML = '';
       let isSelectedSlotConflict = false;
 
       slots.forEach(slot => {
-        const isBooked = window.ChatSessionService.isSlotBooked(counselorId, selectedBookingDateStr, slot);
+        const [slotHourStr, slotMinStr] = slot.split(':');
+        const slotHour = parseInt(slotHourStr, 10);
+        const slotMin = parseInt(slotMinStr, 10);
+        
+        // Slot tidak tersedia jika sudah dibooking ATAU jika hari ini dan jamnya sudah lewat
+        const isPassed = isToday && (slotHour < currentHours || (slotHour === currentHours && slotMin <= currentMinutes));
+        const isBooked = bookedSlots.includes(slot) || isPassed;
         const isSelected = (slot === selectedBookingTimeSlot);
 
         if (isSelected && isBooked) {
@@ -583,20 +653,28 @@
         slotBtn.type = 'button';
         slotBtn.className = `p-2.5 rounded-xl border text-xs font-bold transition-all flex flex-col items-center justify-center gap-0.5 relative ${
           isBooked
-            ? 'bg-rose-50 border-rose-300 text-rose-700 opacity-80 cursor-pointer hover:bg-rose-100'
+            ? 'bg-rose-50 border-rose-300 text-rose-700 opacity-80 cursor-not-allowed'
             : (isSelected
                 ? 'bg-heather-600 text-white border-heather-700 shadow-sm ring-2 ring-heather-300'
                 : 'bg-white hover:bg-heather-50 text-oase-plum border-oase-border hover:border-heather-400')
         }`;
 
+        let statusText = '✓ Tersedia';
+        if (isPassed && !bookedSlots.includes(slot)) {
+          statusText = '✕ Terlewat';
+        } else if (isBooked) {
+          statusText = '✕ Terisi';
+        }
+
         slotBtn.innerHTML = `
           <span>${slot} WIB</span>
           <span class="text-[9px] font-semibold ${isBooked ? 'text-rose-600 font-extrabold' : (isSelected ? 'text-heather-100' : 'text-emerald-700')}">
-            ${isBooked ? '✕ Terisi' : '✓ Tersedia'}
+            ${statusText}
           </span>
         `;
 
         slotBtn.addEventListener('click', () => {
+          if (isBooked) return;
           selectedBookingTimeSlot = slot;
           timeInput.value = slot;
           renderTimeSlots();
@@ -671,6 +749,27 @@
       submitBtn.textContent = 'Memproses Booking...';
 
       try {
+        const cStatus = await window.ChatSessionService.getCounselorStatus(counselorId);
+        if (cStatus === 'offline') {
+          alert(`Maaf, ${counselorName} sedang tidak bisa mendengarkan saat ini. Silakan pilih konselor lain.`);
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Konfirmasi Booking Jadwal';
+          return;
+        }
+        // Cek apakah waktu sudah lewat (isPassed)
+        const now = new Date();
+        const todayStr = now.toISOString().split('T')[0];
+        if (bookingDate === todayStr) {
+          const [slotHourStr, slotMinStr] = bookingTime.split(':');
+          const slotHour = parseInt(slotHourStr, 10);
+          const slotMin = parseInt(slotMinStr, 10);
+          if (slotHour < now.getHours() || (slotHour === now.getHours() && slotMin <= now.getMinutes())) {
+            renderTimeSlots();
+            alert(`Maaf, jadwal jam ${bookingTime} WIB hari ini sudah terlewat. Silakan pilih jam lain yang masih tersedia.`);
+            return;
+          }
+        }
+
         // Cek apakah slot sudah terisi untuk konselor ini (async)
         const slotTaken = await window.ChatSessionService.isSlotBooked(counselorId, bookingDate, bookingTime);
         if (slotTaken) {

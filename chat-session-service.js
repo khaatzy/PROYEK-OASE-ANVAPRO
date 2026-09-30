@@ -6,9 +6,9 @@ const ChatSessionService = {
     if (!counselorId || counselorId === 'auto' || !bookingDate || !bookingTime) return false;
 
     // Cek di Supabase dulu
-    if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+    if (window.supabaseClient) {
       try {
-        const { data, error } = await supabaseClient
+        const { data, error } = await window.supabaseClient
           .from('counseling_sessions')
           .select('id')
           .eq('counselor_id', counselorId)
@@ -34,9 +34,9 @@ const ChatSessionService = {
   async getBookedSlots(counselorId, bookingDate) {
     if (!counselorId || counselorId === 'auto' || !bookingDate) return [];
 
-    if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+    if (window.supabaseClient) {
       try {
-        const { data, error } = await supabaseClient
+        const { data, error } = await window.supabaseClient
           .from('counseling_sessions')
           .select('booking_time')
           .eq('counselor_id', counselorId)
@@ -115,9 +115,9 @@ const ChatSessionService = {
     };
 
     // Simpan ke Supabase (PRIMARY)
-    if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+    if (window.supabaseClient) {
       try {
-        const { data, error } = await supabaseClient
+        const { data, error } = await window.supabaseClient
           .from('counseling_sessions')
           .insert([sessionData])
           .select();
@@ -160,9 +160,9 @@ const ChatSessionService = {
     const now = new Date().toISOString();
     const updateData = { status: 'aktif', started_at: now };
 
-    if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+    if (window.supabaseClient) {
       try {
-        const { data, error } = await supabaseClient
+        const { data, error } = await window.supabaseClient
           .from('counseling_sessions')
           .update(updateData)
           .eq('id', sessionId)
@@ -196,9 +196,9 @@ const ChatSessionService = {
   // AMBIL SESI (dari Supabase primary, localStorage fallback)
   // ============================================================
   async getActiveSession(userEmail, counselorId = null) {
-    if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+    if (window.supabaseClient) {
       try {
-        let query = supabaseClient.from('counseling_sessions').select('*').eq('status', 'aktif');
+        let query = window.supabaseClient.from('counseling_sessions').select('*').eq('status', 'aktif');
         if (userEmail) query = query.eq('user_email', userEmail);
         if (counselorId) query = query.eq('counselor_id', counselorId);
         const { data, error } = await query.order('created_at', { ascending: false }).limit(1);
@@ -219,9 +219,9 @@ const ChatSessionService = {
 
   // Ambil sesi terjadwal (belum aktif)
   async getScheduledSessions(userEmail = null, counselorId = null) {
-    if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+    if (window.supabaseClient) {
       try {
-        let query = supabaseClient.from('counseling_sessions').select('*').eq('status', 'terjadwal');
+        let query = window.supabaseClient.from('counseling_sessions').select('*').eq('status', 'terjadwal');
         if (userEmail) query = query.eq('user_email', userEmail);
         if (counselorId) query = query.eq('counselor_id', counselorId);
         const { data, error } = await query.order('scheduled_at', { ascending: true });
@@ -242,9 +242,9 @@ const ChatSessionService = {
 
   // Ambil sesi berdasarkan ID
   async getSessionById(sessionId) {
-    if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+    if (window.supabaseClient) {
       try {
-        const { data, error } = await supabaseClient
+        const { data, error } = await window.supabaseClient
           .from('counseling_sessions')
           .select('*')
           .eq('id', sessionId)
@@ -262,9 +262,9 @@ const ChatSessionService = {
 
   // Seluruh sesi untuk konselor
   async getCounselorSessions(counselorId) {
-    if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+    if (window.supabaseClient) {
       try {
-        const { data, error } = await supabaseClient
+        const { data, error } = await window.supabaseClient
           .from('counseling_sessions')
           .select('*')
           .eq('counselor_id', counselorId)
@@ -282,9 +282,9 @@ const ChatSessionService = {
 
   // Semua sesi aktif (untuk konselor dashboard)
   async getAllActiveSessions() {
-    if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+    if (window.supabaseClient) {
       try {
-        const { data, error } = await supabaseClient
+        const { data, error } = await window.supabaseClient
           .from('counseling_sessions')
           .select('*')
           .eq('status', 'aktif')
@@ -298,9 +298,9 @@ const ChatSessionService = {
 
   // Semua sesi terjadwal (untuk konselor dashboard)
   async getAllScheduledSessions() {
-    if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+    if (window.supabaseClient) {
       try {
-        const { data, error } = await supabaseClient
+        const { data, error } = await window.supabaseClient
           .from('counseling_sessions')
           .select('*')
           .eq('status', 'terjadwal')
@@ -323,9 +323,9 @@ const ChatSessionService = {
     let targetSession = null;
 
     // Update Supabase dulu
-    if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+    if (window.supabaseClient) {
       try {
-        const { data, error } = await supabaseClient
+        const { data, error } = await window.supabaseClient
           .from('counseling_sessions')
           .update(updateData)
           .eq('id', sessionId)
@@ -376,10 +376,10 @@ const ChatSessionService = {
     };
 
     // Simpan ke Supabase
-    if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+    if (window.supabaseClient) {
       try {
-        await supabaseClient.from('session_messages').insert([msg]);
-        await supabaseClient.from('counseling_sessions').update({ motivational_message: messageText }).eq('id', sessionId);
+        await window.supabaseClient.from('session_messages').insert([msg]);
+        await window.supabaseClient.from('counseling_sessions').update({ motivational_message: messageText }).eq('id', sessionId);
       } catch (e) {}
     }
 
@@ -405,9 +405,9 @@ const ChatSessionService = {
     const starNum = Math.min(5, Math.max(1, parseInt(rating) || 5));
     const now = new Date().toISOString();
 
-    if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+    if (window.supabaseClient) {
       try {
-        await supabaseClient.from('counseling_sessions').update({
+        await window.supabaseClient.from('counseling_sessions').update({
           rating: starNum, review: reviewText.trim(), rated_at: now
         }).eq('id', sessionId);
       } catch (e) {}
@@ -451,9 +451,9 @@ const ChatSessionService = {
   // SESI SELESAI (RIWAYAT)
   // ============================================================
   async getCompletedSessions(userEmail = null, counselorId = null) {
-    if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+    if (window.supabaseClient) {
       try {
-        let query = supabaseClient.from('counseling_sessions').select('*').eq('status', 'selesai');
+        let query = window.supabaseClient.from('counseling_sessions').select('*').eq('status', 'selesai');
         if (userEmail) query = query.eq('user_email', userEmail);
         if (counselorId) query = query.eq('counselor_id', counselorId);
         const { data, error } = await query.order('ended_at', { ascending: false });
@@ -487,9 +487,9 @@ const ChatSessionService = {
     };
 
     // Simpan ke Supabase (PRIMARY)
-    if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+    if (window.supabaseClient) {
       try {
-        const { data, error } = await supabaseClient.from('session_messages').insert([msg]).select();
+        const { data, error } = await window.supabaseClient.from('session_messages').insert([msg]).select();
         if (!error && data && data.length > 0) {
           // Cache ke localStorage juga
           this._cacheMessageToLocal(msg);
@@ -523,9 +523,9 @@ const ChatSessionService = {
     });
 
     let remoteMsgs = [];
-    if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+    if (window.supabaseClient) {
       try {
-        const { data, error } = await supabaseClient
+        const { data, error } = await window.supabaseClient
           .from('session_messages')
           .select('*')
           .eq('session_id', sessionId)
@@ -555,15 +555,15 @@ const ChatSessionService = {
   _realtimeChannels: {},
 
   subscribeToMessages(sessionId, onNewMessage) {
-    if (typeof supabaseClient === 'undefined' || !supabaseClient) return null;
+    if (!window.supabaseClient) return null;
     const channelName = 'messages-' + sessionId;
 
     // Hindari duplicate subscription
     if (this._realtimeChannels[channelName]) {
-      supabaseClient.removeChannel(this._realtimeChannels[channelName]);
+      window.supabaseClient.removeChannel(this._realtimeChannels[channelName]);
     }
 
-    const channel = supabaseClient
+    const channel = window.supabaseClient
       .channel(channelName)
       .on('postgres_changes', {
         event: 'INSERT',
@@ -583,14 +583,14 @@ const ChatSessionService = {
   },
 
   subscribeToSession(sessionId, onSessionChange) {
-    if (typeof supabaseClient === 'undefined' || !supabaseClient) return null;
+    if (!window.supabaseClient) return null;
     const channelName = 'session-' + sessionId;
 
     if (this._realtimeChannels[channelName]) {
-      supabaseClient.removeChannel(this._realtimeChannels[channelName]);
+      window.supabaseClient.removeChannel(this._realtimeChannels[channelName]);
     }
 
-    const channel = supabaseClient
+    const channel = window.supabaseClient
       .channel(channelName)
       .on('postgres_changes', {
         event: 'UPDATE',
@@ -611,14 +611,14 @@ const ChatSessionService = {
 
   // Subscribe ke semua sesi baru (untuk dashboard konselor)
   subscribeToAllSessions(onSessionChange) {
-    if (typeof supabaseClient === 'undefined' || !supabaseClient) return null;
+    if (!window.supabaseClient) return null;
     const channelName = 'all-sessions';
 
     if (this._realtimeChannels[channelName]) {
-      supabaseClient.removeChannel(this._realtimeChannels[channelName]);
+      window.supabaseClient.removeChannel(this._realtimeChannels[channelName]);
     }
 
-    const channel = supabaseClient
+    const channel = window.supabaseClient
       .channel(channelName)
       .on('postgres_changes', {
         event: '*',
@@ -635,11 +635,42 @@ const ChatSessionService = {
   },
 
   unsubscribeAll() {
-    if (typeof supabaseClient === 'undefined' || !supabaseClient) return;
+    if (!window.supabaseClient) return;
     Object.values(this._realtimeChannels).forEach(ch => {
-      try { supabaseClient.removeChannel(ch); } catch (e) {}
+      try { window.supabaseClient.removeChannel(ch); } catch (e) {}
     });
     this._realtimeChannels = {};
+  },
+
+  // ============================================================
+  // STATUS KONSELOR
+  // ============================================================
+  async getCounselorStatus(counselorId) {
+    if (!counselorId) return 'tersedia';
+    if (window.supabaseClient) {
+      try {
+        const { data, error } = await window.supabaseClient
+          .from('counselor_status')
+          .select('status')
+          .eq('counselor_id', counselorId)
+          .single();
+        if (!error && data) return data.status;
+      } catch (e) {}
+    }
+    return 'tersedia';
+  },
+
+  async updateCounselorStatus(counselorId, statusStr) {
+    if (!counselorId) return false;
+    if (window.supabaseClient) {
+      try {
+        const { error } = await window.supabaseClient
+          .from('counselor_status')
+          .upsert({ counselor_id: counselorId, status: statusStr, updated_at: new Date().toISOString() });
+        return !error;
+      } catch (e) {}
+    }
+    return false;
   },
 
   // ============================================================
@@ -676,10 +707,33 @@ const ChatSessionService = {
     window.dispatchEvent(new CustomEvent('oase_new_notification', { detail: payload }));
 
     if (window.NotificationService) {
-      window.NotificationService.sendNotification(payload.title || 'Notifikasi OASE Cerita', {
+      let iconUrl = null;
+      let targetCounselorId = payload.counselorId;
+
+      // Jika tidak ada counselorId tapi ada sessionId, cari dari sesi
+      if (!targetCounselorId && payload.sessionId) {
+        const sessions = JSON.parse(localStorage.getItem('oase_counseling_sessions') || '[]');
+        const s = sessions.find(x => x.id === payload.sessionId);
+        if (s) targetCounselorId = s.counselor_id;
+      }
+
+      // Cocokkan dengan data konselor
+      if (targetCounselorId && window.COUNSELORS_DATA) {
+        const c = window.COUNSELORS_DATA.find(x => x.id === targetCounselorId);
+        if (c && c.avatar) iconUrl = c.avatar;
+      }
+
+      const notifOptions = {
         body: payload.message || 'Ada pesan atau pembaruan baru untuk Anda.',
         tag: 'oase-session-' + (payload.sessionId || 'chat')
-      });
+      };
+      
+      if (iconUrl) {
+        notifOptions.icon = iconUrl;
+        notifOptions.badge = iconUrl;
+      }
+
+      window.NotificationService.sendNotification(payload.title || 'Notifikasi OASE Cerita', notifOptions);
     }
   },
 
