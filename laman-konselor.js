@@ -662,7 +662,18 @@
       
       const myActiveSessions = allActiveSessions.filter(s => s.counselor_id === currentSession.id);
       const otherActiveSessions = allActiveSessions.filter(s => s.counselor_id !== currentSession.id);
-      const myScheduledSessions = allScheduledSessions.filter(s => s.counselor_id === currentSession.id);
+      
+      let myScheduledSessions = [];
+      const rawScheduled = allScheduledSessions.filter(s => s.counselor_id === currentSession.id);
+      for (const s of rawScheduled) {
+        if (window.ChatSessionService.isSessionExpired && window.ChatSessionService.isSessionExpired(s)) {
+          if (window.ChatSessionService.expireSession) {
+            await window.ChatSessionService.expireSession(s.id);
+          }
+        } else {
+          myScheduledSessions.push(s);
+        }
+      }
 
       const totalItems = myActiveSessions.length + otherActiveSessions.length + myScheduledSessions.length;
 

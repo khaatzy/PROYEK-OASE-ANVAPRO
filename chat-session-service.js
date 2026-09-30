@@ -322,8 +322,22 @@ const ChatSessionService = {
   },
 
   // ============================================================
-  // SELESAIKAN SESI
+  // SELESAIKAN & KADALUARSAKAN SESI
   // ============================================================
+  async expireSession(sessionId) {
+    if (window.supabaseClient) {
+      try {
+        await window.supabaseClient.from('counseling_sessions').update({ status: 'kadaluarsa' }).eq('id', sessionId);
+      } catch (e) {}
+    }
+    const sessions = JSON.parse(localStorage.getItem('oase_counseling_sessions') || '[]');
+    const idx = sessions.findIndex(s => s.id === sessionId);
+    if (idx !== -1) {
+      sessions[idx].status = 'kadaluarsa';
+      localStorage.setItem('oase_counseling_sessions', JSON.stringify(sessions));
+    }
+  },
+
   async endSession(sessionId, motivationalMessage = null) {
     const now = new Date().toISOString();
     const updateData = { status: 'selesai', ended_at: now };
@@ -462,7 +476,7 @@ const ChatSessionService = {
   async getCompletedSessions(userEmail = null, counselorId = null) {
     if (window.supabaseClient) {
       try {
-        let query = window.supabaseClient.from('counseling_sessions').select('*').eq('status', 'selesai');
+        let query = window.supabaseClient.from('counseling_sessions').select('*').in('status', ['selesai', 'kadaluarsa', 'dibatalkan']);
         if (userEmail) query = query.eq('user_email', userEmail);
         if (counselorId) query = query.eq('counselor_id', counselorId);
         const { data, error } = await query.order('ended_at', { ascending: false });
@@ -471,7 +485,8 @@ const ChatSessionService = {
     }
     const sessions = JSON.parse(localStorage.getItem('oase_counseling_sessions') || '[]');
     return sessions.filter(s => {
-      return s.status === 'selesai' && (!userEmail || s.user_email === userEmail) && (!counselorId || s.counselor_id === counselorId);
+      const matchStatus = ['selesai', 'kadaluarsa', 'dibatalkan'].includes(s.status);
+      return matchStatus && (!userEmail || s.user_email === userEmail) && (!counselorId || s.counselor_id === counselorId);
     });
   },
 
