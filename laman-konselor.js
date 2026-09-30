@@ -532,17 +532,27 @@
     refreshQueueBtn.addEventListener('click', loadQueue);
 
     // 6. LOGIN HANDLER
-    counselorLoginForm.addEventListener('submit', (e) => {
+    counselorLoginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const email = counselorEmailInput.value.trim();
       const password = counselorPasswordInput.value;
       const rememberMe = rememberMeCheckbox.checked;
 
+      const submitBtn = document.getElementById('loginSubmitBtn');
+      const originalText = submitBtn.innerHTML;
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span>Memeriksa...</span>';
+      if (window.lucide) lucide.createIcons();
+
       try {
-        currentSession = window.CounselingService.loginCounselor({ email, password, rememberMe });
+        currentSession = await window.CounselingService.loginCounselor({ email, password, rememberMe });
         checkAuth();
       } catch (err) {
         alert(err.message || 'Login gagal. Periksa email dan password.');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+        if (window.lucide) lucide.createIcons();
       }
     });
 
@@ -661,10 +671,21 @@
       const allScheduledSessions = await window.ChatSessionService.getAllScheduledSessions();
       
       const myActiveSessions = allActiveSessions.filter(s => s.counselor_id === currentSession.id);
-      const otherActiveSessions = allActiveSessions.filter(s => s.counselor_id !== currentSession.id);
-      const myScheduledSessions = allScheduledSessions.filter(s => s.counselor_id === currentSession.id);
+      
+      
+      let myScheduledSessions = [];
+      const rawScheduled = allScheduledSessions.filter(s => s.counselor_id === currentSession.id);
+      for (const s of rawScheduled) {
+        if (window.ChatSessionService.isSessionExpired && window.ChatSessionService.isSessionExpired(s)) {
+          if (window.ChatSessionService.expireSession) {
+            await window.ChatSessionService.expireSession(s.id);
+          }
+        } else {
+          myScheduledSessions.push(s);
+        }
+      }
 
-      const totalItems = myActiveSessions.length + otherActiveSessions.length + myScheduledSessions.length;
+      const totalItems = myActiveSessions.length + myScheduledSessions.length;
 
       if (liveChatCountBadge) {
         if (myActiveSessions.length > 0) {
@@ -699,10 +720,7 @@
       myActiveSessions.forEach(s => {
         liveSessionsListContainer.appendChild(createCounselorSessionCard(s, true, 'aktif'));
       });
-      // Sesi aktif konselor lain
-      otherActiveSessions.forEach(s => {
-        liveSessionsListContainer.appendChild(createCounselorSessionCard(s, false, 'aktif'));
-      });
+      
       lucide.createIcons();
     }
 
@@ -723,8 +741,16 @@
       if (isScheduled) {
         badge = `<span class="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[10px] font-bold">📅 Terjadwal untuk Anda</span>`;
         timeInfo = `<span class="text-[11px] text-amber-700 font-medium">${s.booking_date} pukul ${s.booking_time} WIB</span>`;
+        
+        const isExpired = window.ChatSessionService.isSessionExpired ? window.ChatSessionService.isSessionExpired(s) : false;
         const isReady = window.ChatSessionService.isSessionReady(s);
-        if (isReady) {
+        
+        if (isExpired) {
+          badge = `<span class="px-2.5 py-0.5 rounded-full bg-red-100 text-red-700 text-[10px] font-bold">Terlewat</span>`;
+          actionBtn = `<button disabled class="px-4 py-2 rounded-xl bg-gray-200 text-gray-500 font-bold text-xs cursor-not-allowed flex items-center gap-1.5">
+            <i data-lucide="x-circle" class="w-3.5 h-3.5"></i><span>Jadwal Kadaluarsa</span>
+          </button>`;
+        } else if (isReady) {
           actionBtn = `<button class="open-counselor-chat-btn px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs shadow-xs flex items-center gap-1.5 transition-all" data-session-id="${s.id}">
             <i data-lucide="messages-square" class="w-3.5 h-3.5"></i><span>Mulai Chat Sekarang</span>
           </button>`;
@@ -738,9 +764,15 @@
           ? `<span class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold">🔴 Sesi Aktif untuk Anda</span>`
           : `<span class="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-bold">⚡ Sesi Terbuka (${s.counselor_name})</span>`;
         timeInfo = `<span class="text-[11px] text-oase-muted font-medium">${getRelativeTime(s.started_at)}</span>`;
-        actionBtn = `<button class="open-counselor-chat-btn px-4 py-2 rounded-xl bg-heather-500 hover:bg-heather-600 text-white font-bold text-xs shadow-xs flex items-center gap-1.5 transition-all" data-session-id="${s.id}">
-          <i data-lucide="messages-square" class="w-3.5 h-3.5"></i><span>Buka Ruang Chat</span>
-        </button>`;
+        if (isDirectlyAssigned) {
+          actionBtn = `<button class="open-counselor-chat-btn px-4 py-2 rounded-xl bg-heather-500 hover:bg-heather-600 text-white font-bold text-xs shadow-xs flex items-center gap-1.5 transition-all" data-session-id="${s.id}">
+            <i data-lucide="messages-square" class="w-3.5 h-3.5"></i><span>Buka Ruang Chat</span>
+          </button>`;
+        } else {
+          actionBtn = `<button disabled class="px-4 py-2 rounded-xl bg-gray-100 text-gray-400 font-bold text-xs cursor-not-allowed flex items-center gap-1.5" title="Sesi milik konselor lain">
+            <i data-lucide="lock" class="w-3.5 h-3.5"></i><span>Ruang Terkunci</span>
+          </button>`;
+        }
       }
 
       card.innerHTML = `
@@ -780,9 +812,6 @@
       let completed = [];
       if (window.ChatSessionService) {
         completed = await window.ChatSessionService.getCompletedSessions(null, currentSession.id);
-        if (!completed || completed.length === 0) {
-          completed = await window.ChatSessionService.getCompletedSessions(null, null);
-        }
       }
 
       if (historyCountBadge) {
@@ -955,4 +984,6 @@
     loadLiveSessions();
     loadHistorySessions();
  
+
+
 
