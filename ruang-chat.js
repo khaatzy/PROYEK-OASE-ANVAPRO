@@ -525,9 +525,11 @@
             let iconUrl = null;
             if (m.sender_type === 'counselor' && activeSession) {
               const c = (window.COUNSELORS_DATA || []).find(x => x.id === activeSession.counselor_id);
-              if (c && c.avatar) iconUrl = c.avatar;
+              if (c && c.avatar) {
+                iconUrl = new URL(c.avatar, document.baseURI).href;
+              }
             } else if (m.sender_type === 'user') {
-              // Jika user tidak ada avatar khusus, bisa biarkan null atau beri default user icon. Biarkan null akan pakai fallback default
+              // Jika user tidak ada avatar khusus, bisa biarkan null atau beri default user icon
             }
 
             const notifOpts = {

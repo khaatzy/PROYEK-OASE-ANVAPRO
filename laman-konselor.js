@@ -738,9 +738,15 @@
           ? `<span class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold">🔴 Sesi Aktif untuk Anda</span>`
           : `<span class="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-bold">⚡ Sesi Terbuka (${s.counselor_name})</span>`;
         timeInfo = `<span class="text-[11px] text-oase-muted font-medium">${getRelativeTime(s.started_at)}</span>`;
-        actionBtn = `<button class="open-counselor-chat-btn px-4 py-2 rounded-xl bg-heather-500 hover:bg-heather-600 text-white font-bold text-xs shadow-xs flex items-center gap-1.5 transition-all" data-session-id="${s.id}">
-          <i data-lucide="messages-square" class="w-3.5 h-3.5"></i><span>Buka Ruang Chat</span>
-        </button>`;
+        if (isDirectlyAssigned) {
+          actionBtn = `<button class="open-counselor-chat-btn px-4 py-2 rounded-xl bg-heather-500 hover:bg-heather-600 text-white font-bold text-xs shadow-xs flex items-center gap-1.5 transition-all" data-session-id="${s.id}">
+            <i data-lucide="messages-square" class="w-3.5 h-3.5"></i><span>Buka Ruang Chat</span>
+          </button>`;
+        } else {
+          actionBtn = `<button disabled class="px-4 py-2 rounded-xl bg-gray-100 text-gray-400 font-bold text-xs cursor-not-allowed flex items-center gap-1.5" title="Sesi milik konselor lain">
+            <i data-lucide="lock" class="w-3.5 h-3.5"></i><span>Ruang Terkunci</span>
+          </button>`;
+        }
       }
 
       card.innerHTML = `

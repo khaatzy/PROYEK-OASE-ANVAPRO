@@ -720,7 +720,9 @@ const ChatSessionService = {
       // Cocokkan dengan data konselor
       if (targetCounselorId && window.COUNSELORS_DATA) {
         const c = window.COUNSELORS_DATA.find(x => x.id === targetCounselorId);
-        if (c && c.avatar) iconUrl = c.avatar;
+        if (c && c.avatar) {
+          iconUrl = new URL(c.avatar, document.baseURI).href;
+        }
       }
 
       const notifOptions = {

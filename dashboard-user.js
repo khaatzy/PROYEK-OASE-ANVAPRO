@@ -770,11 +770,58 @@
           }
         }
 
+        // Cek batasan booking untuk user ini (Max 2 per hari, jeda 1.5 jam, tidak boleh jam sama)
+        if (window.supabaseClient && currentUser && currentUser.id) {
+          const { data: userBookings, error: errBookings } = await window.supabaseClient
+            .from('counseling_sessions')
+            .select('*')
+            .eq('user_id', currentUser.id)
+            .eq('booking_date', bookingDate);
+
+          if (!errBookings && userBookings) {
+            // 1. Batas 2 booking per hari
+            if (userBookings.length >= 2) {
+              alert('Maaf, Anda hanya diperbolehkan maksimal 2 kali sesi konseling dalam satu hari untuk menjaga efektivitas sesi.');
+              submitBtn.disabled = false;
+              submitBtn.textContent = 'Konfirmasi Booking Jadwal';
+              return;
+            }
+
+            // Hitung menit jadwal baru
+            const [newH, newM] = bookingTime.split(':').map(Number);
+            const newTotalMins = newH * 60 + newM;
+
+            for (const b of userBookings) {
+              // 2. Tidak boleh jam yang sama persis walau beda konselor
+              if (b.booking_time === bookingTime) {
+                alert(`Maaf, Anda sudah memiliki jadwal konseling di jam ${bookingTime} bersama ${b.counselor_name}. Anda tidak bisa membuat 2 sesi di waktu yang bersamaan.`);
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Konfirmasi Booking Jadwal';
+                return;
+              }
+
+              // 3. Jeda minimal 1.5 jam (90 menit)
+              const [oldH, oldM] = b.booking_time.split(':').map(Number);
+              const oldTotalMins = oldH * 60 + oldM;
+              const diffMins = Math.abs(newTotalMins - oldTotalMins);
+              
+              if (diffMins < 90) {
+                alert(`Maaf, jadwal baru harus memiliki jeda setidaknya 1,5 jam dari jadwal Anda yang lain (jam ${b.booking_time}).`);
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Konfirmasi Booking Jadwal';
+                return;
+              }
+            }
+          }
+        }
+
         // Cek apakah slot sudah terisi untuk konselor ini (async)
         const slotTaken = await window.ChatSessionService.isSlotBooked(counselorId, bookingDate, bookingTime);
         if (slotTaken) {
           renderTimeSlots();
           alert(`Maaf, jadwal tanggal ${bookingDate} jam ${bookingTime} WIB untuk ${counselorName} sudah terisi. Silakan pilih konselor pengganti rekomendasi di bawah atau pilih jam lainnya.`);
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Konfirmasi Booking Jadwal';
           return;
         }
 
