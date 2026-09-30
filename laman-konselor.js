@@ -723,8 +723,16 @@
       if (isScheduled) {
         badge = `<span class="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[10px] font-bold">📅 Terjadwal untuk Anda</span>`;
         timeInfo = `<span class="text-[11px] text-amber-700 font-medium">${s.booking_date} pukul ${s.booking_time} WIB</span>`;
+        
+        const isExpired = window.ChatSessionService.isSessionExpired ? window.ChatSessionService.isSessionExpired(s) : false;
         const isReady = window.ChatSessionService.isSessionReady(s);
-        if (isReady) {
+        
+        if (isExpired) {
+          badge = `<span class="px-2.5 py-0.5 rounded-full bg-red-100 text-red-700 text-[10px] font-bold">Terlewat</span>`;
+          actionBtn = `<button disabled class="px-4 py-2 rounded-xl bg-gray-200 text-gray-500 font-bold text-xs cursor-not-allowed flex items-center gap-1.5">
+            <i data-lucide="x-circle" class="w-3.5 h-3.5"></i><span>Jadwal Kadaluarsa</span>
+          </button>`;
+        } else if (isReady) {
           actionBtn = `<button class="open-counselor-chat-btn px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs shadow-xs flex items-center gap-1.5 transition-all" data-session-id="${s.id}">
             <i data-lucide="messages-square" class="w-3.5 h-3.5"></i><span>Mulai Chat Sekarang</span>
           </button>`;

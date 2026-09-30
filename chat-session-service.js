@@ -70,7 +70,16 @@ const ChatSessionService = {
   isSessionReady(session) {
     if (!session || !session.booking_date || !session.booking_time) return true;
     const scheduledTime = new Date(`${session.booking_date}T${session.booking_time}:00`).getTime();
-    return Date.now() >= scheduledTime;
+    const now = Date.now();
+    // Ready if current time is after scheduled time AND not expired (30 mins passed)
+    return now >= scheduledTime && now < scheduledTime + (30 * 60 * 1000);
+  },
+
+  isSessionExpired(session) {
+    if (!session || !session.booking_date || !session.booking_time) return false;
+    const scheduledTime = new Date(`${session.booking_date}T${session.booking_time}:00`).getTime();
+    // Expired if 30 minutes have passed since the scheduled time
+    return Date.now() >= scheduledTime + (30 * 60 * 1000);
   },
 
   getTimeUntilReady(session) {
