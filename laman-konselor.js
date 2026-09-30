@@ -661,7 +661,7 @@
       const allScheduledSessions = await window.ChatSessionService.getAllScheduledSessions();
       
       const myActiveSessions = allActiveSessions.filter(s => s.counselor_id === currentSession.id);
-      const otherActiveSessions = allActiveSessions.filter(s => s.counselor_id !== currentSession.id);
+      
       
       let myScheduledSessions = [];
       const rawScheduled = allScheduledSessions.filter(s => s.counselor_id === currentSession.id);
@@ -675,7 +675,7 @@
         }
       }
 
-      const totalItems = myActiveSessions.length + otherActiveSessions.length + myScheduledSessions.length;
+      const totalItems = myActiveSessions.length + myScheduledSessions.length;
 
       if (liveChatCountBadge) {
         if (myActiveSessions.length > 0) {
@@ -710,10 +710,7 @@
       myActiveSessions.forEach(s => {
         liveSessionsListContainer.appendChild(createCounselorSessionCard(s, true, 'aktif'));
       });
-      // Sesi aktif konselor lain
-      otherActiveSessions.forEach(s => {
-        liveSessionsListContainer.appendChild(createCounselorSessionCard(s, false, 'aktif'));
-      });
+      
       lucide.createIcons();
     }
 
@@ -805,9 +802,6 @@
       let completed = [];
       if (window.ChatSessionService) {
         completed = await window.ChatSessionService.getCompletedSessions(null, currentSession.id);
-        if (!completed || completed.length === 0) {
-          completed = await window.ChatSessionService.getCompletedSessions(null, null);
-        }
       }
 
       if (historyCountBadge) {
@@ -980,4 +974,6 @@
     loadLiveSessions();
     loadHistorySessions();
  
+
+
 
