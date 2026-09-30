@@ -10,7 +10,7 @@
  * baru di bawah ini.
  * 
  * Format data setiap konselor:
- * - id          : Kode unik konselor (contoh: 'counselor-1', 'counselor-2', dst)
+ * - id          : Kode unik konselor (contoh: 'rachma', 'ida', dst)
  * - name        : Nama lengkap beserta gelar
  * - role        : Jabatan atau bidang keahlian
  * - email       : Email login khusus konselor
@@ -37,7 +37,7 @@
       total_reviews: 10
     },
     {
-      id: 'counselor-1',
+      id: 'rachma',
       name: 'Rachma Murtisari Prihastanti S.Pd',
       role: 'Konselor Remaja & Pengajar',
       email: 'rachma@oase.id',
@@ -49,7 +49,7 @@
       total_reviews: 18
     },
     {
-      id: 'counselor-2',
+      id: 'ida',
       name: 'Ida Liyatul Ulyah S.Pd',
       role: 'Pengajar & Konselor Keluarga',
       email: 'ida@oase.id',
@@ -61,7 +61,7 @@
       total_reviews: 14
     },
     {
-      id: 'counselor-3',
+      id: 'ningsih',
       name: 'Ibu Ningsih Rahayu, M.Pd.',
       role: 'Konselor Bimbingan & Karier',
       email: 'ningsih@oase.id',
