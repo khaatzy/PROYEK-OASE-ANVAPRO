@@ -1026,7 +1026,16 @@
 
       // Countdown ke waktu booking
       const updateCountdown = () => {
-        const diff = window.ChatSessionService.getTimeUntilReady(session);
+          const diff = window.ChatSessionService.getTimeUntilReady(session);
+          if (diff <= 300000 && diff > 298000 && !session._notified5Min) {
+            session._notified5Min = true;
+            if (window.NotificationService && localStorage.getItem('oase_notif_muted') !== 'true') {
+              window.NotificationService.sendNotification('Sesi Segera Dimulai!', {
+                body: 'Sesi konseling bersama ' + counselorObj.name + ' akan dimulai dalam 5 menit.',
+                tag: 'oase-5min-reminder-' + session.id
+              });
+            }
+          }
         const label = document.getElementById('scheduledCountdownLabel');
         if (diff <= 0) {
           clearInterval(sessionTimerInterval);
@@ -1178,6 +1187,8 @@
         }
       }, 500);
     }
+
+
 
 
 

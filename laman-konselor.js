@@ -733,17 +733,50 @@
       });
       // Sesi aktif milik konselor ini
       myActiveSessions.forEach(s => {
-        liveSessionsListContainer.appendChild(createCounselorSessionCard(s, true, 'aktif'));
-      });
-      
-      lucide.createIcons();
-    }
+          liveSessionsListContainer.appendChild(createCounselorSessionCard(s, true, 'aktif'));
+        });
+        
+        lucide.createIcons();
+        
+        if (window.counselorTimerInterval) clearInterval(window.counselorTimerInterval);
+        window.counselorTimerInterval = setInterval(() => {
+          myScheduledSessions.forEach(s => {
+            if (window.ChatSessionService && window.ChatSessionService.getTimeUntilReady) {
+              const diff = window.ChatSessionService.getTimeUntilReady(s);
+              if (diff <= 300000 && diff > 298000 && !s._notified5Min) {
+                s._notified5Min = true;
+                if (window.NotificationService && localStorage.getItem('oase_notif_muted') !== 'true') {
+                  window.NotificationService.sendNotification('Sesi Segera Dimulai!', {
+                    body: 'Sesi konseling dengan ' + s.user_name + ' akan dimulai dalam 5 menit. Bersiaplah!',
+                    tag: 'oase-5min-reminder-' + s.id
+                  });
+                }
+              }
+              if (diff <= 0 && !s._unlockedUI) {
+                s._unlockedUI = true;
+                loadLiveSessions();
+              }
+            }
+          });
+        }, 1000);
+      }
 
     // Setup Supabase Realtime untuk auto-refresh sesi
     if (window.ChatSessionService && window.ChatSessionService.subscribeToAllSessions) {
-      window.ChatSessionService.subscribeToAllSessions(() => {
-        loadLiveSessions();
-      });
+      window.ChatSessionService.subscribeToAllSessions((payload) => {
+          loadLiveSessions();
+          if (payload && payload.eventType === 'INSERT' && payload.new) {
+            const session = payload.new;
+            if (session.counselor_id === currentSession.id) {
+              if (window.NotificationService && localStorage.getItem('oase_notif_muted') !== 'true') {
+                window.NotificationService.sendNotification('Jadwal Booking Baru Masuk!', {
+                  body: session.user_name + ' membooking sesi untuk tanggal ' + session.booking_date + ' pukul ' + session.booking_time + ' WIB.',
+                  tag: 'oase-new-booking-' + session.id
+                });
+              }
+            }
+          }
+        });
     }
 
     function createCounselorSessionCard(s, isDirectlyAssigned, sessionStatus) {
@@ -999,6 +1032,11 @@
     loadLiveSessions();
     loadHistorySessions();
  
+
+
+
+
+
 
 
 
