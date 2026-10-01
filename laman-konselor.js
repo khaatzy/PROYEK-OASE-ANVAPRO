@@ -191,6 +191,11 @@
 
       try {
         allQueueStories = await window.CounselingService.getAllSubmissions({ category: 'all', status: 'all' });
+
+        // Filter agar konselor HANYA BISA MELIHAT cerita yang ditugaskan kepada mereka
+        if (currentSession && currentSession.id) {
+          allQueueStories = allQueueStories.filter(s => s.counselor_id === currentSession.id);
+        }
         
         // Peringatan Bunyi Alarm Krisis jika ada kasus darurat yang belum ditangani
         const unhandledCrisis = allQueueStories.filter(s => s.is_crisis && s.status !== 'sudah_dibalas');
@@ -984,6 +989,7 @@
     loadLiveSessions();
     loadHistorySessions();
  
+
 
 
 
