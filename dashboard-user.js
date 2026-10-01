@@ -952,7 +952,15 @@
       const scheduled = await window.ChatSessionService.getScheduledSessions(currentUser.email);
       if (scheduled && scheduled.length > 0) {
         const nextSession = scheduled[0]; // Sesi terjadwal terdekat
-        const isReady = window.ChatSessionService.isSessionReady(nextSession);
+          
+          // Cek apakah sesi sudah kadaluarsa (lewat 30 menit)
+          if (window.ChatSessionService.isSessionExpired(nextSession)) {
+            await window.ChatSessionService.expireSession(nextSession.id);
+            checkActiveCounselingSession();
+            return;
+          }
+
+          const isReady = window.ChatSessionService.isSessionReady(nextSession);
         if (isReady) {
           // Waktu sudah tiba! Aktifkan sesi
           const activated = await window.ChatSessionService.activateSession(nextSession.id);
@@ -1170,6 +1178,8 @@
         }
       }, 500);
     }
+
+
 
 
 

@@ -82,7 +82,14 @@ const ChatSessionService = {
     return Date.now() >= scheduledTime + (30 * 60 * 1000);
   },
 
-  getTimeUntilReady(session) {
+  isActiveSessionExpired(session) {
+      if (!session || !session.started_at) return false;
+      const startTime = new Date(session.started_at).getTime();
+      const durationMs = (session.duration_minutes || 30) * 60 * 1000;
+      return Date.now() >= startTime + durationMs;
+    },
+
+    getTimeUntilReady(session) {
     if (!session || !session.booking_date || !session.booking_time) return 0;
     const scheduledTime = new Date(`${session.booking_date}T${session.booking_time}:00`).getTime();
     return Math.max(0, scheduledTime - Date.now());
@@ -769,3 +776,5 @@ const ChatSessionService = {
 };
 
 window.ChatSessionService = ChatSessionService;
+
+

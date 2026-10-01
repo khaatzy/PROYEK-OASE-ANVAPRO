@@ -675,7 +675,17 @@
       const allActiveSessions = await window.ChatSessionService.getAllActiveSessions();
       const allScheduledSessions = await window.ChatSessionService.getAllScheduledSessions();
       
-      const myActiveSessions = allActiveSessions.filter(s => s.counselor_id === currentSession.id);
+      let myActiveSessions = [];
+      const rawActive = allActiveSessions.filter(s => s.counselor_id === currentSession.id);
+      for (const s of rawActive) {
+        if (window.ChatSessionService.isActiveSessionExpired && window.ChatSessionService.isActiveSessionExpired(s)) {
+          if (window.ChatSessionService.endSession) {
+            await window.ChatSessionService.endSession(s.id);
+          }
+        } else {
+          myActiveSessions.push(s);
+        }
+      }
       
       
       let myScheduledSessions = [];
@@ -989,6 +999,7 @@
     loadLiveSessions();
     loadHistorySessions();
  
+
 
 
 
