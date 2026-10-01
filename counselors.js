@@ -50,7 +50,7 @@
     },
     {
       id: 'ningsih',
-      name: 'Ibu Ningsih Rahayu, M.Pd.',
+      name: 'Ibu Rahayu, M.Pd.',
       role: 'Konselor Bimbingan & Karier',
       email: 'ningsih@oase.id',
       password: 'konselor3',
@@ -89,4 +89,5 @@
     module.exports = { COUNSELORS_DATA, getCounselorRatingInfo };
   }
 })();
+
 
