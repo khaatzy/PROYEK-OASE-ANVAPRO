@@ -139,13 +139,7 @@ const ChatSessionService = {
           .select();
         if (!error && data && data.length > 0) {
           this._syncSessionToLocal(data[0]);
-          this.triggerNotification({
-            type: 'booking',
-            targetRole: 'counselor',
-            counselorId: counselorId,
-            title: 'Sesi Konseling Baru Dijadwalkan!',
-            message: `${sessionData.user_name} menjadwalkan sesi ${finalDate} pukul ${finalTime} (${topic})`
-          });
+          
           return data[0];
         }
       } catch (e) {
@@ -158,13 +152,7 @@ const ChatSessionService = {
     sessions.unshift(sessionData);
     localStorage.setItem('oase_counseling_sessions', JSON.stringify(sessions));
 
-    this.triggerNotification({
-      type: 'booking',
-      targetRole: 'counselor',
-      counselorId: counselorId,
-      title: 'Sesi Konseling Baru Dijadwalkan!',
-      message: `${sessionData.user_name} menjadwalkan sesi ${finalDate} pukul ${finalTime} (${topic})`
-    });
+    
 
     return sessionData;
   },
@@ -418,12 +406,7 @@ const ChatSessionService = {
     allMsgs.push(msg);
     localStorage.setItem('oase_session_messages', JSON.stringify(allMsgs));
 
-    this.triggerNotification({
-      type: 'motivation',
-      sessionId,
-      title: `Pesan Semangat dari ${counselorName}`,
-      message: `"${messageText.substring(0, 60)}${messageText.length > 60 ? '...' : ''}"`
-    });
+    
 
     return msg;
   },
@@ -524,11 +507,7 @@ const ChatSessionService = {
         if (!error && data && data.length > 0) {
           // Cache ke localStorage juga
           this._cacheMessageToLocal(msg);
-          this.triggerNotification({
-            type: 'message', sessionId, senderType,
-            title: `Pesan baru dari ${senderName}`,
-            message: messageType === 'voice' ? '🎙️ Mengirim pesan suara' : messageText
-          });
+          
           return { ...data[0], message_text: messageText, is_crisis: crisisCheck.isCrisis };
         }
       } catch (e) {}
@@ -536,11 +515,7 @@ const ChatSessionService = {
 
     // Fallback: simpan ke localStorage
     this._cacheMessageToLocal(msg);
-    this.triggerNotification({
-      type: 'message', sessionId, senderType,
-      title: `Pesan baru dari ${senderName}`,
-      message: messageType === 'voice' ? '🎙️ Mengirim pesan suara' : messageText
-    });
+    
     return { ...msg, message_text: messageText };
   },
 
@@ -776,5 +751,8 @@ const ChatSessionService = {
 };
 
 window.ChatSessionService = ChatSessionService;
+
+
+
 
 
