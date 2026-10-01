@@ -119,6 +119,18 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (openWriteStoryBtn) openWriteStoryBtn.addEventListener('click', handleStartStoryClick);
   if (navWriteStoryBtn) navWriteStoryBtn.addEventListener('click', openStoryModal);
 
+  // Intercept 'Cek Tiket' links
+  document.querySelectorAll('a[href="kirim-cerita.html#cek-tiket"]').forEach(link => {
+    link.addEventListener('click', (e) => {
+      if (!currentUserSession) {
+        e.preventDefault();
+        sessionStorage.setItem('oase_auth_redirect', 'kirim-cerita.html#cek-tiket');
+        openAuthModal('login');
+        showAuthFeedback('Silakan masuk atau daftar terlebih dahulu untuk mengecek balasan tiket Anda.', 'info');
+      }
+    });
+  });
+
   // Intercept 'Chat dengan Konselor' links
   document.querySelectorAll('.chat-counselor-btn, a[href*="action=chat-counselor"], a[href="kirim-cerita.html"]').forEach(link => {
     link.addEventListener('click', (e) => {
@@ -484,3 +496,4 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 });
+
