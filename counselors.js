@@ -25,18 +25,6 @@
 (function () {
   const COUNSELORS_DATA = [
     {
-      id: 'auto',
-      name: 'Pilihkan Otomatis',
-      role: 'Sistem OASE akan meneruskan ke konselor pertama yang siap',
-      email: '',
-      password: '',
-      avatar: 'https://images.unsplash.com/photo-1544027993-37dbfe43562a?auto=format&fit=crop&w=200&h=200&q=80',
-      specialties: ['Semua Kategori', 'Respon Cepat'],
-      status: 'Tersedia',
-      rating: 5.0,
-      total_reviews: 10
-    },
-    {
       id: 'rachma',
       name: 'Rachma Murtisari Prihastanti S.Pd',
       role: 'Konselor Remaja & Pengajar',
