@@ -206,10 +206,21 @@ const ChatSessionService = {
         if (userEmail) query = query.eq('user_email', userEmail);
         if (counselorId) query = query.eq('counselor_id', counselorId);
         const { data, error } = await query.order('created_at', { ascending: false }).limit(1);
-        if (!error && data && data.length > 0) {
-          this._syncSessionToLocal(data[0]);
-          return data[0];
-        }
+          if (error) throw error;
+          if (data) {
+            if (data.length > 0) {
+                const session = data[0];
+                const endedLocally = JSON.parse(localStorage.getItem('oase_manually_ended_sessions') || '[]');
+                if (endedLocally.includes(session.id)) {
+                  // Force end again if it's a zombie session
+                  this.endSession(session.id);
+                  return null;
+                }
+                this._syncSessionToLocal(session);
+                return session;
+              }
+            return null;
+          }
       } catch (e) {}
     }
 
@@ -217,7 +228,8 @@ const ChatSessionService = {
     return sessions.find(s => {
       const matchUser = userEmail ? s.user_email === userEmail : true;
       const matchCounselor = counselorId ? s.counselor_id === counselorId : true;
-      return matchUser && matchCounselor && s.status === 'aktif';
+      const isZombie = JSON.parse(localStorage.getItem('oase_manually_ended_sessions') || '[]').includes(s.id);
+        return matchUser && matchCounselor && s.status === 'aktif' && !isZombie;
     }) || null;
   },
 
@@ -293,11 +305,15 @@ const ChatSessionService = {
           .select('*')
           .eq('status', 'aktif')
           .order('started_at', { ascending: false });
-        if (!error && data) return data;
+        if (!error && data) {
+            const endedLocally = JSON.parse(localStorage.getItem('oase_manually_ended_sessions') || '[]');
+            return data.filter(s => !endedLocally.includes(s.id));
+          }
       } catch (e) {}
     }
     const sessions = JSON.parse(localStorage.getItem('oase_counseling_sessions') || '[]');
-    return sessions.filter(s => s.status === 'aktif');
+      const endedLocally = JSON.parse(localStorage.getItem('oase_manually_ended_sessions') || '[]');
+      return sessions.filter(s => s.status === 'aktif' && !endedLocally.includes(s.id));
   },
 
   // Semua sesi terjadwal (untuk konselor dashboard)
@@ -305,11 +321,13 @@ const ChatSessionService = {
     if (window.supabaseClient) {
       try {
         const { data, error } = await window.supabaseClient
-          .from('counseling_sessions')
-          .select('*')
-          .eq('status', 'terjadwal')
-          .order('scheduled_at', { ascending: true });
-        if (!error && data) return data;
+            .from('counseling_sessions')
+            .select('*')
+            .eq('status', 'terjadwal')
+            .order('scheduled_at', { ascending: true });
+          if (!error && data) {
+            return data;
+          }
       } catch (e) {}
     }
     const sessions = JSON.parse(localStorage.getItem('oase_counseling_sessions') || '[]');
@@ -470,7 +488,10 @@ const ChatSessionService = {
         if (userEmail) query = query.eq('user_email', userEmail);
         if (counselorId) query = query.eq('counselor_id', counselorId);
         const { data, error } = await query.order('ended_at', { ascending: false });
-        if (!error && data) return data;
+          if (!error && data) {
+            data.forEach(s => this._syncSessionToLocal(s));
+            return data;
+          }
       } catch (e) {}
     }
     const sessions = JSON.parse(localStorage.getItem('oase_counseling_sessions') || '[]');
@@ -751,6 +772,14 @@ const ChatSessionService = {
 };
 
 window.ChatSessionService = ChatSessionService;
+
+
+
+
+
+
+
+
 
 
 
