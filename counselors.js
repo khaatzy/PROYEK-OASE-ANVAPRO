@@ -54,7 +54,7 @@
       role: 'Konselor Bimbingan & Karier',
       email: 'ningsih@oase.id',
       password: 'konselor3',
-      avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=200&h=200&q=80',
+      avatar: 'rahayu.jpg',
       specialties: ['Pengembangan Diri', 'Kecemasan Belajar'],
       status: 'Siap Mendengarkan',
       rating: 4.8,
@@ -89,3 +89,4 @@
     module.exports = { COUNSELORS_DATA, getCounselorRatingInfo };
   }
 })();
+
