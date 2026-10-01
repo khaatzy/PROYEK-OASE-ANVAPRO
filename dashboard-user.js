@@ -309,7 +309,7 @@
       if (confirm('Apakah Anda yakin ingin keluar?')) {
         try { await window.AuthService.signOut(); } catch(e){}
         localStorage.removeItem('oase_active_user_email');
-        window.location.href = 'index.html';
+        window.location.href = 'dashboard-awal.html';
       }
     });
 
@@ -1170,4 +1170,5 @@
         }
       }, 500);
     }
+
 
