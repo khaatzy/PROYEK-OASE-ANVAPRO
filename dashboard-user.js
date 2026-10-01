@@ -918,7 +918,7 @@
         }
         const cat = bugCategorySelect ? bugCategorySelect.value : 'Kendala Sistem';
         const msg = encodeURIComponent(`*LAPORAN KENDALA OASE CERITA*\n\n*Kategori:* ${cat}\n*Halaman:* ${window.location.pathname}\n*User:* ${userProfile.display_name || userProfile.full_name || 'Pengguna'}\n*Deskripsi Kendala:*\n${desc}\n\n_Mohon bantuannya untuk diperbaiki tim IT. Terima kasih._`);
-        window.open(`https://wa.me/6281234567890?text=${msg}`, '_blank');
+        window.open(`https://wa.me/6282228176090?text=${msg}`, '_blank');
       });
     }
 
@@ -933,7 +933,7 @@
         const cat = bugCategorySelect ? bugCategorySelect.value : 'Kendala Sistem';
         const subject = encodeURIComponent(`[Laporan Bug OASE] ${cat}`);
         const body = encodeURIComponent(`Halo Tim Pengembang OASE Cerita,\n\nSaya menemukan kendala teknis berikut:\n\nKategori: ${cat}\nHalaman: ${window.location.pathname}\nUser: ${userProfile.display_name || userProfile.full_name || 'Pengguna'}\n\nDeskripsi Masalah:\n${desc}\n\nTerima kasih.`);
-        window.location.href = `mailto:support@oase.id?subject=${subject}&body=${body}`;
+        window.location.href = `mailto:arkhanzaazs020911@gmail.com?subject=${subject}&body=${body}`;
       });
     }
 
@@ -1170,5 +1170,6 @@
         }
       }, 500);
     }
+
 
 

@@ -965,7 +965,7 @@
           return;
         }
         const text = encodeURIComponent(`Halo Tim IT OASE Cerita, saya ingin melaporkan bug:\n\n*Kategori:* ${category}\n*Halaman:* Laman Konselor\n*Deskripsi:* ${desc}`);
-        window.open(`https://wa.me/6281234567890?text=${text}`, '_blank');
+        window.open(`https://wa.me/6282228176090?text=${text}`, '_blank');
       });
     }
 
@@ -979,7 +979,7 @@
         }
         const subject = encodeURIComponent(`[Laporan Bug OASE] - ${category}`);
         const body = encodeURIComponent(`Halo Tim IT OASE Cerita,\n\nSaya ingin melaporkan kendala pada platform OASE Cerita:\n\nKategori: ${category}\nHalaman: Laman Konselor\nDeskripsi: ${desc}\n\nTerima kasih.`);
-        window.location.href = `mailto:support@oase.id?subject=${subject}&body=${body}`;
+        window.location.href = `mailto:arkhanzaazs020911@gmail.com?subject=${subject}&body=${body}`;
       });
     }
 
@@ -989,6 +989,7 @@
     loadLiveSessions();
     loadHistorySessions();
  
+
 
 
 
