@@ -35,9 +35,7 @@
     function setupAnonCurhat() {
       if (!openAnonCurhatBtn) return;
       openAnonCurhatBtn.addEventListener('click', () => {
-        generateAnonPseudonym();
-        populateAnonCounselors();
-        anonymousCurhatModal.classList.remove('hidden');
+        window.location.href = 'kirim-cerita.html';
       });
 
       if (closeAnonModalBtn) {
@@ -510,3 +508,4 @@
     // Run check ticket setup on start
     setupCheckTicketModal();
 })();
+
