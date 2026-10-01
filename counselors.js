@@ -26,11 +26,11 @@
   const COUNSELORS_DATA = [
     {
       id: 'rachma',
-      name: 'Rachma Murtisari Prihastanti S.Pd',
+      name: 'Rachma Murtisari Prihastanti, S.Pd',
       role: 'Konselor Remaja & Pengajar',
       email: 'rachma@oase.id',
       password: 'konselor1',
-      avatar: 'rachma.jpg',
+      avatar: 'rachma.jpg?v=2',
       specialties: ['Kesehatan Mental', 'Akademik & Pembelajaran'],
       status: 'Siap Mendengarkan',
       rating: 4.9,
@@ -38,23 +38,23 @@
     },
     {
       id: 'ida',
-      name: 'Ida Liyatul Ulyah S.Pd',
+      name: 'Ida Liyatul Ulyah, S.Pd',
       role: 'Pengajar & Konselor Keluarga',
       email: 'ida@oase.id',
       password: 'konselor2',
-      avatar: 'ida.jpg',
+      avatar: 'ida.jpg?v=2',
       specialties: ['Masalah Keluarga', 'Pertemanan & Sosial'],
       status: 'Siap Mendengarkan',
       rating: 5.0,
       total_reviews: 14
     },
     {
-      id: 'ningsih',
-      name: 'Ibu Rahayu, M.Pd.',
+      id: 'rahayu',
+      name: 'Rahayu Kurniawati, S.Sos',
       role: 'Konselor Bimbingan & Karier',
-      email: 'ningsih@oase.id',
+      email: 'rahayu@oase.id',
       password: 'konselor3',
-      avatar: 'rahayu.jpg',
+      avatar: 'rahayu.jpg?v=2',
       specialties: ['Pengembangan Diri', 'Kecemasan Belajar'],
       status: 'Siap Mendengarkan',
       rating: 4.8,
@@ -89,5 +89,6 @@
     module.exports = { COUNSELORS_DATA, getCounselorRatingInfo };
   }
 })();
+
 
 
