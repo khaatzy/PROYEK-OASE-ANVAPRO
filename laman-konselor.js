@@ -668,10 +668,14 @@
       loadCounselorNotifs();
       loadLiveSessions();
       loadHistorySessions();
+      setInterval(loadLiveSessions, 10000); // Poll every 10 seconds as a fallback
     });
 
     // Load Live Sessions for this counselor & all active students (from Supabase)
-    async function loadLiveSessions() {
+    let _knownLiveSessionIds = new Set();
+      let _isFirstLoadLiveSessions = true;
+
+      async function loadLiveSessions() {
       if (!currentSession || !liveSessionsListContainer) return;
 
       // Ambil dari Supabase
@@ -700,6 +704,15 @@
           }
         } else {
           myScheduledSessions.push(s);
+            if (!_isFirstLoadLiveSessions && !_knownLiveSessionIds.has(s.id)) {
+              if (window.NotificationService && localStorage.getItem('oase_notif_muted') !== 'true') {
+                window.NotificationService.sendNotification('Jadwal Booking Baru Masuk!', {
+                  body: s.user_name + ' membooking sesi untuk tanggal ' + s.booking_date + ' pukul ' + s.booking_time + ' WIB.',
+                  tag: 'oase-new-booking-' + s.id
+                });
+              }
+            }
+            _knownLiveSessionIds.add(s.id);
         }
       }
 
@@ -1033,8 +1046,13 @@
     checkAuth();
     loadCounselorNotifs();
     loadLiveSessions();
-    loadHistorySessions();
+      loadHistorySessions();
+      setInterval(loadLiveSessions, 10000); // Poll every 10 seconds as a fallback
  
+
+
+
+
 
 
 

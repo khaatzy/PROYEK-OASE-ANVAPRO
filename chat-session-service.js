@@ -733,7 +733,8 @@ const ChatSessionService = {
     localStorage.setItem('oase_notifications', JSON.stringify(notifs.slice(0, 40)));
     window.dispatchEvent(new CustomEvent('oase_new_notification', { detail: payload }));
 
-      const activeRole = sessionStorage.getItem('oase_active_chat_role') || (window.location.pathname.includes('konselor') ? 'counselor' : 'user');
+      let activeRole = window.location.pathname.includes('konselor') ? 'counselor' : 'user';
+        if (window.location.pathname.includes('ruang-chat')) activeRole = sessionStorage.getItem('oase_active_chat_role') || 'user';
       if (payload.targetRole && payload.targetRole !== activeRole) return;
 
       if (window.NotificationService) {
@@ -783,7 +784,8 @@ window.addEventListener('storage', (e) => {
         const latestNotif = newNotifs[0];
         window.dispatchEvent(new CustomEvent('oase_new_notification', { detail: latestNotif }));
         // Filter out if this notification is for the other role
-        const activeRole = sessionStorage.getItem('oase_active_chat_role') || (window.location.pathname.includes('konselor') ? 'counselor' : 'user');
+        let activeRole = window.location.pathname.includes('konselor') ? 'counselor' : 'user';
+        if (window.location.pathname.includes('ruang-chat')) activeRole = sessionStorage.getItem('oase_active_chat_role') || 'user';
         if (latestNotif.targetRole && latestNotif.targetRole !== activeRole) return;
         if (window.NotificationService && localStorage.getItem('oase_notif_muted') !== 'true') {
           window.NotificationService.sendNotification(latestNotif.title, latestNotif);
@@ -794,6 +796,8 @@ window.addEventListener('storage', (e) => {
 });
 
 window.ChatSessionService = ChatSessionService;
+
+
 
 
 
