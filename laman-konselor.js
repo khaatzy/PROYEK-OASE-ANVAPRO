@@ -615,9 +615,12 @@
 
     // Notifications
     if (counselorNotifBellBtn) {
-      counselorNotifBellBtn.addEventListener('click', () => {
-        counselorNotifDropdown.classList.toggle('hidden');
-      });
+      counselorNotifBellBtn.addEventListener('click', async () => {
+          counselorNotifDropdown.classList.toggle('hidden');
+          if (window.NotificationService && window.NotificationService.getPermissionStatus() === 'default') {
+            try { await window.NotificationService.requestPermission(); } catch(e){}
+          }
+        });
     }
 
     function loadCounselorNotifs() {
@@ -1032,6 +1035,8 @@
     loadLiveSessions();
     loadHistorySessions();
  
+
+
 
 
 

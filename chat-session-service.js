@@ -733,7 +733,10 @@ const ChatSessionService = {
     localStorage.setItem('oase_notifications', JSON.stringify(notifs.slice(0, 40)));
     window.dispatchEvent(new CustomEvent('oase_new_notification', { detail: payload }));
 
-    if (window.NotificationService) {
+      const activeRole = sessionStorage.getItem('oase_active_chat_role') || (window.location.pathname.includes('konselor') ? 'counselor' : 'user');
+      if (payload.targetRole && payload.targetRole !== activeRole) return;
+
+      if (window.NotificationService) {
       let iconUrl = null;
       let targetCounselorId = payload.counselorId;
 
@@ -771,7 +774,29 @@ const ChatSessionService = {
   }
 };
 
+window.addEventListener('storage', (e) => {
+  if (e.key === 'oase_notifications' && e.newValue) {
+    try {
+      const newNotifs = JSON.parse(e.newValue);
+      const oldNotifs = JSON.parse(e.oldValue || '[]');
+      if (newNotifs.length > 0 && (oldNotifs.length === 0 || newNotifs[0].id !== oldNotifs[0].id)) {
+        const latestNotif = newNotifs[0];
+        window.dispatchEvent(new CustomEvent('oase_new_notification', { detail: latestNotif }));
+        // Filter out if this notification is for the other role
+        const activeRole = sessionStorage.getItem('oase_active_chat_role') || (window.location.pathname.includes('konselor') ? 'counselor' : 'user');
+        if (latestNotif.targetRole && latestNotif.targetRole !== activeRole) return;
+        if (window.NotificationService && localStorage.getItem('oase_notif_muted') !== 'true') {
+          window.NotificationService.sendNotification(latestNotif.title, latestNotif);
+        }
+      }
+    } catch(err) {}
+  }
+});
+
 window.ChatSessionService = ChatSessionService;
+
+
+
 
 
 

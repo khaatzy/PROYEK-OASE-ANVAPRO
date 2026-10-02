@@ -314,9 +314,12 @@
     });
 
     // 4. NOTIFICATIONS
-    notifBellBtn.addEventListener('click', () => {
-      notifDropdown.classList.toggle('hidden');
-    });
+    notifBellBtn.addEventListener('click', async () => {
+        notifDropdown.classList.toggle('hidden');
+        if (window.NotificationService && window.NotificationService.getPermissionStatus() === 'default') {
+          try { await window.NotificationService.requestPermission(); } catch(e){}
+        }
+      });
 
     function loadNotifications() {
       const notifs = window.ChatSessionService.getNotifications();
@@ -1187,6 +1190,8 @@
         }
       }, 500);
     }
+
+
 
 
 
